@@ -10,7 +10,7 @@ const navigation = {
         },
         {
             name: 'StackBlitz',
-            href: 'https://stackblitz.com/@devsrv',
+            href: 'https://stackblitz.com/@rsrv1',
             icon: props => <Lightning weight="duotone" className="w-6 h-6 hover:text-orange-500" aria-hidden="true" {...props} />,
         },
         {
