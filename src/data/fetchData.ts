@@ -1,0 +1,50 @@
+import faker from '@faker-js/faker'
+
+export type Person = {
+    firstName: string
+    lastName: string
+    age: number
+    visits: number
+    progress: number
+    status: 'In Relationship' | 'Single' | 'Complicated'
+}
+
+const range = (len: number) => {
+    const arr = []
+    for (let i = 0; i < len; i++) {
+        arr.push(i)
+    }
+    return arr
+}
+
+const newPerson = (): Person => {
+    return {
+        firstName: faker.name.firstName(),
+        lastName: faker.name.lastName(),
+        age: faker.datatype.number(40),
+        visits: faker.datatype.number(1000),
+        progress: faker.datatype.number(100),
+        status: faker.helpers.shuffle<Person['status']>(['In Relationship', 'Single', 'Complicated'])[0]!,
+    }
+}
+
+export function makeData(...lens: number[]) {
+    const makeDataLevel = (depth = 0): Person[] => {
+        const len = lens[depth]!
+        return range(len).map((d): Person => newPerson())
+    }
+
+    return makeDataLevel()
+}
+
+const data = makeData(10000)
+
+export async function fetchData(options: { pageIndex: number; pageSize: number }) {
+    // Simulate some network latency
+    await new Promise(r => setTimeout(r, 500))
+
+    return {
+        rows: data.slice(options.pageIndex * options.pageSize, (options.pageIndex + 1) * options.pageSize),
+        pageCount: Math.ceil(data.length / options.pageSize),
+    }
+}
