@@ -19,13 +19,23 @@ function useColumns() {
                 />
             ),
             header: ({ table }) => (
-                <IndeterminateCheckbox
-                    {...{
-                        checked: table.getIsAllRowsSelected(),
-                        indeterminate: table.getIsSomeRowsSelected(),
-                        onChange: table.getToggleAllRowsSelectedHandler(),
-                    }}
-                />
+                <div className="flex items-center">
+                    <IndeterminateCheckbox
+                        {...{
+                            checked: table.getIsAllRowsSelected(),
+                            indeterminate: table.getIsSomeRowsSelected(),
+                            onChange: table.getToggleAllRowsSelectedHandler(),
+                        }}
+                    />
+                    <div className="flex flex-col text-xs font-medium space-y-1 ml-1">
+                        <button type="button" className="border border-gray-400 px-1 py-0">
+                            all
+                        </button>
+                        <button type="button" className="border border-gray-400 px-1 py-0">
+                            this page
+                        </button>
+                    </div>
+                </div>
             ),
         }),
         columnHelper.accessor('_expand', {
