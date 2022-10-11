@@ -2,23 +2,21 @@ import React from 'react'
 import { flexRender, getCoreRowModel, ColumnOrderState, useReactTable, PaginationState } from '@tanstack/react-table'
 import useSWR from 'swr'
 import { fetchData, Person } from './data/fetchData'
-import IndeterminateCheckbox from './components/IndeterminateCheckbox'
 import renderSubComponent from './components/RowSubExpand'
 import useColumns from './useColumns'
 import { _shuffle } from './utils'
 import { RootState } from './redux/store'
 import { useAppDispatch, useAppSelector } from './redux/hooks'
-import { getSelectedRows, selectionCount } from './redux/slice/rowSelection'
+import { getSelectedRows } from './redux/slice/rowSelection'
 import useCurrentPageRowSelectionListener from './useCurrentPageRowSelectionListener'
 import { reset } from './redux/slice/rowSelection'
+import useTotalRowSelectionCount from './useTotalRowSelectionCount'
+import Select from './components/Select'
 
 function Table() {
-    const columns = useColumns()
     const [columnVisibility, setColumnVisibility] = React.useState({})
     const [columnOrder, setColumnOrder] = React.useState<ColumnOrderState>([])
-    const [rowSelection, setRowSelection] = React.useState({})
     const dispatch = useAppDispatch()
-    const totalSelectionCountGetter = useAppSelector(selectionCount)
     const selectedRows = useAppSelector(getSelectedRows)
     const [{ pageIndex, pageSize }, setPagination] = React.useState<PaginationState>({
         pageIndex: 0,
@@ -34,12 +32,9 @@ function Table() {
 
     const dataQuery = useSWR(fetchDataOptions, fetchData)
     useCurrentPageRowSelectionListener(dataQuery.data)
+    const columns = useColumns(dataQuery.data)
 
-    const totalSelectionCount = React.useMemo(() => {
-        if (!dataQuery.data) return 0
-
-        return totalSelectionCountGetter(dataQuery.data.total)
-    }, [totalSelectionCountGetter, dataQuery.data])
+    const totalSelectionCount = useTotalRowSelectionCount(dataQuery.data)
 
     const pagination = React.useMemo(
         () => ({
@@ -61,9 +56,7 @@ function Table() {
             columnVisibility,
             columnOrder,
             pagination,
-            rowSelection,
         },
-        onRowSelectionChange: setRowSelection,
         onPaginationChange: setPagination,
         onColumnVisibilityChange: setColumnVisibility,
         onColumnOrderChange: setColumnOrder,
@@ -126,9 +119,21 @@ function Table() {
             <div className="h-4" />
 
             {totalSelectionCount > 0 && (
-                <button onClick={deselectAllRows} type="button">
-                    de-select {totalSelectionCount} selected rows
-                </button>
+                <div className="rounded-md bg-sky-50 p-4">
+                    <div className="flex">
+                        <div className="ml-3 flex-1 md:flex md:justify-between">
+                            <p className="text-sm text-sky-700">{totalSelectionCount} rows selected</p>
+                            <p className="mt-3 text-sm md:mt-0 md:ml-6">
+                                <button
+                                    onClick={deselectAllRows}
+                                    type="button"
+                                    className="whitespace-nowrap font-medium text-sky-700 hover:text-sky-600">
+                                    <span aria-hidden="true">&times;</span> de-select all
+                                </button>
+                            </p>
+                        </div>
+                    </div>
+                </div>
             )}
 
             <table>
@@ -175,6 +180,7 @@ function Table() {
                 </tfoot>
             </table>
             <div className="h-4" />
+            {/* pagination */}
             <div className="flex items-center gap-2">
                 <button className="border rounded p-1" onClick={() => table.setPageIndex(0)} disabled={!table.getCanPreviousPage()}>
                     {'<<'}
@@ -209,7 +215,8 @@ function Table() {
                         className="border p-1 rounded w-16"
                     />
                 </span>
-                <select
+                <Select
+                    className="w-28"
                     value={table.getState().pagination.pageSize}
                     onChange={e => {
                         table.setPageSize(Number(e.target.value))
@@ -219,7 +226,7 @@ function Table() {
                             Show {pageSize}
                         </option>
                     ))}
-                </select>
+                </Select>
                 {!dataQuery.data && !dataQuery.error ? 'Loading...' : null}
             </div>
 

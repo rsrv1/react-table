@@ -7,7 +7,6 @@ import { RootState } from './redux/store'
 import {
     selectAll,
     reset,
-    selectCurrentPageAll,
     selectAllCurrentPageRows,
     addToOnly,
     removeFromOnly,
@@ -15,19 +14,21 @@ import {
     addToExcept,
     removeFromExcept,
 } from './redux/slice/rowSelection'
-import clsx from 'clsx'
+import useTotalRowSelectionCount from './useTotalRowSelectionCount'
+import { Response } from '../pages/api/persons'
+import Select from './components/Select'
 
 const columnHelper = createColumnHelper<Person>()
 
-function useColumns() {
+function useColumns(data: undefined | Response) {
     const dispatch = useAppDispatch()
     const { all } = useAppSelector((state: RootState) => state.rowSelection)
     const isSelectedGetter = useAppSelector(isSelected)
     const [bulkSelectionType, setBulkSelectionType] = React.useState('_')
+    const totalSelectionCount = useTotalRowSelectionCount(data)
 
     // takes care of the select all page rows click
-    const handleSelectAll = (table: Table<Person>) => {
-        table.resetRowSelection(true)
+    const handleSelectAll = () => {
         dispatch(reset())
         dispatch(selectAll())
     }
@@ -53,12 +54,12 @@ function useColumns() {
         else dispatch(removeFromOnly(id))
     }
 
-    const handleBulkSelectionChange = (event: React.ChangeEvent<HTMLSelectElement>, table: Table<Person>) => {
+    const handleBulkSelectionChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
         const selected = event.target.value
         setBulkSelectionType(selected)
 
         if (selected === 'all') {
-            return handleSelectAll(table)
+            return handleSelectAll()
         }
 
         if (selected === 'current') {
@@ -68,89 +69,92 @@ function useColumns() {
         dispatch(reset())
     }
 
-    const columns = [
-        columnHelper.accessor('id', {
-            id: 'id',
-            cell: ({ getValue, row, column: { id }, table }) => (
-                <IndeterminateCheckbox
-                    {...{
-                        checked: isSelectedGetter(getValue()),
-                        indeterminate: false,
-                        onChange: e => handleCellSelectChange(e, getValue()),
-                    }}
-                />
-            ),
-            header: ({ table }) => (
-                <select className="text-xs font-medium ml-1" value={bulkSelectionType} onChange={e => handleBulkSelectionChange(e, table)}>
-                    <option value="_">select rows</option>
-                    <option value="all">all</option>
-                    <option value="current">current page</option>
-                </select>
-            ),
-        }),
-        columnHelper.accessor('_expand', {
-            header: () => null,
-            cell: ({ row }) => {
-                return row.getCanExpand() ? (
-                    <button
+    const columns = React.useMemo(
+        () => [
+            columnHelper.accessor('id', {
+                id: 'id',
+                cell: ({ getValue, row, column: { id }, table }) => (
+                    <IndeterminateCheckbox
                         {...{
-                            onClick: row.getToggleExpandedHandler(),
-                            style: { cursor: 'pointer' },
+                            checked: isSelectedGetter(getValue()),
+                            indeterminate: false,
+                            onChange: e => handleCellSelectChange(e, getValue()),
+                        }}
+                    />
+                ),
+                header: ({ table }) => (
+                    <Select className="text-xs font-normal ml-1" value={bulkSelectionType} onChange={handleBulkSelectionChange}>
+                        <option value="_">select rows</option>
+                        <option value="all">all</option>
+                        <option value="current">current page</option>
+                    </Select>
+                ),
+            }),
+            columnHelper.accessor('_expand', {
+                header: () => null,
+                cell: ({ row }) => {
+                    return row.getCanExpand() ? (
+                        <button
+                            {...{
+                                onClick: row.getToggleExpandedHandler(),
+                                style: { cursor: 'pointer' },
+                            }}>
+                            {row.getIsExpanded() ? '👇' : '👉'}
+                        </button>
+                    ) : (
+                        '🔵'
+                    )
+                },
+            }),
+            columnHelper.accessor('firstName', {
+                cell: ({ row, getValue }) => (
+                    <div
+                        style={{
+                            paddingLeft: `${row.depth * 2}rem`,
                         }}>
-                        {row.getIsExpanded() ? '👇' : '👉'}
+                        {getValue()}
+                    </div>
+                ),
+            }),
+            columnHelper.accessor(row => row.lastName, {
+                id: 'lastName',
+                cell: info => <i>{info.getValue()}</i>,
+                header: () => <span>Last Name</span>,
+            }),
+            columnHelper.accessor('age', {
+                header: () => 'Age',
+                cell: info => info.renderValue(),
+            }),
+            columnHelper.accessor('visits', {
+                header: () => <span>Visits</span>,
+            }),
+            columnHelper.accessor('status', {
+                header: 'Status',
+            }),
+            columnHelper.accessor('progress', {
+                header: 'Profile Progress',
+                cell: info => (
+                    <span>
+                        {info.row.original.lastName}-{info.row.original.age}
+                    </span>
+                ),
+            }),
+            columnHelper.accessor('_action', {
+                header: 'Action',
+                cell: ({ getValue, row: { index }, column: { id }, table }) => (
+                    <button
+                        onClick={() => {
+                            table.options.meta?.customFn(index, id, getValue)
+                            console.log('clicked', index, getValue, id)
+                        }}
+                        type="button">
+                        call
                     </button>
-                ) : (
-                    '🔵'
-                )
-            },
-        }),
-        columnHelper.accessor('firstName', {
-            cell: ({ row, getValue }) => (
-                <div
-                    style={{
-                        paddingLeft: `${row.depth * 2}rem`,
-                    }}>
-                    {getValue()}
-                </div>
-            ),
-        }),
-        columnHelper.accessor(row => row.lastName, {
-            id: 'lastName',
-            cell: info => <i>{info.getValue()}</i>,
-            header: () => <span>Last Name</span>,
-        }),
-        columnHelper.accessor('age', {
-            header: () => 'Age',
-            cell: info => info.renderValue(),
-        }),
-        columnHelper.accessor('visits', {
-            header: () => <span>Visits</span>,
-        }),
-        columnHelper.accessor('status', {
-            header: 'Status',
-        }),
-        columnHelper.accessor('progress', {
-            header: 'Profile Progress',
-            cell: info => (
-                <span>
-                    {info.row.original.lastName}-{info.row.original.age}
-                </span>
-            ),
-        }),
-        columnHelper.accessor('_action', {
-            header: 'Action',
-            cell: ({ getValue, row: { index }, column: { id }, table }) => (
-                <button
-                    onClick={() => {
-                        table.options.meta?.customFn(index, id, getValue)
-                        console.log('clicked', index, getValue, id)
-                    }}
-                    type="button">
-                    call
-                </button>
-            ),
-        }),
-    ]
+                ),
+            }),
+        ],
+        [data, totalSelectionCount]
+    )
 
     return columns
 }
