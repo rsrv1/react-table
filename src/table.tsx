@@ -8,8 +8,9 @@ import useColumns from './useColumns'
 import { _shuffle } from './utils'
 import { RootState } from './redux/store'
 import { useAppDispatch, useAppSelector } from './redux/hooks'
-// import { selectAllCurrentPageRows, selectCurrentPageAll } from './redux/slice/rowSelection'
+import { getSelectedRows, selectionCount } from './redux/slice/rowSelection'
 import useCurrentPageRowSelectionListener from './useCurrentPageRowSelectionListener'
+import { reset } from './redux/slice/rowSelection'
 
 function Table() {
     const columns = useColumns()
@@ -17,7 +18,8 @@ function Table() {
     const [columnOrder, setColumnOrder] = React.useState<ColumnOrderState>([])
     const [rowSelection, setRowSelection] = React.useState({})
     const dispatch = useAppDispatch()
-    // const { all } = useAppSelector((state: RootState) => state.rowSelection)
+    const totalSelectionCountGetter = useAppSelector(selectionCount)
+    const selectedRows = useAppSelector(getSelectedRows)
     const [{ pageIndex, pageSize }, setPagination] = React.useState<PaginationState>({
         pageIndex: 0,
         pageSize: 10,
@@ -32,6 +34,12 @@ function Table() {
 
     const dataQuery = useSWR(fetchDataOptions, fetchData)
     useCurrentPageRowSelectionListener(dataQuery.data)
+
+    const totalSelectionCount = React.useMemo(() => {
+        if (!dataQuery.data) return 0
+
+        return totalSelectionCountGetter(dataQuery.data.total)
+    }, [totalSelectionCountGetter, dataQuery.data])
 
     const pagination = React.useMemo(
         () => ({
@@ -71,6 +79,10 @@ function Table() {
 
     const randomizeColumns = () => {
         table.setColumnOrder(_shuffle(table.getAllLeafColumns().map(d => d.id)))
+    }
+
+    const deselectAllRows = () => {
+        dispatch(reset())
     }
 
     return (
@@ -113,6 +125,12 @@ function Table() {
             </div>
             <div className="h-4" />
 
+            {totalSelectionCount > 0 && (
+                <button onClick={deselectAllRows} type="button">
+                    de-select {totalSelectionCount} selected rows
+                </button>
+            )}
+
             <table>
                 <thead>
                     {table.getHeaderGroups().map(headerGroup => (
@@ -147,16 +165,12 @@ function Table() {
                 </tbody>
                 <tfoot>
                     <tr>
-                        <td className="p-1">
-                            <IndeterminateCheckbox
-                                {...{
-                                    checked: table.getIsAllPageRowsSelected(),
-                                    indeterminate: table.getIsSomePageRowsSelected(),
-                                    onChange: table.getToggleAllPageRowsSelectedHandler(),
-                                }}
-                            />
+                        <td></td>
+                        <td colSpan={20} className="pt-3">
+                            <div>
+                                {totalSelectionCount} of {dataQuery.data?.total} Total Rows Selected
+                            </div>
                         </td>
-                        <td colSpan={20}>Page Rows ({table.getRowModel().rows.length})</td>
                     </tr>
                 </tfoot>
             </table>
@@ -208,23 +222,12 @@ function Table() {
                 </select>
                 {!dataQuery.data && !dataQuery.error ? 'Loading...' : null}
             </div>
-            <div>{table.getRowModel().rows.length} Rows</div>
 
-            <div>
-                {Object.keys(rowSelection).length} of {table.getPreFilteredRowModel().rows.length} Total Rows Selected
-            </div>
             <hr />
 
             <div>
-                <button className="border rounded p-2 mb-2" onClick={() => console.info('rowSelection', rowSelection)}>
+                <button className="border rounded p-2 mb-2" onClick={() => console.info('rowSelection', selectedRows)}>
                     Log `rowSelection` state
-                </button>
-            </div>
-            <div>
-                <button
-                    className="border rounded p-2 mb-2"
-                    onClick={() => console.info('table.getSelectedFlatRows()', table.getSelectedRowModel().flatRows)}>
-                    Log table.getSelectedFlatRows()
                 </button>
             </div>
         </div>

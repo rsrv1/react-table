@@ -6,6 +6,7 @@ import { range } from '../../src/utils'
 export type Response = {
     rows: Person[]
     pageCount: number
+    total: number
 }
 
 type Query = {
@@ -34,7 +35,8 @@ export function makeData(...lens: number[]) {
     return makeDataLevel()
 }
 
-const data = makeData(10000)
+const TOTAL = 100
+const data = makeData(TOTAL)
 
 function handler(req: NextApiRequest, res: NextApiResponse<Response>) {
     const { page, perPage } = <Query>req.query
@@ -43,7 +45,8 @@ function handler(req: NextApiRequest, res: NextApiResponse<Response>) {
 
     res.status(200).json({
         rows: data.slice(pageIndex * pageSize, (pageIndex + 1) * pageSize),
-        pageCount: Math.ceil(data.length / pageSize),
+        pageCount: Math.ceil(TOTAL / pageSize),
+        total: TOTAL,
     })
 }
 

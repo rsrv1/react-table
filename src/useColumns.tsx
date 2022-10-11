@@ -21,8 +21,9 @@ const columnHelper = createColumnHelper<Person>()
 
 function useColumns() {
     const dispatch = useAppDispatch()
-    const { all, only } = useAppSelector((state: RootState) => state.rowSelection)
+    const { all } = useAppSelector((state: RootState) => state.rowSelection)
     const isSelectedGetter = useAppSelector(isSelected)
+    const [bulkSelectionType, setBulkSelectionType] = React.useState('_')
 
     // takes care of the select all page rows click
     const handleSelectAll = (table: Table<Person>) => {
@@ -32,7 +33,7 @@ function useColumns() {
     }
 
     // takes care of all rows selection of the current page
-    const handleSelectAllCurrentPage = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>, table: Table<Person>) => {
+    const handleSelectAllCurrentPage = () => {
         dispatch(reset())
         dispatch(selectAllCurrentPageRows(true)) // enable the flag
     }
@@ -52,8 +53,22 @@ function useColumns() {
         else dispatch(removeFromOnly(id))
     }
 
+    const handleBulkSelectionChange = (event: React.ChangeEvent<HTMLSelectElement>, table: Table<Person>) => {
+        const selected = event.target.value
+        setBulkSelectionType(selected)
+
+        if (selected === 'all') {
+            return handleSelectAll(table)
+        }
+
+        if (selected === 'current') {
+            return handleSelectAllCurrentPage()
+        }
+
+        dispatch(reset())
+    }
+
     const columns = [
-        // memoize
         columnHelper.accessor('id', {
             id: 'id',
             cell: ({ getValue, row, column: { id }, table }) => (
@@ -66,26 +81,11 @@ function useColumns() {
                 />
             ),
             header: ({ table }) => (
-                <div className="flex items-center">
-                    <IndeterminateCheckbox
-                        {...{
-                            checked: table.getIsAllRowsSelected() || all,
-                            indeterminate: table.getIsSomeRowsSelected(),
-                            onChange: table.getToggleAllRowsSelectedHandler(),
-                        }}
-                    />
-                    <div className="flex flex-col text-xs font-medium space-y-1 ml-1">
-                        <button onClick={() => handleSelectAll(table)} type="button" className={clsx('border border-gray-400 px-1 py-0')}>
-                            all
-                        </button>
-                        <button
-                            onClick={event => handleSelectAllCurrentPage(event, table)}
-                            type="button"
-                            className={clsx('border border-gray-400 px-1 py-0')}>
-                            this page select all
-                        </button>
-                    </div>
-                </div>
+                <select className="text-xs font-medium ml-1" value={bulkSelectionType} onChange={e => handleBulkSelectionChange(e, table)}>
+                    <option value="_">select rows</option>
+                    <option value="all">all</option>
+                    <option value="current">current page</option>
+                </select>
             ),
         }),
         columnHelper.accessor('_expand', {

@@ -1,19 +1,21 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 import type { RootState } from '../store'
 
+export type KeyedIds = { [key: string]: boolean }
+
 type initialState = {
     all: boolean
-    except: string[]
+    except: KeyedIds
 
-    only: string[]
+    only: KeyedIds
     addAllCurrentPageRows: boolean
 }
 
 const initialState: initialState = {
     all: false,
-    except: [],
+    except: {},
 
-    only: [],
+    only: {},
     addAllCurrentPageRows: false,
 }
 
@@ -23,36 +25,38 @@ export const rowSelection = createSlice({
     reducers: {
         selectAll: state => {
             state.all = true
-            state.only = []
-            state.except = []
+            state.only = {}
+            state.except = {}
         },
         selectCurrentPageAll: (state, action: PayloadAction<string[]>) => {
             state.all = false
-            state.except = []
-            state.only = action.payload
+            state.except = {}
+
+            state.only = action.payload.reduce((acc, id) => Object.assign({}, acc, { [id]: true }), {})
         },
         selectAllCurrentPageRows: (state, action: PayloadAction<boolean>) => {
             state.addAllCurrentPageRows = action.payload
         },
 
         addToOnly: (state, action: PayloadAction<string>) => {
-            state.only = [...state.only, action.payload]
+            state.only[action.payload] = true
         },
         removeFromOnly: (state, action: PayloadAction<string>) => {
-            state.only = state.only.filter(id => id !== action.payload)
+            delete state.only[action.payload]
         },
 
         addToExcept: (state, action: PayloadAction<string>) => {
-            state.except = [...state.except, action.payload]
+            state.except[action.payload] = true
         },
         removeFromExcept: (state, action: PayloadAction<string>) => {
-            state.except = state.except.filter(id => id !== action.payload)
+            delete state.except[action.payload]
         },
 
         reset: state => {
             state.all = false
-            state.only = []
-            state.except = []
+            state.only = {}
+            state.except = {}
+            state.addAllCurrentPageRows = false
         },
     },
 })
@@ -68,16 +72,56 @@ export const isSelected = (state: RootState): isSelectedGetter => {
     const { all, only, except } = state.rowSelection
 
     return (id: string) => {
-        if (only.length > 0) {
-            return only.includes(id)
+        if (Object.keys(only).length > 0) {
+            return only[id]
         }
 
         if (all) {
-            return !except.includes(id)
+            return !except[id]
         }
 
         return false
     }
+}
+
+interface totalSelectionCountGetter {
+    (total: number): number
+}
+export const selectionCount = (state: RootState): totalSelectionCountGetter => {
+    const { all, only, except } = state.rowSelection
+    const totalOnly = Object.keys(only).length
+    const totalExcept = Object.keys(except).length
+
+    return (total: number) => {
+        if (totalOnly) {
+            return totalOnly
+        }
+
+        if (all) {
+            return total - totalExcept
+        }
+
+        return 0
+    }
+}
+
+type selectedAllRows = {
+    all: boolean
+    except: string[]
+}
+type selectedSomeRows = {
+    ids: string[]
+}
+
+export const getSelectedRows = (state: RootState): selectedAllRows | selectedSomeRows => {
+    const { all, only, except } = state.rowSelection
+    const allOnly = Object.keys(only)
+
+    if (all) {
+        return { all: true, except: Object.keys(except) }
+    }
+
+    return { ids: allOnly }
 }
 
 export default rowSelection.reducer
