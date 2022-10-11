@@ -3,7 +3,7 @@ import faker from '@faker-js/faker'
 import type { Person } from '../../src/data/fetchData'
 import { range } from '../../src/utils'
 
-type Response = {
+export type Response = {
     rows: Person[]
     pageCount: number
 }
@@ -15,6 +15,7 @@ type Query = {
 
 const newPerson = (): Person => {
     return {
+        id: faker.datatype.uuid(),
         firstName: faker.name.firstName(),
         lastName: faker.name.lastName(),
         age: faker.datatype.number(40),

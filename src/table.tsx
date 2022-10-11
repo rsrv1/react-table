@@ -6,12 +6,18 @@ import IndeterminateCheckbox from './components/IndeterminateCheckbox'
 import renderSubComponent from './components/RowSubExpand'
 import useColumns from './useColumns'
 import { _shuffle } from './utils'
+import { RootState } from './redux/store'
+import { useAppDispatch, useAppSelector } from './redux/hooks'
+// import { selectAllCurrentPageRows, selectCurrentPageAll } from './redux/slice/rowSelection'
+import useCurrentPageRowSelectionListener from './useCurrentPageRowSelectionListener'
 
 function Table() {
     const columns = useColumns()
     const [columnVisibility, setColumnVisibility] = React.useState({})
     const [columnOrder, setColumnOrder] = React.useState<ColumnOrderState>([])
     const [rowSelection, setRowSelection] = React.useState({})
+    const dispatch = useAppDispatch()
+    // const { all } = useAppSelector((state: RootState) => state.rowSelection)
     const [{ pageIndex, pageSize }, setPagination] = React.useState<PaginationState>({
         pageIndex: 0,
         pageSize: 10,
@@ -25,6 +31,7 @@ function Table() {
     const lastData = React.useRef<{ rows: Person[]; pageCount: number }>({ rows: [], pageCount: 0 })
 
     const dataQuery = useSWR(fetchDataOptions, fetchData)
+    useCurrentPageRowSelectionListener(dataQuery.data)
 
     const pagination = React.useMemo(
         () => ({

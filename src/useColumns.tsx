@@ -1,20 +1,67 @@
 import React from 'react'
-import { createColumnHelper } from '@tanstack/react-table'
+import { createColumnHelper, Row, Table } from '@tanstack/react-table'
 import { Person } from './data/fetchData'
 import IndeterminateCheckbox from './components/IndeterminateCheckbox'
+import { useAppDispatch, useAppSelector } from './redux/hooks'
+import { RootState } from './redux/store'
+import {
+    selectAll,
+    reset,
+    selectCurrentPageAll,
+    selectAllCurrentPageRows,
+    addToOnly,
+    removeFromOnly,
+    isSelected,
+    addToExcept,
+    removeFromExcept,
+} from './redux/slice/rowSelection'
+import clsx from 'clsx'
 
 const columnHelper = createColumnHelper<Person>()
 
 function useColumns() {
+    const dispatch = useAppDispatch()
+    const { all, only } = useAppSelector((state: RootState) => state.rowSelection)
+    const isSelectedGetter = useAppSelector(isSelected)
+
+    // takes care of the select all page rows click
+    const handleSelectAll = (table: Table<Person>) => {
+        table.resetRowSelection(true)
+        dispatch(reset())
+        dispatch(selectAll())
+    }
+
+    // takes care of all rows selection of the current page
+    const handleSelectAllCurrentPage = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>, table: Table<Person>) => {
+        dispatch(reset())
+        dispatch(selectAllCurrentPageRows(true)) // enable the flag
+    }
+
+    // row item check/uncheck
+    const handleCellSelectChange = (event: React.FormEvent<HTMLInputElement>, id: string) => {
+        const isChecked = (event.target as HTMLInputElement).checked
+
+        if (all) {
+            if (isChecked) dispatch(removeFromExcept(id))
+            else dispatch(addToExcept(id))
+
+            return
+        }
+
+        if (isChecked) dispatch(addToOnly(id))
+        else dispatch(removeFromOnly(id))
+    }
+
     const columns = [
-        columnHelper.accessor('_check', {
-            id: '_select',
+        // memoize
+        columnHelper.accessor('id', {
+            id: 'id',
             cell: ({ getValue, row, column: { id }, table }) => (
                 <IndeterminateCheckbox
                     {...{
-                        checked: row.getIsSelected(),
-                        indeterminate: row.getIsSomeSelected(),
-                        onChange: row.getToggleSelectedHandler(),
+                        checked: isSelectedGetter(getValue()),
+                        indeterminate: false,
+                        onChange: e => handleCellSelectChange(e, getValue()),
                     }}
                 />
             ),
@@ -22,17 +69,20 @@ function useColumns() {
                 <div className="flex items-center">
                     <IndeterminateCheckbox
                         {...{
-                            checked: table.getIsAllRowsSelected(),
+                            checked: table.getIsAllRowsSelected() || all,
                             indeterminate: table.getIsSomeRowsSelected(),
                             onChange: table.getToggleAllRowsSelectedHandler(),
                         }}
                     />
                     <div className="flex flex-col text-xs font-medium space-y-1 ml-1">
-                        <button type="button" className="border border-gray-400 px-1 py-0">
+                        <button onClick={() => handleSelectAll(table)} type="button" className={clsx('border border-gray-400 px-1 py-0')}>
                             all
                         </button>
-                        <button type="button" className="border border-gray-400 px-1 py-0">
-                            this page
+                        <button
+                            onClick={event => handleSelectAllCurrentPage(event, table)}
+                            type="button"
+                            className={clsx('border border-gray-400 px-1 py-0')}>
+                            this page select all
                         </button>
                     </div>
                 </div>
