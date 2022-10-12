@@ -1,17 +1,12 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import faker from '@faker-js/faker'
-import type { Person } from '../../src/data/fetchData'
+import type { Person, Query } from '../../src/data/fetchData'
 import { range } from '../../src/utils'
 
 export type Response = {
     rows: Person[]
     pageCount: number
     total: number
-}
-
-type Query = {
-    page: string
-    perPage: string
 }
 
 const newPerson = (): Person => {

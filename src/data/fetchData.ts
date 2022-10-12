@@ -8,8 +8,14 @@ export type Person = {
     status: 'In Relationship' | 'Single' | 'Complicated'
 }
 
-export async function fetchData(options: { pageIndex: number; pageSize: number }) {
-    return fetch(`/api/persons?page=${options.pageIndex}&perPage=${options.pageSize}`)
+export type Query = {
+    page: number | string
+    perPage: number | string
+    sort?: string
+}
+
+export async function fetchData(options: { page: number; perPage: number; sort: string }) {
+    return fetch(`/api/persons?page=${options.page}&perPage=${options.perPage}&sort=${options.sort}`)
         .then(r => r.json())
         .then(result => result)
         .catch(e => ({

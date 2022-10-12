@@ -1,9 +1,11 @@
 import { configureStore, Reducer, AnyAction } from '@reduxjs/toolkit'
+import columnSorting from './slice/columnSorting'
 import rowSelection from './slice/rowSelection'
 
 const store = configureStore({
     reducer: {
         rowSelection: rowSelection,
+        columnSorting: columnSorting,
     },
 })
 

@@ -1,7 +1,7 @@
 import React from 'react'
 import { flexRender, getCoreRowModel, ColumnOrderState, useReactTable, PaginationState } from '@tanstack/react-table'
 import useSWR from 'swr'
-import { fetchData, Person } from './data/fetchData'
+import { fetchData, Person, Query } from './data/fetchData'
 import renderSubComponent from './components/RowSubExpand'
 import useColumns from './useColumns'
 import { _shuffle } from './utils'
@@ -12,20 +12,24 @@ import useCurrentPageRowSelectionListener from './useCurrentPageRowSelectionList
 import { reset } from './redux/slice/rowSelection'
 import useTotalRowSelectionCount from './useTotalRowSelectionCount'
 import Select from './components/Select'
+import SortTrigger from './components/SortTrigger'
+import { getSorted } from './redux/slice/columnSorting'
 
 function Table() {
     const [columnVisibility, setColumnVisibility] = React.useState({})
     const [columnOrder, setColumnOrder] = React.useState<ColumnOrderState>([])
     const dispatch = useAppDispatch()
     const selectedRows = useAppSelector(getSelectedRows)
+    const sort = useAppSelector(getSorted)
     const [{ pageIndex, pageSize }, setPagination] = React.useState<PaginationState>({
         pageIndex: 0,
         pageSize: 10,
     })
 
-    const fetchDataOptions = {
-        pageIndex,
-        pageSize,
+    const fetchDataOptions: Query = {
+        page: pageIndex,
+        perPage: pageSize,
+        sort,
     }
 
     const lastData = React.useRef<{ rows: Person[]; pageCount: number }>({ rows: [], pageCount: 0 })
@@ -142,9 +146,9 @@ function Table() {
                         <tr key={headerGroup.id}>
                             {headerGroup.headers.map(header => (
                                 <th key={header.id}>
-                                    <div className="whitespace-nowrap">
+                                    <SortTrigger sortable={!header.id.startsWith('_')} name={header.id} className="whitespace-nowrap">
                                         {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
-                                    </div>
+                                    </SortTrigger>
                                 </th>
                             ))}
                         </tr>
@@ -180,6 +184,7 @@ function Table() {
                 </tfoot>
             </table>
             <div className="h-4" />
+
             {/* pagination */}
             <div className="flex items-center gap-2">
                 <button className="border rounded p-1" onClick={() => table.setPageIndex(0)} disabled={!table.getCanPreviousPage()}>
@@ -231,12 +236,13 @@ function Table() {
             </div>
 
             <hr />
-
             <div>
                 <button className="border rounded p-2 mb-2" onClick={() => console.info('rowSelection', selectedRows)}>
-                    Log `rowSelection` state
+                    Log selectedRows
                 </button>
             </div>
+            <hr />
+            <div>{JSON.stringify(fetchDataOptions)}</div>
         </div>
     )
 }
