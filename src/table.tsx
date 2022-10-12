@@ -4,19 +4,23 @@ import useSWR from 'swr'
 import { fetchData, Person, Query, Status } from './data/fetchData'
 import renderSubComponent from './components/RowSubExpand'
 import useColumns from './useColumns'
-import { _shuffle } from './utils'
 import { RootState } from './redux/store'
 import { useAppDispatch, useAppSelector } from './redux/hooks'
 import { getSelectedRows } from './redux/slice/rowSelection'
 import useCurrentPageRowSelectionListener from './useCurrentPageRowSelectionListener'
 import { reset } from './redux/slice/rowSelection'
 import useTotalRowSelectionCount from './useTotalRowSelectionCount'
-import Select from './components/Select'
 import SortTrigger from './components/SortTrigger'
 import { getSorted } from './redux/slice/columnSorting'
 import { getFiltered } from './redux/slice/filters'
-import Age from './filters/age'
-import StatusFilter from './filters/status'
+import Pagination from './pagination'
+import Filters from './filters'
+import ColumnVisibility from './columnVisibility'
+import RowSelectionMessage from './rowSelectionMessage'
+import { setLoading } from './redux/slice/request'
+import { Response } from '../pages/api/persons'
+
+let firstRenderPagination = true
 
 function Table() {
     const [columnVisibility, setColumnVisibility] = React.useState({})
@@ -37,13 +41,13 @@ function Table() {
         filter,
     }
 
-    const lastData = React.useRef<{ rows: Person[]; pageCount: number }>({ rows: [], pageCount: 0 })
+    const lastData = React.useRef<Response>({ rows: [], pageCount: 0, total: 0 })
 
     const dataQuery = useSWR(fetchDataOptions, fetchData)
     useCurrentPageRowSelectionListener(dataQuery.data)
     const columns = useColumns(dataQuery.data)
 
-    const totalSelectionCount = useTotalRowSelectionCount(dataQuery.data)
+    const totalSelectionCount = useTotalRowSelectionCount(lastData.current)
 
     const pagination = React.useMemo(
         () => ({
@@ -53,9 +57,20 @@ function Table() {
         [pageIndex, pageSize]
     )
 
+    /** keeping the last data as - when SWR fetches the current data becomes undefined (to avoid the flickering) */
     React.useEffect(() => {
         if (dataQuery.data) lastData.current = dataQuery.data
     }, [dataQuery.data])
+
+    /** track loading state */
+    React.useEffect(() => {
+        if (!dataQuery.data && !dataQuery.error) {
+            dispatch(setLoading(true))
+            return
+        }
+
+        dispatch(setLoading(false))
+    }, [dataQuery])
 
     const table = useReactTable({
         data: dataQuery.data?.rows ?? lastData.current.rows,
@@ -79,95 +94,25 @@ function Table() {
         },
     })
 
-    const randomizeColumns = () => {
-        table.setColumnOrder(_shuffle(table.getAllLeafColumns().map(d => d.id)))
-    }
+    /** when any filtering happens then reset the pagination */
+    React.useEffect(() => {
+        if (firstRenderPagination) {
+            firstRenderPagination = false
+            return
+        }
 
-    const deselectAllRows = () => {
-        dispatch(reset())
-    }
+        table.resetPagination()
+    }, [filter])
 
     return (
         <div className="p-2">
-            <details>
-                <summary className=" cursor-pointer">Column Visibility:</summary>
+            <ColumnVisibility table={table} />
 
-                <div className="inline-block border border-black shadow rounded">
-                    <div className="px-1 border-b border-black">
-                        <label>
-                            <input
-                                {...{
-                                    type: 'checkbox',
-                                    checked: table.getIsAllColumnsVisible(),
-                                    onChange: table.getToggleAllColumnsVisibilityHandler(),
-                                }}
-                            />{' '}
-                            Toggle All
-                        </label>
-                    </div>
-                    {table.getAllLeafColumns().map(column => {
-                        return (
-                            <div key={column.id} className="px-1">
-                                <label>
-                                    <input
-                                        {...{
-                                            type: 'checkbox',
-                                            checked: column.getIsVisible(),
-                                            onChange: column.getToggleVisibilityHandler(),
-                                        }}
-                                    />{' '}
-                                    {column.id}
-                                </label>
-                            </div>
-                        )
-                    })}
-                </div>
-            </details>
+            <Filters />
 
-            <div className="h-4" />
-            <div className="flex flex-wrap gap-2">
-                <button onClick={randomizeColumns} className="border p-1">
-                    Reorder Columns
-                </button>
-            </div>
-            <div className="h-4" />
+            {totalSelectionCount > 0 && <RowSelectionMessage count={totalSelectionCount} />}
 
-            {totalSelectionCount > 0 && (
-                <div className="rounded-md bg-sky-50 p-4">
-                    <div className="flex">
-                        <div className="ml-3 flex-1 md:flex md:justify-between">
-                            <p className="text-sm text-sky-700">{totalSelectionCount} rows selected</p>
-                            <p className="mt-3 text-sm md:mt-0 md:ml-6">
-                                <button
-                                    onClick={deselectAllRows}
-                                    type="button"
-                                    className="whitespace-nowrap font-medium text-sky-700 hover:text-sky-600">
-                                    <span aria-hidden="true">&times;</span> de-select all
-                                </button>
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            )}
-
-            {/* filters */}
-            <div className="flex justify-end space-x-5">
-                <div className="flex items-center w-28">
-                    <details>
-                        <summary className="text-xs cursor-pointer">Status:</summary>
-                        <StatusFilter />
-                    </details>
-                </div>
-                <div className="flex items-center space-x-2">
-                    <label for="filter-age" className="text-xs cursor-pointer">
-                        Age:{' '}
-                    </label>
-                    <Age id="filter-age" />
-                </div>
-            </div>
-            {/* filters */}
-
-            <table>
+            <table className="w-full">
                 <thead>
                     {table.getHeaderGroups().map(headerGroup => (
                         <tr key={headerGroup.id}>
@@ -216,63 +161,16 @@ function Table() {
             <div className="h-4" />
 
             {/* pagination */}
-            <div className="flex items-center gap-2 text-sm">
-                <button className="border rounded p-1" onClick={() => table.setPageIndex(0)} disabled={!table.getCanPreviousPage()}>
-                    {'<<'}
-                </button>
-                <button className="border rounded p-1" onClick={() => table.previousPage()} disabled={!table.getCanPreviousPage()}>
-                    {'<'}
-                </button>
-                <button className="border rounded p-1" onClick={() => table.nextPage()} disabled={!table.getCanNextPage()}>
-                    {'>'}
-                </button>
-                <button
-                    className="border rounded p-1"
-                    onClick={() => table.setPageIndex(table.getPageCount() - 1)}
-                    disabled={!table.getCanNextPage()}>
-                    {'>>'}
-                </button>
-                <span className="flex items-center gap-1">
-                    <div>Page</div>
-                    <strong>
-                        {table.getState().pagination.pageIndex + 1} of {table.getPageCount()}
-                    </strong>
-                </span>
-                <span className="flex items-center gap-1">
-                    | Go to page:
-                    <input
-                        type="number"
-                        defaultValue={table.getState().pagination.pageIndex + 1}
-                        onChange={e => {
-                            const page = e.target.value ? Number(e.target.value) - 1 : 0
-                            table.setPageIndex(page)
-                        }}
-                        className="border border-gray-300 p-1 rounded w-10 text-sm py-0.5"
-                    />
-                </span>
-                <Select
-                    className="!w-24"
-                    value={table.getState().pagination.pageSize}
-                    onChange={e => {
-                        table.setPageSize(Number(e.target.value))
-                    }}>
-                    {[10, 20, 30, 40, 50].map(pageSize => (
-                        <option key={pageSize} value={pageSize}>
-                            Show {pageSize}
-                        </option>
-                    ))}
-                </Select>
-                {!dataQuery.data && !dataQuery.error ? 'Loading...' : null}
-            </div>
+            <Pagination table={table} />
 
             {/* debug interaction */}
             <div className="mt-10">
-                <button className="border rounded p-2 mb-2" onClick={() => console.info('rowSelection', selectedRows)}>
-                    Log selectedRows
-                </button>
+                <span className="font-medium text-indigo-500">Selected rows:</span> {JSON.stringify(selectedRows)}
             </div>
             <hr />
-            <div>{JSON.stringify(fetchDataOptions)}</div>
+            <div>
+                <span className="font-medium text-indigo-500">Query:</span> {JSON.stringify(fetchDataOptions)}
+            </div>
         </div>
     )
 }

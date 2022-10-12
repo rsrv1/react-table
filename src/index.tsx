@@ -7,7 +7,7 @@ import store from './redux/store'
 function Main() {
     return (
         <ReduxProvider store={store}>
-            <SWRConfig value={{ refreshInterval: 3000 }}>
+            <SWRConfig value={{ refreshInterval: 5000 }}>
                 <Table />
             </SWRConfig>
         </ReduxProvider>

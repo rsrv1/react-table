@@ -1,6 +1,7 @@
 import { configureStore, Reducer, AnyAction } from '@reduxjs/toolkit'
 import columnSorting from './slice/columnSorting'
 import filters from './slice/filters'
+import request from './slice/request'
 import rowSelection from './slice/rowSelection'
 
 const store = configureStore({
@@ -8,6 +9,7 @@ const store = configureStore({
         rowSelection: rowSelection,
         columnSorting: columnSorting,
         filters: filters,
+        request: request,
     },
 })
 

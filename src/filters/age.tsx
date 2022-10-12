@@ -1,7 +1,9 @@
 import React from 'react'
 import { useDispatch } from 'react-redux'
 import Select from '../components/Select'
+import { useAppSelector } from '../redux/hooks'
 import { filterByAge } from '../redux/slice/filters'
+import { RootState } from '../redux/store'
 
 type props = {
     id: string
@@ -11,6 +13,7 @@ type props = {
 function Age({ id }: props) {
     const dispatch = useDispatch()
     const [age, setAge] = React.useState<number | 'ALL'>('ALL')
+    const loading = useAppSelector((state: RootState) => state.request.loading)
 
     const handleAgeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         const value = e.target.value === 'ALL' ? 'ALL' : Number(e.target.value)
@@ -20,7 +23,7 @@ function Age({ id }: props) {
     }
 
     return (
-        <Select id={id} className="!pl-2 !pr-7 !text-xs" value={age} onChange={handleAgeChange}>
+        <Select id={id} className="!pl-2 !pr-7 !text-xs" value={age} onChange={handleAgeChange} disabled={loading}>
             <option value="ALL">any</option>
             <option value="20"> {'>'} 20</option>
             <option value="40"> {'>'} 40</option>

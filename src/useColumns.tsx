@@ -23,6 +23,7 @@ const columnHelper = createColumnHelper<Person>()
 function useColumns(data: undefined | Response) {
     const dispatch = useAppDispatch()
     const { all } = useAppSelector((state: RootState) => state.rowSelection)
+    const loading = useAppSelector((state: RootState) => state.request.loading)
     const isSelectedGetter = useAppSelector(isSelected)
     const [bulkSelectionType, setBulkSelectionType] = React.useState('_')
     const totalSelectionCount = useTotalRowSelectionCount(data)
@@ -79,11 +80,12 @@ function useColumns(data: undefined | Response) {
                             checked: isSelectedGetter(getValue()),
                             indeterminate: false,
                             onChange: e => handleCellSelectChange(e, getValue()),
+                            disabled: loading,
                         }}
                     />
                 ),
                 header: ({ table }) => (
-                    <Select className="!pl-2 !pr-5 font-normal" value={bulkSelectionType} onChange={handleBulkSelectionChange}>
+                    <Select className="!pl-2 !pr-5 font-normal" value={bulkSelectionType} onChange={handleBulkSelectionChange} disabled={loading}>
                         <option value="_">select</option>
                         <option value="all">all</option>
                         <option value="current">this page</option>
@@ -153,7 +155,7 @@ function useColumns(data: undefined | Response) {
                 ),
             }),
         ],
-        [data, totalSelectionCount]
+        [data, totalSelectionCount, loading]
     )
 
     return columns

@@ -29,7 +29,7 @@ function StatusFilter() {
                         checked={status.includes(option)}
                         className="pr-2"
                     />{' '}
-                    <label for={`status:${option}`} className="cursor-pointer">
+                    <label htmlFor={`status:${option}`} className="cursor-pointer">
                         {option}
                     </label>
                 </li>
