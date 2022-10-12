@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import faker from '@faker-js/faker'
-import type { Person, Query } from '../../src/data/fetchData'
+import { Person, Query, Status } from '../../src/data/fetchData'
 import { range } from '../../src/utils'
 
 export type Response = {
@@ -17,7 +17,7 @@ const newPerson = (): Person => {
         age: faker.datatype.number(40),
         visits: faker.datatype.number(1000),
         progress: faker.datatype.number(100),
-        status: faker.helpers.shuffle<Person['status']>(['In Relationship', 'Single', 'Complicated'])[0]!,
+        status: faker.helpers.shuffle<Person['status']>(Object.values(Status))[0]!,
     }
 }
 

@@ -6,16 +6,14 @@ import { mutate, remove, reset, sortDirection } from './../redux/slice/columnSor
 
 type Props = {
     name: string
-    sortable: boolean
+    unsortable: boolean
     children: React.ReactNode
     up?: JSX.Element
     down?: JSX.Element
     className?: string
 }
 
-function SortTrigger({ name, sortable, children, up = <span>^</span>, down = <span>v</span>, className }: Props) {
-    console.log('SortTrigger', name)
-
+function SortTrigger({ name, unsortable, children, up = <span>^</span>, down = <span>v</span>, className }: Props) {
     const dispatch = useAppDispatch()
     const columns = useAppSelector((state: RootState) => state.columnSorting.column)
 
@@ -33,7 +31,7 @@ function SortTrigger({ name, sortable, children, up = <span>^</span>, down = <sp
         dispatch(remove(name))
     }
 
-    if (!sortable) return <div className={className}>{children}</div>
+    if (unsortable) return <div className={className}>{children}</div>
 
     return (
         <button onClick={handleSort} type="button" className={clsx('flex justify-between items-center', className)}>

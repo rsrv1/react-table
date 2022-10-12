@@ -1,7 +1,7 @@
 import React from 'react'
 import { flexRender, getCoreRowModel, ColumnOrderState, useReactTable, PaginationState } from '@tanstack/react-table'
 import useSWR from 'swr'
-import { fetchData, Person, Query } from './data/fetchData'
+import { fetchData, Person, Query, Status } from './data/fetchData'
 import renderSubComponent from './components/RowSubExpand'
 import useColumns from './useColumns'
 import { _shuffle } from './utils'
@@ -14,6 +14,9 @@ import useTotalRowSelectionCount from './useTotalRowSelectionCount'
 import Select from './components/Select'
 import SortTrigger from './components/SortTrigger'
 import { getSorted } from './redux/slice/columnSorting'
+import { getFiltered } from './redux/slice/filters'
+import Age from './filters/age'
+import StatusFilter from './filters/status'
 
 function Table() {
     const [columnVisibility, setColumnVisibility] = React.useState({})
@@ -21,6 +24,7 @@ function Table() {
     const dispatch = useAppDispatch()
     const selectedRows = useAppSelector(getSelectedRows)
     const sort = useAppSelector(getSorted)
+    const filter = useAppSelector(getFiltered)
     const [{ pageIndex, pageSize }, setPagination] = React.useState<PaginationState>({
         pageIndex: 0,
         pageSize: 10,
@@ -30,6 +34,7 @@ function Table() {
         page: pageIndex,
         perPage: pageSize,
         sort,
+        filter,
     }
 
     const lastData = React.useRef<{ rows: Person[]; pageCount: number }>({ rows: [], pageCount: 0 })
@@ -140,13 +145,33 @@ function Table() {
                 </div>
             )}
 
+            {/* filters */}
+            <div className="flex justify-end space-x-5">
+                <div className="flex items-center w-28">
+                    <details>
+                        <summary className="text-xs cursor-pointer">Status:</summary>
+                        <StatusFilter />
+                    </details>
+                </div>
+                <div className="flex items-center space-x-2">
+                    <label for="filter-age" className="text-xs cursor-pointer">
+                        Age:{' '}
+                    </label>
+                    <Age id="filter-age" />
+                </div>
+            </div>
+            {/* filters */}
+
             <table>
                 <thead>
                     {table.getHeaderGroups().map(headerGroup => (
                         <tr key={headerGroup.id}>
                             {headerGroup.headers.map(header => (
                                 <th key={header.id}>
-                                    <SortTrigger sortable={!header.id.startsWith('_')} name={header.id} className="whitespace-nowrap">
+                                    <SortTrigger
+                                        unsortable={header.id.startsWith('_') || ['id'].includes(header.id)}
+                                        name={header.id}
+                                        className="whitespace-nowrap">
                                         {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
                                     </SortTrigger>
                                 </th>
@@ -234,9 +259,10 @@ function Table() {
                 </Select>
                 {!dataQuery.data && !dataQuery.error ? 'Loading...' : null}
             </div>
-
             <hr />
-            <div>
+
+            {/* debug interaction */}
+            <div className="mt-10">
                 <button className="border rounded p-2 mb-2" onClick={() => console.info('rowSelection', selectedRows)}>
                     Log selectedRows
                 </button>
