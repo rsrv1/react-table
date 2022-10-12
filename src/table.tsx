@@ -211,7 +211,7 @@ function Table() {
             <div className="h-4" />
 
             {/* pagination */}
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 text-sm">
                 <button className="border rounded p-1" onClick={() => table.setPageIndex(0)} disabled={!table.getCanPreviousPage()}>
                     {'<<'}
                 </button>
@@ -242,11 +242,11 @@ function Table() {
                             const page = e.target.value ? Number(e.target.value) - 1 : 0
                             table.setPageIndex(page)
                         }}
-                        className="border p-1 rounded w-16"
+                        className="border border-gray-300 p-1 rounded w-10 text-sm py-0.5"
                     />
                 </span>
                 <Select
-                    className="w-28"
+                    className="w-24 py-0.5"
                     value={table.getState().pagination.pageSize}
                     onChange={e => {
                         table.setPageSize(Number(e.target.value))
@@ -259,7 +259,6 @@ function Table() {
                 </Select>
                 {!dataQuery.data && !dataQuery.error ? 'Loading...' : null}
             </div>
-            <hr />
 
             {/* debug interaction */}
             <div className="mt-10">

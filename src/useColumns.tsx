@@ -83,7 +83,7 @@ function useColumns(data: undefined | Response) {
                     />
                 ),
                 header: ({ table }) => (
-                    <Select className="py-1 pl-2 pr-5 font-normal" value={bulkSelectionType} onChange={handleBulkSelectionChange}>
+                    <Select className="py-0.5 pl-2 pr-5 font-normal" value={bulkSelectionType} onChange={handleBulkSelectionChange}>
                         <option value="_">select</option>
                         <option value="all">all</option>
                         <option value="current">this page</option>
