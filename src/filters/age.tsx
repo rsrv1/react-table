@@ -20,7 +20,7 @@ function Age({ id }: props) {
     }
 
     return (
-        <Select id={id} className="py-0 pl-2 pr-7 !text-xs" value={age} onChange={handleAgeChange}>
+        <Select id={id} className="!pl-2 !pr-7 !text-xs" value={age} onChange={handleAgeChange}>
             <option value="ALL">any</option>
             <option value="20"> {'>'} 20</option>
             <option value="40"> {'>'} 40</option>

@@ -89,36 +89,41 @@ function Table() {
 
     return (
         <div className="p-2">
-            <div className="inline-block border border-black shadow rounded">
-                <div className="px-1 border-b border-black">
-                    <label>
-                        <input
-                            {...{
-                                type: 'checkbox',
-                                checked: table.getIsAllColumnsVisible(),
-                                onChange: table.getToggleAllColumnsVisibilityHandler(),
-                            }}
-                        />{' '}
-                        Toggle All
-                    </label>
+            <details>
+                <summary className=" cursor-pointer">Column Visibility:</summary>
+
+                <div className="inline-block border border-black shadow rounded">
+                    <div className="px-1 border-b border-black">
+                        <label>
+                            <input
+                                {...{
+                                    type: 'checkbox',
+                                    checked: table.getIsAllColumnsVisible(),
+                                    onChange: table.getToggleAllColumnsVisibilityHandler(),
+                                }}
+                            />{' '}
+                            Toggle All
+                        </label>
+                    </div>
+                    {table.getAllLeafColumns().map(column => {
+                        return (
+                            <div key={column.id} className="px-1">
+                                <label>
+                                    <input
+                                        {...{
+                                            type: 'checkbox',
+                                            checked: column.getIsVisible(),
+                                            onChange: column.getToggleVisibilityHandler(),
+                                        }}
+                                    />{' '}
+                                    {column.id}
+                                </label>
+                            </div>
+                        )
+                    })}
                 </div>
-                {table.getAllLeafColumns().map(column => {
-                    return (
-                        <div key={column.id} className="px-1">
-                            <label>
-                                <input
-                                    {...{
-                                        type: 'checkbox',
-                                        checked: column.getIsVisible(),
-                                        onChange: column.getToggleVisibilityHandler(),
-                                    }}
-                                />{' '}
-                                {column.id}
-                            </label>
-                        </div>
-                    )
-                })}
-            </div>
+            </details>
+
             <div className="h-4" />
             <div className="flex flex-wrap gap-2">
                 <button onClick={randomizeColumns} className="border p-1">
@@ -246,7 +251,7 @@ function Table() {
                     />
                 </span>
                 <Select
-                    className="w-24 py-0.5"
+                    className="!w-24"
                     value={table.getState().pagination.pageSize}
                     onChange={e => {
                         table.setPageSize(Number(e.target.value))
