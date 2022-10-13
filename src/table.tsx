@@ -17,7 +17,7 @@ import Pagination from './pagination'
 import Filters from './filters'
 import ColumnVisibility from './columnVisibility'
 import RowSelectionMessage from './rowSelectionMessage'
-import { setLoading } from './redux/slice/request'
+import { setLoading, storeLastSearchTerm } from './redux/slice/request'
 import { Response } from '../pages/api/persons'
 
 let firstRenderPagination = true
@@ -29,6 +29,8 @@ function Table() {
     const selectedRows = useAppSelector(getSelectedRows)
     const sort = useAppSelector(getSorted)
     const filter = useAppSelector(getFiltered)
+    const searchTerm = useAppSelector((state: RootState) => state.request.searchTerm)
+    const loading = useAppSelector((state: RootState) => state.request.loading)
     const [{ pageIndex, pageSize }, setPagination] = React.useState<PaginationState>({
         pageIndex: 0,
         pageSize: 10,
@@ -37,6 +39,7 @@ function Table() {
     const fetchDataOptions: Query = {
         page: pageIndex,
         perPage: pageSize,
+        search: searchTerm,
         sort,
         filter,
     }
@@ -104,6 +107,11 @@ function Table() {
         table.resetPagination()
     }, [filter])
 
+    /** when a request ends then set the last search term if applicable */
+    React.useEffect(() => {
+        dataQuery.data && dispatch(storeLastSearchTerm())
+    }, [dataQuery.data])
+
     return (
         <div className="p-2">
             <ColumnVisibility table={table} />
@@ -162,6 +170,8 @@ function Table() {
 
             {/* pagination */}
             <Pagination table={table} />
+
+            <div className="h-5 my-2">{loading && <h4>loading...</h4>}</div>
 
             {/* debug interaction */}
             <div className="mt-10">

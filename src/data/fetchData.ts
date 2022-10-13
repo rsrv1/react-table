@@ -17,12 +17,13 @@ export type Person = {
 export type Query = {
     page: number | string
     perPage: number | string
+    search: string
     filter: string | null
     sort?: string
 }
 
-export async function fetchData({ page, perPage, sort, filter }: Query) {
-    return fetch(`/api/persons?page=${page}&perPage=${perPage}&sort=${sort}&${filter}`)
+export async function fetchData({ page, perPage, search, sort, filter }: Query) {
+    return fetch(`/api/persons?page=${page}&perPage=${perPage}&sort=${sort}&${filter}&search=${search}`)
         .then(r => r.json())
         .then(result => result)
         .catch(e => ({

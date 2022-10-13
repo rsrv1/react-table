@@ -10,8 +10,8 @@ function ColumnVisibility({ table }: { table: Table<Person> }) {
 
     return (
         <>
-            <details>
-                <summary className=" cursor-pointer">Column Visibility:</summary>
+            <details className="w-40">
+                <summary className="cursor-pointer">Column Visibility:</summary>
 
                 <div className="inline-block border border-black shadow rounded">
                     <div className="px-1 border-b border-black">

@@ -34,7 +34,7 @@ const TOTAL = 100
 const data = makeData(TOTAL)
 
 function handler(req: NextApiRequest, res: NextApiResponse<Response>) {
-    const { page, perPage } = <Query>req.query
+    const { page, perPage, search, sort, filter } = <Query>req.query
     const pageIndex = Number(page)
     const pageSize = Number(perPage)
 

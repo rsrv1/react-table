@@ -64,7 +64,7 @@ export const rowSelection = createSlice({
 export const { selectAll, addToExcept, removeFromExcept, selectCurrentPageAll, addToOnly, removeFromOnly, selectAllCurrentPageRows, reset } =
     rowSelection.actions
 
-interface isSelectedGetter {
+type isSelectedGetter = {
     (id: string): boolean
 }
 
@@ -84,7 +84,7 @@ export const isSelected = (state: RootState): isSelectedGetter => {
     }
 }
 
-interface totalSelectionCountGetter {
+type totalSelectionCountGetter = {
     (total: number): number
 }
 export const selectionCount = (state: RootState): totalSelectionCountGetter => {
