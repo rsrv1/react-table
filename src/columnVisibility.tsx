@@ -2,11 +2,14 @@ import { Table } from '@tanstack/react-table'
 import React from 'react'
 import { Person } from './data/fetchData'
 import { _shuffle } from './utils'
+import { Reorder } from 'framer-motion'
 
 function ColumnVisibility({ table }: { table: Table<Person> }) {
     const randomizeColumns = () => {
         table.setColumnOrder(_shuffle(table.getAllLeafColumns().map(d => d.id)))
     }
+
+    const reOrderHandler = data => table.setColumnOrder(data.map(c => c.id))
 
     return (
         <>
@@ -26,22 +29,27 @@ function ColumnVisibility({ table }: { table: Table<Person> }) {
                             Toggle All
                         </label>
                     </div>
-                    {table.getAllLeafColumns().map(column => {
-                        return (
-                            <div key={column.id} className="px-1">
-                                <label>
-                                    <input
-                                        {...{
-                                            type: 'checkbox',
-                                            checked: column.getIsVisible(),
-                                            onChange: column.getToggleVisibilityHandler(),
-                                        }}
-                                    />{' '}
-                                    {column.id}
-                                </label>
-                            </div>
-                        )
-                    })}
+
+                    <Reorder.Group values={table.getAllLeafColumns()} onReorder={reOrderHandler} className="">
+                        {table.getAllLeafColumns().map(column => {
+                            return (
+                                <Reorder.Item transition={{ damping: 0 }} key={column.id} value={column}>
+                                    <div className="px-1">
+                                        <label>
+                                            <input
+                                                {...{
+                                                    type: 'checkbox',
+                                                    checked: column.getIsVisible(),
+                                                    onChange: column.getToggleVisibilityHandler(),
+                                                }}
+                                            />{' '}
+                                            {column.id}
+                                        </label>
+                                    </div>
+                                </Reorder.Item>
+                            )
+                        })}
+                    </Reorder.Group>
                 </div>
 
                 <div className="h-4" />
