@@ -18,7 +18,7 @@ function Search({ value: initialValue = '', debounce = 500, className, ...rest }
     const [searching, setSearching] = React.useState(false)
     const [value, setValue] = React.useState(initialValue)
     const termDiff = React.useMemo(() => searchTerm !== lastSearchTerm, [searchTerm, lastSearchTerm])
-    const inputRef = React.useRef<HTMLInputElement>()
+    const inputRef = React.useRef<HTMLInputElement>(null)
 
     React.useEffect(() => {
         setValue(initialValue)

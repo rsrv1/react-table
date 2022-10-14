@@ -1,4 +1,4 @@
-import { Table } from '@tanstack/react-table'
+import { Column, Table } from '@tanstack/react-table'
 import React from 'react'
 import { Person } from './data/fetchData'
 import { _shuffle } from './utils'
@@ -9,7 +9,7 @@ function ColumnVisibility({ table }: { table: Table<Person> }) {
         table.setColumnOrder(_shuffle(table.getAllLeafColumns().map(d => d.id)))
     }
 
-    const reOrderHandler = data => table.setColumnOrder(data.map(c => c.id))
+    const reOrderHandler = (data: Column<Person>[]) => table.setColumnOrder(data.map((c: Column<Person>) => c.id))
 
     return (
         <>
