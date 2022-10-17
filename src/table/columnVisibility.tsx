@@ -1,6 +1,6 @@
 import { Column, Table } from '@tanstack/react-table'
 import React from 'react'
-import { Person } from './data/fetchData'
+import { Person } from '../data/fetchData'
 import { _shuffle } from './utils'
 import { Reorder } from 'framer-motion'
 

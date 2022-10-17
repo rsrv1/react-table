@@ -1,10 +1,6 @@
 import React from 'react'
-import { useAppDispatch } from './redux/hooks'
-import { reset } from './redux/slice/rowSelection'
 
 function RowSelectionMessage({ count, resetRowSelection }: { count: number; resetRowSelection: () => void }) {
-    const dispatch = useAppDispatch()
-
     return (
         <div className="bg-sky-50 px-4 py-2 mb-2">
             <div className="flex">

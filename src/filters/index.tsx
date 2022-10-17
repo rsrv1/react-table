@@ -1,7 +1,7 @@
 import React from 'react'
-import Search from './components/Search'
-import Age from './filters/age'
-import StatusFilter from './filters/status'
+import Search from '../table/Search'
+import Age from './age'
+import StatusFilter from './status'
 
 function Filters() {
     return (

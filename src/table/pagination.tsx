@@ -1,7 +1,7 @@
 import { Table } from '@tanstack/react-table'
 import React from 'react'
-import Select from './components/Select'
-import { Person } from './data/fetchData'
+import Select from '../components/Select'
+import { Person } from '../data/fetchData'
 
 function Pagination({ table, loading }: { table: Table<Person>; loading: boolean }) {
     return (

@@ -1,13 +1,8 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import faker from '@faker-js/faker'
-import { Person, Query, Status } from '../../src/data/fetchData'
-import { range } from '../../src/utils'
-
-export type Response = {
-    rows: Person[]
-    pageCount: number
-    total: number
-}
+import { Person, Status } from '../../src/data/fetchData'
+import { range } from '../../src/table/utils'
+import { Query, Response } from '../../src/table/hooks/useTableData'
 
 const newPerson = (): Person => {
     return {
@@ -33,7 +28,7 @@ export function makeData(...lens: number[]) {
 const TOTAL = 100
 const data = makeData(TOTAL)
 
-function handler(req: NextApiRequest, res: NextApiResponse<Response>) {
+function handler(req: NextApiRequest, res: NextApiResponse<Response<Person>>) {
     const { page, perPage, search, sort, filter } = <Query>req.query
     const pageIndex = Number(page)
     const pageSize = Number(perPage)

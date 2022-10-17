@@ -1,5 +1,5 @@
 import React from 'react'
-import { useAppDispatch, useAppSelector } from './redux/hooks'
+import { useAppDispatch, useAppSelector } from '../../redux/hooks'
 import {
     isSelected,
     reset as resetRowSelectionAction,
@@ -10,7 +10,7 @@ import {
     addToExcept,
     addToOnly,
     removeFromOnly,
-} from './redux/slice/rowSelection'
+} from '../../redux/slice/rowSelection'
 
 function useTableHandlers() {
     const dispatch = useAppDispatch()

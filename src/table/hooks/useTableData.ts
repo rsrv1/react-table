@@ -1,27 +1,36 @@
 import React from 'react'
-import { getCoreRowModel, ColumnOrderState, useReactTable, PaginationState, Table, ColumnDef } from '@tanstack/react-table'
+import { PaginationState, Table, ColumnDef } from '@tanstack/react-table'
 import useSWR, { SWRResponse } from 'swr'
-import { Person, Query } from './data/fetchData'
-import useColumns from './useColumns'
-import { RootState } from './redux/store'
-import { useAppDispatch, useAppSelector } from './redux/hooks'
-import { getSelectedRows, selectedRows } from './redux/slice/rowSelection'
-import useCurrentPageRowSelectionListener from './useCurrentPageRowSelectionListener'
+import { RootState } from '../../redux/store'
+import { useAppDispatch, useAppSelector } from '../../redux/hooks'
+import { getSelectedRows, selectAllCurrentPageRows, selectCurrentPageAll, selectedRows } from '../../redux/slice/rowSelection'
 import useTotalRowSelectionCount from './useTotalRowSelectionCount'
-import { getSorted } from './redux/slice/columnSorting'
-import { setLoading, storeLastSearchTerm } from './redux/slice/request'
-import { Response } from '../pages/api/persons'
-import { filtersToString } from './utils'
+import { getSorted } from '../../redux/slice/columnSorting'
+import { setLoading, storeLastSearchTerm } from '../../redux/slice/request'
+import { filtersToString } from '../utils'
 
-type Props = {
-    // columns: ColumnDef<Person, any>[]
-    fetchData: (args: Query) => Promise<Response>
+export type Response<T> = {
+    rows: T[]
+    pageCount: number
+    total: number
+}
+
+export type Query = {
+    page: number | string
+    perPage: number | string
+    search: string
+    filter: string | null
+    sort?: string
+}
+
+export type TableData<T> = {
+    fetcher: (args: Query) => Promise<Response<T>>
     filters?: {
         [key: string]: unknown | unknown[]
     }
 }
 
-function useTableData({ filters, fetchData }: Props) {
+function useTableData<T extends { id: string }>({ filters, fetcher }: TableData<T>) {
     const dispatch = useAppDispatch()
     const selectedRows = useAppSelector(getSelectedRows)
     const sort = useAppSelector(getSorted)
@@ -29,12 +38,13 @@ function useTableData({ filters, fetchData }: Props) {
     const searchTerm = useAppSelector((state: RootState) => state.request.searchTerm)
     const loading = useAppSelector((state: RootState) => state.request.loading)
     const { all } = useAppSelector((state: RootState) => state.rowSelection)
+    const addAllCurrentPageRows = useAppSelector((state: RootState) => state.rowSelection.addAllCurrentPageRows)
     const [{ pageIndex, pageSize }, setPagination] = React.useState<PaginationState>({
         pageIndex: 0,
         pageSize: 10,
     })
 
-    const fetchDataOptions: Query = {
+    const fetcherOptions: Query = {
         page: pageIndex,
         perPage: pageSize,
         search: searchTerm,
@@ -42,12 +52,11 @@ function useTableData({ filters, fetchData }: Props) {
         filter,
     }
 
-    const lastData = React.useRef<Response>({ rows: [], pageCount: 0, total: 0 })
+    const lastData = React.useRef<Response<T>>({ rows: [], pageCount: 0, total: 0 })
 
-    const dataQuery = useSWR(fetchDataOptions, fetchData)
-    useCurrentPageRowSelectionListener(dataQuery.data)
+    const dataQuery = useSWR(fetcherOptions, fetcher)
 
-    const rowSelectionCount = useTotalRowSelectionCount(lastData.current)
+    const rowSelectionCount = useTotalRowSelectionCount<T>(lastData.current)
 
     const pagination = React.useMemo(
         () => ({
@@ -77,6 +86,14 @@ function useTableData({ filters, fetchData }: Props) {
         dataQuery.data && dispatch(storeLastSearchTerm())
     }, [dataQuery.data])
 
+    /** select all current page rows */
+    React.useEffect(() => {
+        if (dataQuery.data && addAllCurrentPageRows) {
+            dispatch(selectCurrentPageAll(dataQuery.data.rows.map((row: T) => row.id)))
+            dispatch(selectAllCurrentPageRows(false)) // disable the flag
+        }
+    }, [addAllCurrentPageRows, dataQuery.data])
+
     return {
         pagination,
         setPagination,
@@ -89,7 +106,7 @@ function useTableData({ filters, fetchData }: Props) {
         lastData,
         loading,
         filter,
-        options: fetchDataOptions,
+        options: fetcherOptions,
     }
 }
 

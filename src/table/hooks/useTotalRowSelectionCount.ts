@@ -1,9 +1,9 @@
 import React from 'react'
-import { Response } from '../pages/api/persons'
-import { useAppSelector } from './redux/hooks'
-import { selectionCount } from './redux/slice/rowSelection'
+import { useAppSelector } from '../../redux/hooks'
+import { selectionCount } from '../../redux/slice/rowSelection'
+import { Response } from './useTableData'
 
-function useTotalRowSelectionCount(data: undefined | Response): number {
+function useTotalRowSelectionCount<T>(data: undefined | Response<T>): number {
     const totalSelectionCountGetter = useAppSelector(selectionCount)
 
     const totalSelectionCount = React.useMemo(() => {

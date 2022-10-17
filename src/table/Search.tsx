@@ -3,7 +3,7 @@ import React from 'react'
 import { useAppDispatch, useAppSelector } from '../redux/hooks'
 import { setSearchTerm } from '../redux/slice/request'
 import { RootState } from '../redux/store'
-import Spinner from './Spinner'
+import Spinner from '../components/Spinner'
 
 type Props = {
     value?: string

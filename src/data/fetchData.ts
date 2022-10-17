@@ -1,3 +1,5 @@
+import { Query } from '../table/hooks/useTableData'
+
 export enum Status {
     IN_RELATIONSHIP = 'In Relationship',
     SINGLE = 'Single',
@@ -12,14 +14,6 @@ export type Person = {
     visits: number
     progress: number
     status: Status
-}
-
-export type Query = {
-    page: number | string
-    perPage: number | string
-    search: string
-    filter: string | null
-    sort?: string
 }
 
 export async function fetchData({ page, perPage, search, sort, filter }: Query) {

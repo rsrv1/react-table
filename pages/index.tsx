@@ -1,6 +1,6 @@
 import type { NextPage } from 'next'
 import Head from 'next/head'
-import Main from '../src'
+import Table from '../src/index'
 import Footer from '../src/components/Footer'
 import styles from '../styles/Home.module.css'
 
@@ -14,7 +14,7 @@ const Home: NextPage = () => {
             </Head>
 
             <main className={styles.main}>
-                <Main />
+                <Table />
             </main>
 
             <footer className={styles.footer}>

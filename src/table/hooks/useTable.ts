@@ -1,9 +1,22 @@
 import React from 'react'
-import { getCoreRowModel, ColumnOrderState, useReactTable, PaginationState, Table } from '@tanstack/react-table'
+import { getCoreRowModel, ColumnOrderState, useReactTable, PaginationState, Table, TableMeta, ColumnDef } from '@tanstack/react-table'
+import { Response } from './useTableData'
 
 let firstRenderPagination = true
 
-function useTable({ data, lastData, pagination, setPagination, columns, filter, searchTerm, pageSize, meta = {} }) {
+type Args<T> = {
+    data: Response<T> | undefined
+    lastData: React.MutableRefObject<Response<T>>
+    pagination: PaginationState
+    setPagination: React.Dispatch<React.SetStateAction<PaginationState>>
+    columns: ColumnDef<T, any>[]
+    filter: string | null
+    searchTerm: string
+    pageSize: number
+    meta?: TableMeta<T> | undefined
+}
+
+function useTable<T>({ data, lastData, pagination, setPagination, columns, filter, searchTerm, pageSize, meta }: Args<T>) {
     const [columnVisibility, setColumnVisibility] = React.useState({})
     const [columnOrder, setColumnOrder] = React.useState<ColumnOrderState>([])
 

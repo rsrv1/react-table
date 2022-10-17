@@ -1,10 +1,26 @@
 import React from 'react'
-import { createColumnHelper, Row, Table } from '@tanstack/react-table'
+import { ColumnDef, createColumnHelper, Row, Table } from '@tanstack/react-table'
 import { Person } from './data/fetchData'
 import IndeterminateCheckbox from './components/IndeterminateCheckbox'
 import Select from './components/Select'
+import { Response } from './table/hooks/useTableData'
 
 const columnHelper = createColumnHelper<Person>()
+
+type Args = {
+    resetRowSelection: () => void
+    handleSelectAll: () => void
+    isSelectedGetter: (id: string) => boolean
+    handleSelectAllCurrentPage: () => void
+    handleRemoveFromExcept: (id: string) => void
+    handleAddToExcept: (id: string) => void
+    handleAddToOnly: (id: string) => void
+    handleRemoveFromOnly: (id: string) => void
+    data: Response<Person> | undefined
+    loading: boolean
+    allRowSelected: boolean
+    rowSelectionCount: number
+}
 
 function useColumns({
     resetRowSelection,
@@ -19,7 +35,7 @@ function useColumns({
     loading,
     allRowSelected,
     rowSelectionCount,
-}) {
+}: Args): ColumnDef<Person, any>[] {
     const [bulkSelectionType, setBulkSelectionType] = React.useState('_')
 
     const handleBulkSelectionChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
