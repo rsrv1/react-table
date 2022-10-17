@@ -3,7 +3,7 @@ import Search from '../table/Search'
 import Age from './age'
 import StatusFilter from './status'
 
-function Filters() {
+function Filters({ loading }: { loading: boolean }) {
     return (
         <div className="flex justify-between items-start mb-5">
             <div className="basis-1/2">
@@ -24,7 +24,7 @@ function Filters() {
                     <label htmlFor="filter-age" className="text-xs cursor-pointer">
                         Age:{' '}
                     </label>
-                    <Age id="filter-age" />
+                    <Age id="filter-age" loading={loading} />
                 </div>
             </div>
         </div>

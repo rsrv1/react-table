@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
-import { Status } from '../../../data/fetchData'
+import { Status } from '../../data/fetchData'
 import type { RootState } from '../store'
 
 type initialState = {

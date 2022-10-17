@@ -7,6 +7,8 @@ import { Table } from '@tanstack/react-table'
 import { SWRResponse } from 'swr'
 import { selectedRows } from './table/redux/slice/rowSelection'
 import { fetchData, Person } from './data/fetchData'
+import { useAppSelector } from './redux/hooks'
+import { RootState } from './redux/store'
 
 export type RenderProps<T> = {
     table: Table<T>
@@ -23,7 +25,7 @@ export type Props = {
 }
 
 function Main({ children }: Props) {
-    const filters = { key: 'val' } // propably from redux
+    const filters = useAppSelector((state: RootState) => state.filters)
 
     const fetcher = React.useCallback((args: Query): Promise<Response<Person>> => {
         return fetchData(args)

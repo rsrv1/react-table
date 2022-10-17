@@ -15,7 +15,7 @@ function Table() {
                 <div className="p-2">
                     <ColumnVisibility table={table} />
 
-                    <Filters />
+                    <Filters loading={loading} />
 
                     {rowSelectionCount > 0 && <RowSelectionMessage count={rowSelectionCount} resetRowSelection={resetRowSelection} />}
 

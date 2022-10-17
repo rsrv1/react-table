@@ -1,13 +1,15 @@
 import React from 'react'
-import { useDispatch } from 'react-redux'
+import { useAppDispatch } from '../redux/hooks'
 import { Status } from '../data/fetchData'
-import { useAppSelector } from '../table/redux/hooks'
-import { filterByStatuses } from '../table/redux/slice/filters'
-import { RootState } from '../table/redux/store'
+import { useAppSelector } from '../redux/hooks'
+import { filterByStatuses } from '../redux/slice/filters'
+import { RootState } from '../redux/store'
 
 function StatusFilter() {
-    const dispatch = useDispatch()
-    const { status } = useAppSelector((state: RootState) => state.filters)
+    const dispatch = useAppDispatch()
+    /** TODO: NEEDS CHANGE */
+    // const { status } = useAppSelector((state: RootState) => state.filters)
+    const status = []
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>, option: Status) => {
         if (e.target.checked) {
