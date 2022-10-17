@@ -1,8 +1,8 @@
 import React from 'react'
 import clsx from 'clsx'
-import { useAppDispatch, useAppSelector } from '../redux/hooks'
-import { RootState } from '../redux/store'
-import { mutate, remove, reset, sortDirection } from '../redux/slice/columnSorting'
+import { useAppDispatch, useAppSelector } from './redux/hooks'
+import { RootState } from './redux/store'
+import { mutate, remove, reset, sortDirection } from './redux/slice/columnSorting'
 
 type Props = {
     name: string

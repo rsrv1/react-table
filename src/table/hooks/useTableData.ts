@@ -1,12 +1,12 @@
 import React from 'react'
 import { PaginationState, Table, ColumnDef } from '@tanstack/react-table'
 import useSWR, { SWRResponse } from 'swr'
-import { RootState } from '../../redux/store'
-import { useAppDispatch, useAppSelector } from '../../redux/hooks'
-import { getSelectedRows, selectAllCurrentPageRows, selectCurrentPageAll, selectedRows } from '../../redux/slice/rowSelection'
+import { RootState } from '../redux/store'
+import { useAppDispatch, useAppSelector } from '../redux/hooks'
+import { getSelectedRows, selectAllCurrentPageRows, selectCurrentPageAll, selectedRows } from '../redux/slice/rowSelection'
 import useTotalRowSelectionCount from './useTotalRowSelectionCount'
-import { getSorted } from '../../redux/slice/columnSorting'
-import { setLoading, storeLastSearchTerm } from '../../redux/slice/request'
+import { getSorted } from '../redux/slice/columnSorting'
+import { setLoading, storeLastSearchTerm } from '../redux/slice/request'
 import { filtersToString } from '../utils'
 
 export type Response<T> = {

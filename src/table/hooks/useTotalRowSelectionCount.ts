@@ -1,6 +1,6 @@
 import React from 'react'
-import { useAppSelector } from '../../redux/hooks'
-import { selectionCount } from '../../redux/slice/rowSelection'
+import { useAppSelector } from '../redux/hooks'
+import { selectionCount } from '../redux/slice/rowSelection'
 import { Response } from './useTableData'
 
 function useTotalRowSelectionCount<T>(data: undefined | Response<T>): number {

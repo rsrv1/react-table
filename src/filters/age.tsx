@@ -1,9 +1,9 @@
 import React from 'react'
 import { useDispatch } from 'react-redux'
 import Select from '../components/Select'
-import { useAppSelector } from '../redux/hooks'
-import { filterByAge } from '../redux/slice/filters'
-import { RootState } from '../redux/store'
+import { useAppSelector } from '../table/redux/hooks'
+import { filterByAge } from '../table/redux/slice/filters'
+import { RootState } from '../table/redux/store'
 
 type props = {
     id: string

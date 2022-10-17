@@ -1,8 +1,8 @@
 import clsx from 'clsx'
 import React from 'react'
-import { useAppDispatch, useAppSelector } from '../redux/hooks'
-import { setSearchTerm } from '../redux/slice/request'
-import { RootState } from '../redux/store'
+import { useAppDispatch, useAppSelector } from './redux/hooks'
+import { setSearchTerm } from './redux/slice/request'
+import { RootState } from './redux/store'
 import Spinner from '../components/Spinner'
 
 type Props = {

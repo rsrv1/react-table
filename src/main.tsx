@@ -5,7 +5,7 @@ import useColumns from './useColumns'
 import useTable from './table/hooks/useTable'
 import { Table } from '@tanstack/react-table'
 import { SWRResponse } from 'swr'
-import { selectedRows } from './redux/slice/rowSelection'
+import { selectedRows } from './table/redux/slice/rowSelection'
 import { fetchData, Person } from './data/fetchData'
 
 export type RenderProps<T> = {

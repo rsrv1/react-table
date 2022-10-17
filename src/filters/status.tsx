@@ -1,9 +1,9 @@
 import React from 'react'
 import { useDispatch } from 'react-redux'
 import { Status } from '../data/fetchData'
-import { useAppSelector } from '../redux/hooks'
-import { filterByStatuses } from '../redux/slice/filters'
-import { RootState } from '../redux/store'
+import { useAppSelector } from '../table/redux/hooks'
+import { filterByStatuses } from '../table/redux/slice/filters'
+import { RootState } from '../table/redux/store'
 
 function StatusFilter() {
     const dispatch = useDispatch()
