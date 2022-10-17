@@ -17,6 +17,9 @@ export type Person = {
 }
 
 export async function fetchData({ page, perPage, search, sort, filter }: Query) {
+    // Simulate some network latency
+    await new Promise(r => setTimeout(r, 500))
+
     return fetch(`/api/persons?page=${page}&perPage=${perPage}&sort=${sort}&${filter}&search=${search}`)
         .then(r => r.json())
         .then(result => result)
