@@ -2,12 +2,8 @@ import { Table } from '@tanstack/react-table'
 import React from 'react'
 import Select from './components/Select'
 import { Person } from './data/fetchData'
-import { useAppSelector } from './redux/hooks'
-import { RootState } from './redux/store'
 
-function Pagination({ table }: { table: Table<Person> }) {
-    const loading = useAppSelector((state: RootState) => state.request.loading)
-
+function Pagination({ table, loading }: { table: Table<Person>; loading: boolean }) {
     return (
         <div className="flex items-center gap-2 text-sm">
             <button className="border rounded p-1" onClick={() => table.setPageIndex(0)} disabled={!table.getCanPreviousPage() || loading}>

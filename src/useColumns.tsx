@@ -2,58 +2,25 @@ import React from 'react'
 import { createColumnHelper, Row, Table } from '@tanstack/react-table'
 import { Person } from './data/fetchData'
 import IndeterminateCheckbox from './components/IndeterminateCheckbox'
-import { useAppDispatch, useAppSelector } from './redux/hooks'
-import { RootState } from './redux/store'
-import {
-    selectAll,
-    reset,
-    selectAllCurrentPageRows,
-    addToOnly,
-    removeFromOnly,
-    isSelected,
-    addToExcept,
-    removeFromExcept,
-} from './redux/slice/rowSelection'
-import useTotalRowSelectionCount from './useTotalRowSelectionCount'
-import { Response } from '../pages/api/persons'
 import Select from './components/Select'
 
 const columnHelper = createColumnHelper<Person>()
 
-function useColumns(data: undefined | Response) {
-    const dispatch = useAppDispatch()
-    const { all } = useAppSelector((state: RootState) => state.rowSelection)
-    const loading = useAppSelector((state: RootState) => state.request.loading)
-    const isSelectedGetter = useAppSelector(isSelected)
+function useColumns({
+    resetRowSelection,
+    handleSelectAll,
+    isSelectedGetter,
+    handleSelectAllCurrentPage,
+    handleRemoveFromExcept,
+    handleAddToExcept,
+    handleAddToOnly,
+    handleRemoveFromOnly,
+    data,
+    loading,
+    allRowSelected,
+    rowSelectionCount,
+}) {
     const [bulkSelectionType, setBulkSelectionType] = React.useState('_')
-    const totalSelectionCount = useTotalRowSelectionCount(data)
-
-    // takes care of the select all page rows click
-    const handleSelectAll = () => {
-        dispatch(reset())
-        dispatch(selectAll())
-    }
-
-    // takes care of all rows selection of the current page
-    const handleSelectAllCurrentPage = () => {
-        dispatch(reset())
-        dispatch(selectAllCurrentPageRows(true)) // enable the flag
-    }
-
-    // row item check/uncheck
-    const handleCellSelectChange = (event: React.FormEvent<HTMLInputElement>, id: string) => {
-        const isChecked = (event.target as HTMLInputElement).checked
-
-        if (all) {
-            if (isChecked) dispatch(removeFromExcept(id))
-            else dispatch(addToExcept(id))
-
-            return
-        }
-
-        if (isChecked) dispatch(addToOnly(id))
-        else dispatch(removeFromOnly(id))
-    }
 
     const handleBulkSelectionChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
         const selected = event.target.value
@@ -67,7 +34,21 @@ function useColumns(data: undefined | Response) {
             return handleSelectAllCurrentPage()
         }
 
-        dispatch(reset())
+        resetRowSelection()
+    }
+
+    const handleCellSelectChange = (event: React.FormEvent<HTMLInputElement>, id: string) => {
+        const isChecked = (event.target as HTMLInputElement).checked
+
+        if (allRowSelected) {
+            if (isChecked) handleRemoveFromExcept(id)
+            else handleAddToExcept(id)
+
+            return
+        }
+
+        if (isChecked) handleAddToOnly(id)
+        else handleRemoveFromOnly(id)
     }
 
     const columns = React.useMemo(
@@ -155,7 +136,7 @@ function useColumns(data: undefined | Response) {
                 ),
             }),
         ],
-        [data, totalSelectionCount, loading]
+        [data, rowSelectionCount, loading]
     )
 
     return columns

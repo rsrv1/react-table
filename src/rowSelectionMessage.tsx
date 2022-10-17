@@ -2,12 +2,8 @@ import React from 'react'
 import { useAppDispatch } from './redux/hooks'
 import { reset } from './redux/slice/rowSelection'
 
-function RowSelectionMessage({ count }: { count: number }) {
+function RowSelectionMessage({ count, resetRowSelection }: { count: number; resetRowSelection: () => void }) {
     const dispatch = useAppDispatch()
-
-    const deselectAllRows = () => {
-        dispatch(reset())
-    }
 
     return (
         <div className="bg-sky-50 px-4 py-2 mb-2">
@@ -17,7 +13,7 @@ function RowSelectionMessage({ count }: { count: number }) {
                         {count} row{count > 1 && 's'} selected
                     </p>
                     <p className="mt-3 text-sm md:mt-0 md:ml-6">
-                        <button onClick={deselectAllRows} type="button" className="whitespace-nowrap font-medium text-sky-700 hover:text-sky-600">
+                        <button onClick={resetRowSelection} type="button" className="whitespace-nowrap font-medium text-sky-700 hover:text-sky-600">
                             <span aria-hidden="true">&times;</span> de-select all
                         </button>
                     </p>

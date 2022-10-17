@@ -113,7 +113,9 @@ type selectedSomeRows = {
     ids: string[]
 }
 
-export const getSelectedRows = (state: RootState): selectedAllRows | selectedSomeRows => {
+export type selectedRows = selectedAllRows | selectedSomeRows
+
+export const getSelectedRows = (state: RootState): selectedRows => {
     const { all, only, except } = state.rowSelection
     const allOnly = Object.keys(only)
 
