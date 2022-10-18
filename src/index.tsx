@@ -4,15 +4,18 @@ import Table from './table'
 import Provider from './table/provider'
 import { Provider as ReduxProvider } from 'react-redux'
 import store from './redux/store'
+import { TableProvider } from './table/context/tableContext'
 
 function App() {
     return (
         <SWRConfig value={{ refreshInterval: 5000 }}>
             {/* user provided redux provider */}
             <ReduxProvider store={store}>
-                <Provider>
-                    <Table />
-                </Provider>
+                <TableProvider>
+                    <Provider>
+                        <Table />
+                    </Provider>
+                </TableProvider>
             </ReduxProvider>
         </SWRConfig>
     )

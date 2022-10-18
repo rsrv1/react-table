@@ -1,9 +1,8 @@
 import clsx from 'clsx'
 import React from 'react'
-import { useAppDispatch, useAppSelector } from './redux/hooks'
-import { setSearchTerm } from './redux/slice/request'
-import { RootState } from './redux/store'
 import Spinner from '../components/Spinner'
+import { useTableState } from './context/tableContext'
+import { actionType } from './context/reducer/request'
 
 type Props = {
     value?: string
@@ -12,9 +11,8 @@ type Props = {
 } & Omit<React.InputHTMLAttributes<HTMLInputElement>, 'onChange'>
 
 function Search({ value: initialValue = '', debounce = 500, className, ...rest }: Props) {
-    const dispatch = useAppDispatch()
-    const { searchTerm, lastSearchTerm } = useAppSelector((state: RootState) => state.request)
-    const loading = useAppSelector((state: RootState) => state.request.loading)
+    const { request } = useTableState()
+    const { searchTerm, lastSearchTerm, loading } = request.state
     const [searching, setSearching] = React.useState(false)
     const [value, setValue] = React.useState(initialValue)
     const termDiff = React.useMemo(() => searchTerm !== lastSearchTerm, [searchTerm, lastSearchTerm])
@@ -35,7 +33,7 @@ function Search({ value: initialValue = '', debounce = 500, className, ...rest }
 
     React.useEffect(() => {
         const timeout = setTimeout(() => {
-            dispatch(setSearchTerm(value))
+            request.dispatch({ type: actionType.SET_SEARCH_TERM, payload: value })
         }, debounce)
 
         return () => clearTimeout(timeout)

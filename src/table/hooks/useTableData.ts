@@ -6,8 +6,9 @@ import { useAppDispatch, useAppSelector } from '../redux/hooks'
 import { getSelectedRows, selectAllCurrentPageRows, selectCurrentPageAll, selectedRows } from '../redux/slice/rowSelection'
 import useTotalRowSelectionCount from './useTotalRowSelectionCount'
 import { getSorted } from '../redux/slice/columnSorting'
-import { setLoading, storeLastSearchTerm } from '../redux/slice/request'
 import { filtersToString } from '../utils'
+import { useTableState } from '../context/tableContext'
+import { actionType } from '../context/reducer/request'
 
 export type Response<T> = {
     rows: T[]
@@ -32,11 +33,11 @@ export type TableData<T> = {
 
 function useTableData<T extends { id: string }>({ filters, fetcher }: TableData<T>) {
     const dispatch = useAppDispatch()
+    const { request } = useTableState()
     const selectedRows = useAppSelector(getSelectedRows)
     const sort = useAppSelector(getSorted)
     const filter = React.useMemo(() => filtersToString(filters), [filters])
-    const searchTerm = useAppSelector((state: RootState) => state.request.searchTerm)
-    const loading = useAppSelector((state: RootState) => state.request.loading)
+    const { searchTerm, loading } = request.state
     const { all } = useAppSelector((state: RootState) => state.rowSelection)
     const addAllCurrentPageRows = useAppSelector((state: RootState) => state.rowSelection.addAllCurrentPageRows)
     const [{ pageIndex, pageSize }, setPagination] = React.useState<PaginationState>({
@@ -74,16 +75,16 @@ function useTableData<T extends { id: string }>({ filters, fetcher }: TableData<
     /** track loading state */
     React.useEffect(() => {
         if (!dataQuery.data && !dataQuery.error) {
-            dispatch(setLoading(true))
+            request.dispatch({ type: actionType.LOADING, payload: true })
             return
         }
 
-        dispatch(setLoading(false))
-    }, [dataQuery])
+        request.dispatch({ type: actionType.LOADING, payload: false })
+    }, [dataQuery.data, dataQuery.error])
 
     /** when a request ends then set the last search term if applicable */
     React.useEffect(() => {
-        dataQuery.data && dispatch(storeLastSearchTerm())
+        dataQuery.data && request.dispatch({ type: actionType.STORE_LAST_SEARCH_TERM })
     }, [dataQuery.data])
 
     /** select all current page rows */
