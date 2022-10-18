@@ -40,6 +40,10 @@ function RowSelectionMessage({ mutate, loading, count, selectedRows, resetRowSel
                 },
                 { revalidate: false }
             )
+
+            resetRowSelection()
+            setAction('')
+            return
         }
 
         // probably action is delete
