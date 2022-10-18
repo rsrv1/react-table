@@ -7,9 +7,7 @@ import { RootState } from '../redux/store'
 
 function StatusFilter() {
     const dispatch = useAppDispatch()
-    /** TODO: NEEDS CHANGE */
-    // const { status } = useAppSelector((state: RootState) => state.filters)
-    const status = []
+    const { status } = useAppSelector((state: RootState) => state.filters)
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>, option: Status) => {
         if (e.target.checked) {
