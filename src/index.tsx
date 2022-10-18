@@ -1,7 +1,6 @@
 import React from 'react'
 import { SWRConfig } from 'swr'
 import Table from './table'
-import Provider from './table/provider'
 import { Provider as ReduxProvider } from 'react-redux'
 import store from './redux/store'
 import { TableProvider } from './table/context/tableContext'
@@ -12,9 +11,7 @@ function App() {
             {/* user provided redux provider */}
             <ReduxProvider store={store}>
                 <TableProvider>
-                    <Provider>
-                        <Table />
-                    </Provider>
+                    <Table />
                 </TableProvider>
             </ReduxProvider>
         </SWRConfig>

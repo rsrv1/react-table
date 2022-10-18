@@ -5,10 +5,10 @@ import useColumns from './useColumns'
 import useTable from './table/hooks/useTable'
 import { Table } from '@tanstack/react-table'
 import { SWRResponse } from 'swr'
-import { selectedRows } from './table/redux/slice/rowSelection'
 import { fetchData, Person } from './data/fetchData'
 import { useAppSelector } from './redux/hooks'
 import { RootState } from './redux/store'
+import { selectedRows } from './table/context/reducer/rowSelection'
 
 export type RenderProps<T> = {
     table: Table<T>

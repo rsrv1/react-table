@@ -1,10 +1,11 @@
 import React from 'react'
-import { useAppSelector } from '../redux/hooks'
-import { selectionCount } from '../redux/slice/rowSelection'
+import { selectionCount } from '../context/reducer/rowSelection'
+import { useTableState } from '../context/tableContext'
 import { Response } from './useTableData'
 
 function useTotalRowSelectionCount<T>(data: undefined | Response<T>): number {
-    const totalSelectionCountGetter = useAppSelector(selectionCount)
+    const { rowSelection } = useTableState()
+    const totalSelectionCountGetter = React.useMemo(() => selectionCount(rowSelection.state), [rowSelection.state])
 
     const totalSelectionCount = React.useMemo(() => {
         if (!data) return 0
