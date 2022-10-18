@@ -1,8 +1,7 @@
 import React from 'react'
 import clsx from 'clsx'
-import { useAppDispatch, useAppSelector } from './redux/hooks'
-import { RootState } from './redux/store'
-import { mutate, remove, reset, sortDirection } from './redux/slice/columnSorting'
+import { useTableState } from './context/tableContext'
+import { actionType, sortDirection } from './context/reducer/columnSort'
 
 type Props = {
     name: string
@@ -13,22 +12,23 @@ type Props = {
     className?: string
 }
 
-function SortTrigger({ name, unsortable, children, up = <span>^</span>, down = <span>v</span>, className }: Props) {
-    const dispatch = useAppDispatch()
-    const columns = useAppSelector((state: RootState) => state.columnSorting.column)
+function SortTrigger({ name, unsortable, children, up = <span>^</span>, down = <div className="transform rotate-180">^</div>, className }: Props) {
+    const { columnSort } = useTableState()
+    const dispatch = columnSort.dispatch
+    const columns = columnSort.state.column
 
     const handleSort = () => {
         if (!columns[name]) {
-            dispatch(mutate({ column: name, direction: sortDirection.ASC }))
+            dispatch({ type: actionType.MUTATE, payload: { column: name, direction: sortDirection.ASC } })
             return
         }
 
         if (columns[name] === sortDirection.ASC) {
-            dispatch(mutate({ column: name, direction: sortDirection.DESC }))
+            dispatch({ type: actionType.MUTATE, payload: { column: name, direction: sortDirection.DESC } })
             return
         }
 
-        dispatch(remove(name))
+        dispatch({ type: actionType.REMOVE, payload: name })
     }
 
     if (unsortable) return <div className={className}>{children}</div>

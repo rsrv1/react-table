@@ -15,7 +15,7 @@ export type actions =
     | { type: actionType.SET_SEARCH_TERM; payload: string }
     | { type: actionType.STORE_LAST_SEARCH_TERM }
 
-export const intialState: state = {
+export const initialState: state = {
     loading: false,
     lastSearchTerm: '',
     searchTerm: '',

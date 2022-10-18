@@ -5,10 +5,10 @@ import { RootState } from '../redux/store'
 import { useAppDispatch, useAppSelector } from '../redux/hooks'
 import { getSelectedRows, selectAllCurrentPageRows, selectCurrentPageAll, selectedRows } from '../redux/slice/rowSelection'
 import useTotalRowSelectionCount from './useTotalRowSelectionCount'
-import { getSorted } from '../redux/slice/columnSorting'
 import { filtersToString } from '../utils'
 import { useTableState } from '../context/tableContext'
 import { actionType } from '../context/reducer/request'
+import { getSorted } from '../context/reducer/columnSort'
 
 export type Response<T> = {
     rows: T[]
@@ -33,9 +33,9 @@ export type TableData<T> = {
 
 function useTableData<T extends { id: string }>({ filters, fetcher }: TableData<T>) {
     const dispatch = useAppDispatch()
-    const { request } = useTableState()
+    const { request, columnSort } = useTableState()
     const selectedRows = useAppSelector(getSelectedRows)
-    const sort = useAppSelector(getSorted)
+    const sort = React.useMemo(() => getSorted(columnSort.state), [columnSort.state])
     const filter = React.useMemo(() => filtersToString(filters), [filters])
     const { searchTerm, loading } = request.state
     const { all } = useAppSelector((state: RootState) => state.rowSelection)
