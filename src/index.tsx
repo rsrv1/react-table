@@ -7,7 +7,15 @@ import { TableProvider } from './table/context/tableContext'
 
 function App() {
     return (
-        <SWRConfig value={{ refreshInterval: 5000 }}>
+        <SWRConfig
+            value={{
+                onError: (error, key) => {
+                    if (error.status !== 403 && error.status !== 404) {
+                        // We can send the error to Sentry,
+                        // or show a notification UI.
+                    }
+                },
+            }}>
             {/* user provided redux provider */}
             <ReduxProvider store={store}>
                 <TableProvider>

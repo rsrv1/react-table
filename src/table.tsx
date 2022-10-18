@@ -17,7 +17,15 @@ function Table() {
 
                     <Filters loading={loading} />
 
-                    {rowSelectionCount > 0 && <RowSelectionMessage count={rowSelectionCount} resetRowSelection={resetRowSelection} />}
+                    {rowSelectionCount > 0 && (
+                        <RowSelectionMessage
+                            mutate={dataQuery.mutate}
+                            loading={loading}
+                            count={rowSelectionCount}
+                            resetRowSelection={resetRowSelection}
+                            selectedRows={selectedRows}
+                        />
+                    )}
 
                     <table className="w-full">
                         <thead>
