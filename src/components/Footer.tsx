@@ -5,7 +5,7 @@ const navigation = {
     social: [
         {
             name: 'LinkedIn',
-            href: 'https://www.linkedin.com/in/srvprofile/',
+            href: 'https://www.linkedin.com/in/sourav-rakshit1/',
             icon: props => <LinkedinLogo weight="fill" className="w-6 h-6 hover:text-sky-600" aria-hidden="true" {...props} />,
         },
         {
