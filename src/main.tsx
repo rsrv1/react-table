@@ -19,6 +19,8 @@ export type RenderProps<T> = {
     rowSelectionCount: number
     selectedRows: selectedRows
     resetRowSelection: () => void
+    handleSelectAll: () => void
+    handleSelectAllCurrentPage: () => void
     dataQuery: SWRResponse<Response<T>>
     loading: boolean
     options: Query
@@ -62,10 +64,7 @@ function Main({ children }: Props) {
     } = useTableHandlers()
 
     const columns = useColumns({
-        resetRowSelection,
-        handleSelectAll,
         isSelectedGetter,
-        handleSelectAllCurrentPage,
         handleRemoveFromExcept,
         handleAddToExcept,
         handleAddToOnly,
@@ -94,7 +93,19 @@ function Main({ children }: Props) {
 
     return (
         <DndProvider backend={HTML5Backend}>
-            {children({ table, columnOrder, resetColumnOrder, rowSelectionCount, selectedRows, resetRowSelection, dataQuery, loading, options })}
+            {children({
+                table,
+                columnOrder,
+                handleSelectAll,
+                handleSelectAllCurrentPage,
+                resetColumnOrder,
+                rowSelectionCount,
+                selectedRows,
+                resetRowSelection,
+                dataQuery,
+                loading,
+                options,
+            })}
         </DndProvider>
     )
 }

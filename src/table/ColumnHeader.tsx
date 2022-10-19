@@ -27,9 +27,9 @@ function ColumnHeader<T>({
     name,
     unsortable,
     children,
+    className,
     up = <span>^</span>,
     down = <div className="transform rotate-180">^</div>,
-    className,
 }: Props<T>) {
     const { columnSort } = useTableState()
     const dispatch = columnSort.dispatch

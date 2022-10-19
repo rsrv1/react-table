@@ -8,11 +8,24 @@ import ColumnHeader from './table/ColumnHeader'
 import renderSubComponent from './components/RowSubExpand'
 import Main from './main'
 import { Person } from './data/fetchData'
+import RowSelect from './components/RowSelect'
 
 function Table() {
     return (
         <Main>
-            {({ table, columnOrder, resetColumnOrder, rowSelectionCount, selectedRows, resetRowSelection, dataQuery, loading, options }) => (
+            {({
+                table,
+                columnOrder,
+                resetColumnOrder,
+                handleSelectAll,
+                handleSelectAllCurrentPage,
+                rowSelectionCount,
+                selectedRows,
+                resetRowSelection,
+                dataQuery,
+                loading,
+                options,
+            }) => (
                 <div className="p-2">
                     <ColumnVisibility<Person> table={table} onResetColumnOrder={resetColumnOrder} />
 
@@ -28,21 +41,32 @@ function Table() {
                         />
                     )}
 
+                    <RowSelect
+                        loading={loading}
+                        resetRowSelection={resetRowSelection}
+                        handleSelectAll={handleSelectAll}
+                        handleSelectAllCurrentPage={handleSelectAllCurrentPage}
+                    />
+
                     <table className="w-full">
                         <thead>
                             {table.getHeaderGroups().map(headerGroup => (
                                 <tr key={headerGroup.id}>
-                                    {headerGroup.headers.map(header => (
-                                        <ColumnHeader<Person>
-                                            key={header.id}
-                                            header={header}
-                                            table={table}
-                                            unsortable={header.id.startsWith('_') || ['id'].includes(header.id)}
-                                            name={header.id}
-                                            className="whitespace-nowrap">
-                                            {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
-                                        </ColumnHeader>
-                                    ))}
+                                    {headerGroup.headers.map(header =>
+                                        ['id', '_expand'].includes(header.id) ? (
+                                            <th></th>
+                                        ) : (
+                                            <ColumnHeader<Person>
+                                                key={header.id}
+                                                header={header}
+                                                table={table}
+                                                unsortable={header.id.startsWith('_') || ['id'].includes(header.id)}
+                                                name={header.id}
+                                                className="whitespace-nowrap">
+                                                {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
+                                            </ColumnHeader>
+                                        )
+                                    )}
                                 </tr>
                             ))}
                         </thead>

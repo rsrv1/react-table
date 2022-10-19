@@ -2,14 +2,10 @@ import React from 'react'
 import { ColumnDef } from '@tanstack/react-table'
 import { Person } from './data/fetchData'
 import IndeterminateCheckbox from './components/IndeterminateCheckbox'
-import Select from './components/Select'
 import { Response } from './table/hooks/useTableData'
 
 type Args = {
-    resetRowSelection: () => void
-    handleSelectAll: () => void
     isSelectedGetter: (id: string) => boolean
-    handleSelectAllCurrentPage: () => void
     handleRemoveFromExcept: (id: string) => void
     handleAddToExcept: (id: string) => void
     handleAddToOnly: (id: string) => void
@@ -21,10 +17,7 @@ type Args = {
 }
 
 function useColumns({
-    resetRowSelection,
-    handleSelectAll,
     isSelectedGetter,
-    handleSelectAllCurrentPage,
     handleRemoveFromExcept,
     handleAddToExcept,
     handleAddToOnly,
@@ -34,23 +27,6 @@ function useColumns({
     allRowSelected,
     rowSelectionCount,
 }: Args): ColumnDef<Person, any>[] {
-    const [bulkSelectionType, setBulkSelectionType] = React.useState('_')
-
-    const handleBulkSelectionChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-        const selected = event.target.value
-        setBulkSelectionType(selected)
-
-        if (selected === 'all') {
-            return handleSelectAll()
-        }
-
-        if (selected === 'current') {
-            return handleSelectAllCurrentPage()
-        }
-
-        resetRowSelection()
-    }
-
     const handleCellSelectChange = (event: React.FormEvent<HTMLInputElement>, id: string) => {
         const isChecked = (event.target as HTMLInputElement).checked
 
@@ -73,19 +49,12 @@ function useColumns({
                 cell: ({ getValue, row, column: { id }, table }) => (
                     <IndeterminateCheckbox
                         {...{
-                            checked: isSelectedGetter(getValue()),
+                            checked: isSelectedGetter(getValue() as string),
                             indeterminate: false,
-                            onChange: e => handleCellSelectChange(e, getValue()),
+                            onChange: e => handleCellSelectChange(e, getValue() as string),
                             disabled: loading,
                         }}
                     />
-                ),
-                header: ({ table }) => (
-                    <Select className="!pl-2 !pr-5 font-normal" value={bulkSelectionType} onChange={handleBulkSelectionChange} disabled={loading}>
-                        <option value="_">select</option>
-                        <option value="all">all</option>
-                        <option value="current">this page</option>
-                    </Select>
                 ),
             },
             {
