@@ -1,19 +1,18 @@
 import React from 'react'
 import { KeyedMutator } from 'swr'
-import { Person } from '../data/fetchData'
 import { selectedRows } from '../table/context/reducer/rowSelection'
 import { Response } from '../table/hooks/useTableData'
 import Select from './Select'
 
-type Props = {
+type Props<T> = {
     loading: boolean
-    mutate: KeyedMutator<Response<Person>>
+    mutate: KeyedMutator<Response<T>>
     count: number
     resetRowSelection: () => void
     selectedRows: selectedRows
 }
 
-function RowSelectionMessage({ mutate, loading, count, selectedRows, resetRowSelection }: Props) {
+function RowSelectionMessage<T>({ mutate, loading, count, selectedRows, resetRowSelection }: Props<T>) {
     const [action, setAction] = React.useState('')
 
     const applyAction = () => {
