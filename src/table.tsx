@@ -9,6 +9,7 @@ import renderSubComponent from './components/RowSubExpand'
 import Main from './main'
 import { Person } from './data/fetchData'
 import RowSelect from './components/RowSelect'
+import clsx from 'clsx'
 
 function TableRenderer({ table, position }: { table: TanstackTable<Person>; position?: 'left' | 'center' | 'right' }) {
     const getHeaderGroups = () => {
@@ -26,7 +27,7 @@ function TableRenderer({ table, position }: { table: TanstackTable<Person>; posi
     }
 
     return (
-        <table className="border-2 border-black">
+        <table className={clsx(position === 'center' || 'shadow bg-gray-100/80')}>
             <thead>
                 {getHeaderGroups().map(headerGroup => (
                     <tr key={headerGroup.id}>
@@ -52,14 +53,12 @@ function TableRenderer({ table, position }: { table: TanstackTable<Person>; posi
                 {table.getRowModel().rows.map(row => (
                     <React.Fragment key={row.id}>
                         <tr>
-                            {/* first row is a normal row */}
                             {getCells(row).map(cell => {
                                 return <td key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</td>
                             })}
                         </tr>
-                        {row.getIsExpanded() && (
+                        {row.getIsExpanded() && (position === undefined || position === 'center') && (
                             <tr>
-                                {/* 2nd row is a custom 1 cell row */}
                                 <td colSpan={getCells(row).length}>{renderSubComponent({ row })}</td>
                             </tr>
                         )}
@@ -86,7 +85,7 @@ function Table() {
                 loading,
                 options,
             }) => (
-                <div className="p-2">
+                <div className="max-w-3xl">
                     <ColumnVisibility<Person> table={table} onResetColumnOrder={resetColumnOrder} />
 
                     <Filters loading={loading} />
@@ -108,17 +107,15 @@ function Table() {
                         handleSelectAllCurrentPage={handleSelectAllCurrentPage}
                     />
 
-                    {/* table */}
-                    <div className="flex gap-4">
+                    <div className="flex space-x-1 mx-auto">
                         <TableRenderer table={table} position="left" />
-                        <TableRenderer table={table} position="center" />
+                        <div className="overflow-x-auto">
+                            <TableRenderer table={table} position="center" />
+                        </div>
                         <TableRenderer table={table} position="right" />
                     </div>
-                    {/* table */}
-                    <div>
-                        {rowSelectionCount} of {dataQuery.data?.total} Total Rows Selected
-                    </div>
-                    <div className="h-4" />
+
+                    <div className="py-4">total {dataQuery.data?.total} results</div>
 
                     {/* pagination */}
                     <Pagination table={table} loading={loading} />

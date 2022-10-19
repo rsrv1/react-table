@@ -27,7 +27,7 @@ function RowSelect({ loading, resetRowSelection, handleSelectAll, handleSelectAl
     }
 
     return (
-        <Select className="!pl-2 !pr-5 font-normal w-28 mb-3" value={bulkSelectionType} onChange={handleBulkSelectionChange} disabled={loading}>
+        <Select className="!pl-2 !pr-5 font-normal !w-28 mb-3" value={bulkSelectionType} onChange={handleBulkSelectionChange} disabled={loading}>
             <option value="_">select</option>
             <option value="all">all</option>
             <option value="current">this page</option>
