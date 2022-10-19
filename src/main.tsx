@@ -3,15 +3,19 @@ import useTableData, { Query, Response, TableData } from './table/hooks/useTable
 import useTableHandlers from './table/hooks/useTableHandlers'
 import useColumns from './useColumns'
 import useTable from './table/hooks/useTable'
-import { Table } from '@tanstack/react-table'
+import { ColumnOrderState, Table } from '@tanstack/react-table'
 import { SWRResponse } from 'swr'
 import { fetchData, Person } from './data/fetchData'
 import { useAppSelector } from './redux/hooks'
 import { RootState } from './redux/store'
 import { selectedRows } from './table/context/reducer/rowSelection'
+import { DndProvider } from 'react-dnd'
+import { HTML5Backend } from 'react-dnd-html5-backend'
 
 export type RenderProps<T> = {
     table: Table<T>
+    columnOrder: ColumnOrderState
+    resetColumnOrder: () => void
     rowSelectionCount: number
     selectedRows: selectedRows
     resetRowSelection: () => void
@@ -72,7 +76,7 @@ function Main({ children }: Props) {
         rowSelectionCount,
     })
 
-    const table = useTable<Person>({
+    const { table, columnOrder, resetColumnOrder } = useTable<Person>({
         data: dataQuery.data,
         lastData,
         pagination,
@@ -88,7 +92,11 @@ function Main({ children }: Props) {
         },
     })
 
-    return <>{children({ table, rowSelectionCount, selectedRows, resetRowSelection, dataQuery, loading, options })}</>
+    return (
+        <DndProvider backend={HTML5Backend}>
+            {children({ table, columnOrder, resetColumnOrder, rowSelectionCount, selectedRows, resetRowSelection, dataQuery, loading, options })}
+        </DndProvider>
+    )
 }
 
 export default Main

@@ -1,5 +1,5 @@
 import React from 'react'
-import { PaginationState, Table, ColumnDef } from '@tanstack/react-table'
+import { PaginationState, Table, ColumnOrderState } from '@tanstack/react-table'
 import useSWR, { SWRResponse } from 'swr'
 import useTotalRowSelectionCount from './useTotalRowSelectionCount'
 import { filtersToString } from '../utils'

@@ -1,11 +1,9 @@
 import React from 'react'
-import { ColumnDef, createColumnHelper, Row, Table } from '@tanstack/react-table'
+import { ColumnDef } from '@tanstack/react-table'
 import { Person } from './data/fetchData'
 import IndeterminateCheckbox from './components/IndeterminateCheckbox'
 import Select from './components/Select'
 import { Response } from './table/hooks/useTableData'
-
-const columnHelper = createColumnHelper<Person>()
 
 type Args = {
     resetRowSelection: () => void
@@ -67,9 +65,10 @@ function useColumns({
         else handleRemoveFromOnly(id)
     }
 
-    const columns = React.useMemo(
+    const columns: ColumnDef<Person>[] = React.useMemo(
         () => [
-            columnHelper.accessor('id', {
+            {
+                accessorKey: 'id',
                 id: 'id',
                 cell: ({ getValue, row, column: { id }, table }) => (
                     <IndeterminateCheckbox
@@ -88,8 +87,10 @@ function useColumns({
                         <option value="current">this page</option>
                     </Select>
                 ),
-            }),
-            columnHelper.accessor('_expand', {
+            },
+            {
+                accessorKey: '_expand',
+                id: '_expand',
                 header: () => null,
                 cell: ({ row }) => {
                     return row.getCanExpand() ? (
@@ -104,8 +105,10 @@ function useColumns({
                         '🔵'
                     )
                 },
-            }),
-            columnHelper.accessor('firstName', {
+            },
+            {
+                accessorKey: 'firstName',
+                id: 'firstName',
                 cell: ({ row, getValue }) => (
                     <div
                         style={{
@@ -114,31 +117,42 @@ function useColumns({
                         {getValue()}
                     </div>
                 ),
-            }),
-            columnHelper.accessor(row => row.lastName, {
+            },
+            {
+                accessorKey: 'lastName',
                 id: 'lastName',
                 cell: info => <i>{info.getValue()}</i>,
                 header: () => <span>Last Name</span>,
-            }),
-            columnHelper.accessor('age', {
+            },
+            {
+                accessorKey: 'age',
+                id: 'age',
                 header: () => 'Age',
                 cell: info => info.renderValue(),
-            }),
-            columnHelper.accessor('visits', {
+            },
+            {
+                accessorKey: 'visits',
+                id: 'visits',
                 header: () => <span>Visits</span>,
-            }),
-            columnHelper.accessor('status', {
+            },
+            {
+                accessorKey: 'status',
+                id: 'status',
                 header: 'Status',
-            }),
-            columnHelper.accessor('progress', {
+            },
+            {
+                accessorKey: 'progress',
+                id: 'progress',
                 header: 'Profile Progress',
                 cell: info => (
                     <span>
                         {info.row.original.lastName}-{info.row.original.age}
                     </span>
                 ),
-            }),
-            columnHelper.accessor('_action', {
+            },
+            {
+                accessorFn: row => row.id,
+                id: '_action',
                 header: 'Action',
                 cell: ({ getValue, row: { index }, column: { id }, table }) => (
                     <button
@@ -150,7 +164,7 @@ function useColumns({
                         call
                     </button>
                 ),
-            }),
+            },
         ],
         [data, rowSelectionCount, loading]
     )

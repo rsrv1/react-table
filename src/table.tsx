@@ -4,21 +4,22 @@ import Pagination from './table/pagination'
 import Filters from './filters'
 import ColumnVisibility from './table/columnVisibility'
 import RowSelectionMessage from './components/rowSelectionMessage'
-import SortTrigger from './table/SortTrigger'
+import ColumnHeader from './table/ColumnHeader'
 import renderSubComponent from './components/RowSubExpand'
 import Main from './main'
+import { Person } from './data/fetchData'
 
 function Table() {
     return (
         <Main>
-            {({ table, rowSelectionCount, selectedRows, resetRowSelection, dataQuery, loading, options }) => (
+            {({ table, columnOrder, resetColumnOrder, rowSelectionCount, selectedRows, resetRowSelection, dataQuery, loading, options }) => (
                 <div className="p-2">
-                    <ColumnVisibility table={table} />
+                    <ColumnVisibility<Person> table={table} onResetColumnOrder={resetColumnOrder} />
 
                     <Filters loading={loading} />
 
                     {rowSelectionCount > 0 && (
-                        <RowSelectionMessage
+                        <RowSelectionMessage<Person>
                             mutate={dataQuery.mutate}
                             loading={loading}
                             count={rowSelectionCount}
@@ -32,14 +33,15 @@ function Table() {
                             {table.getHeaderGroups().map(headerGroup => (
                                 <tr key={headerGroup.id}>
                                     {headerGroup.headers.map(header => (
-                                        <th key={header.id}>
-                                            <SortTrigger
-                                                unsortable={header.id.startsWith('_') || ['id'].includes(header.id)}
-                                                name={header.id}
-                                                className="whitespace-nowrap">
-                                                {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
-                                            </SortTrigger>
-                                        </th>
+                                        <ColumnHeader<Person>
+                                            key={header.id}
+                                            header={header}
+                                            table={table}
+                                            unsortable={header.id.startsWith('_') || ['id'].includes(header.id)}
+                                            name={header.id}
+                                            className="whitespace-nowrap">
+                                            {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
+                                        </ColumnHeader>
                                     ))}
                                 </tr>
                             ))}

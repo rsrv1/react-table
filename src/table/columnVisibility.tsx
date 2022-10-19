@@ -1,15 +1,14 @@
 import { Column, Table } from '@tanstack/react-table'
 import React from 'react'
-import { Person } from '../data/fetchData'
 import { _shuffle } from './utils'
 import { Reorder } from 'framer-motion'
 
-function ColumnVisibility({ table }: { table: Table<Person> }) {
+function ColumnVisibility<T>({ table, onResetColumnOrder }: { table: Table<T>; onResetColumnOrder?: () => void }) {
     const randomizeColumns = () => {
         table.setColumnOrder(_shuffle(table.getAllLeafColumns().map(d => d.id)))
     }
 
-    const reOrderHandler = (data: Column<Person>[]) => table.setColumnOrder(data.map((c: Column<Person>) => c.id))
+    const reOrderHandler = (data: Column<T>[]) => table.setColumnOrder(data.map((c: Column<T>) => c.id))
 
     return (
         <>
@@ -56,6 +55,10 @@ function ColumnVisibility({ table }: { table: Table<Person> }) {
                 <div className="flex flex-wrap gap-2">
                     <button onClick={randomizeColumns} className="border p-1">
                         Reorder Columns
+                    </button>
+
+                    <button onClick={onResetColumnOrder} className="border p-1">
+                        Reset Order
                     </button>
                 </div>
             </details>
