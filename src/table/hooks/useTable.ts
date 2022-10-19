@@ -18,6 +18,7 @@ type Args<T> = {
 
 function useTable<T>({ data, lastData, pagination, setPagination, columns, filter, searchTerm, pageSize, meta }: Args<T>) {
     const [columnVisibility, setColumnVisibility] = React.useState({})
+    const [columnPinning, setColumnPinning] = React.useState({})
     const [columnOrder, setColumnOrder] = React.useState<ColumnOrderState>(
         columns.map(column => column.id as string) //must start out with populated columnOrder so we can splice
     )
@@ -31,10 +32,12 @@ function useTable<T>({ data, lastData, pagination, setPagination, columns, filte
             columnVisibility,
             columnOrder,
             pagination,
+            columnPinning,
         },
         onPaginationChange: setPagination,
         onColumnVisibilityChange: setColumnVisibility,
         onColumnOrderChange: setColumnOrder,
+        onColumnPinningChange: setColumnPinning,
         manualPagination: true,
         getCoreRowModel: getCoreRowModel(),
         getRowCanExpand: row => true,
