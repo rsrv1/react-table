@@ -57,9 +57,11 @@ function TableRenderer({ table, position }: { table: TanstackTable<Person>; posi
                                 return <td key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</td>
                             })}
                         </tr>
-                        {row.getIsExpanded() && (position === undefined || position === 'center') && (
+                        {row.getIsExpanded() && getHeaderGroups()[0].headers.length > 0 && (
                             <tr>
-                                <td colSpan={getCells(row).length}>{renderSubComponent({ row })}</td>
+                                <td colSpan={getCells(row).length}>
+                                    {(position === 'center' || position === undefined) && renderSubComponent({ row })}
+                                </td>
                             </tr>
                         )}
                     </React.Fragment>
