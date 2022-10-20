@@ -145,11 +145,15 @@ function Table() {
                                     </div>
 
                                     <div className="flex space-x-1 mx-auto">
-                                        <TableRenderer table={table} position="left" />
+                                        <div className="overflow-x-scroll">
+                                            <TableRenderer table={table} position="left" />
+                                        </div>
                                         <div className="overflow-x-auto">
                                             <TableRenderer table={table} position="center" />
                                         </div>
-                                        <TableRenderer table={table} position="right" />
+                                        <div className="overflow-x-scroll">
+                                            <TableRenderer table={table} position="right" />
+                                        </div>
                                     </div>
 
                                     <div className="py-4">total {dataQuery.data?.total} results</div>
