@@ -21,7 +21,7 @@ const Menu = (props: any) => <MenuInner {...props} className="relative" menuClas
 
 const MenuItem = (props: any) => <MenuItemInner {...props} className={menuItemClassName} />
 
-function Dropdown<T>({ header, name }: { header: Header<T, unknown>; name: string }) {
+function Dropdown<T>({ unsortable, header, name }: { unsortable: boolean; header: Header<T, unknown>; name: string }) {
     const { columnSort, request } = useTableState()
     const columns = columnSort.state.column
     const canPin = !header.isPlaceholder && header.column.getCanPin()
@@ -56,6 +56,10 @@ function Dropdown<T>({ header, name }: { header: Header<T, unknown>; name: strin
         request.dispatch({ type: requestActionType.COLUMN_RE_POSITIONING, payload: true })
     }
 
+    const hide = (e: React.MouseEvent<HTMLInputElement>) => {
+        header.column.toggleVisibility(false)
+    }
+
     return (
         <Menu
             transition={true}
@@ -66,22 +70,26 @@ function Dropdown<T>({ header, name }: { header: Header<T, unknown>; name: strin
             overflow={'auto'}
             position={'auto'}
             menuButton={
-                <MenuButton className="flex items-center rounded-full bg-gray-50 text-gray-400 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-gray-100">
-                    <DotsThreeVertical weight="regular" className="w-5 h-5 hover:text-gray-600" aria-hidden="true" />
+                <MenuButton className="flex items-center rounded-full hover:bg-gray-100/80 p-1 text-gray-400 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-gray-100">
+                    <DotsThreeVertical weight="regular" className="w-5 h-5 hover:text-gray-700" aria-hidden="true" />
                 </MenuButton>
             }>
-            <MenuItem disabled={!columns[name]} onClick={unsort}>
-                Unsort
-            </MenuItem>
-            <MenuItem disabled={columns[name] === sortDirection.ASC} onClick={sortAsc}>
-                Sort by ASC
-            </MenuItem>
-            <MenuItem disabled={columns[name] === sortDirection.DESC} onClick={sortDesc}>
-                Sort by DESC
-            </MenuItem>
+            {unsortable || (
+                <>
+                    <MenuItem disabled={!columns[name]} onClick={unsort}>
+                        Unsort
+                    </MenuItem>
+                    <MenuItem disabled={columns[name] === sortDirection.ASC} onClick={sortAsc}>
+                        Sort by ASC
+                    </MenuItem>
+                    <MenuItem disabled={columns[name] === sortDirection.DESC} onClick={sortDesc}>
+                        Sort by DESC
+                    </MenuItem>{' '}
+                    <MenuDivider className="h-px bg-gray-200 mx-2.5 my-1.5" />
+                </>
+            )}
             {canPin && (
                 <>
-                    <MenuDivider className="h-px bg-gray-200 mx-2.5 my-1.5" />
                     <MenuItem disabled={header.column.getIsPinned() === 'right'} onClick={handlePinRight}>
                         Pin to right
                     </MenuItem>
@@ -91,13 +99,16 @@ function Dropdown<T>({ header, name }: { header: Header<T, unknown>; name: strin
                     <MenuItem disabled={!header.column.getIsPinned()} onClick={handleUnpin}>
                         Unpin
                     </MenuItem>{' '}
+                    <MenuDivider className="h-px bg-gray-200 mx-2.5 my-1.5" />
                 </>
             )}
-            <MenuDivider className="h-px bg-gray-200 mx-2.5 my-1.5" />
+
             <MenuItem disabled={request.state.columnRePositioning} onClick={startColumnRepositioning}>
                 Reposition
             </MenuItem>
-            <MenuItem>Hide</MenuItem>
+            <MenuItem type="checkbox" checked={header.column.getIsVisible()} onClick={hide}>
+                Hide
+            </MenuItem>
         </Menu>
     )
 }

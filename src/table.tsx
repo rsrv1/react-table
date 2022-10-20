@@ -28,8 +28,8 @@ function TableRenderer({ table, position }: { table: TanstackTable<Person>; posi
     }
 
     return (
-        <table className={clsx(position === 'center' || 'shadow bg-gray-100/80')}>
-            <thead>
+        <table className={clsx('divide-y divide-gray-300', position === 'center' || 'shadow bg-gray-100/80')}>
+            <thead className="bg-gray-50">
                 {getHeaderGroups().map(headerGroup => (
                     <tr key={headerGroup.id}>
                         {headerGroup.headers.map(header =>
@@ -50,12 +50,16 @@ function TableRenderer({ table, position }: { table: TanstackTable<Person>; posi
                     </tr>
                 ))}
             </thead>
-            <tbody>
+            <tbody className="divide-y divide-gray-200 bg-white">
                 {table.getRowModel().rows.map(row => (
                     <React.Fragment key={row.id}>
                         <tr>
                             {getCells(row).map(cell => {
-                                return <td key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</td>
+                                return (
+                                    <td key={cell.id} className="whitespace-nowrap px-2 py-2 text-sm text-gray-500">
+                                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                                    </td>
+                                )
                             })}
                         </tr>
                         {row.getIsExpanded() && getHeaderGroups()[0].headers.length > 0 && (
@@ -74,80 +78,102 @@ function TableRenderer({ table, position }: { table: TanstackTable<Person>; posi
 
 function Table() {
     return (
-        <Main>
-            {({
-                table,
-                columnOrder,
-                resetColumnOrder,
-                handleSelectAll,
-                handleSelectAllCurrentPage,
-                rowSelectionCount,
-                isColumnPositioning,
-                stopColumnPositioning,
-                selectedRows,
-                resetRowSelection,
-                dataQuery,
-                loading,
-                options,
-            }) => (
-                <div className="max-w-2xl">
-                    <ColumnVisibility<Person> table={table} onResetColumnOrder={resetColumnOrder} />
+        <div className="px-4 sm:px-6 lg:px-8">
+            <div className="sm:flex sm:items-center">
+                <div className="sm:flex-auto">
+                    <h1 className="text-xl font-semibold text-gray-900">Transactions</h1>
+                    <p className="mt-2 text-sm text-gray-700">A table of placeholder stock market data that does not make any sense.</p>
+                </div>
+                <div className="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
+                    <button
+                        type="button"
+                        className="inline-flex items-center justify-center rounded-md border border-transparent bg-gray-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:w-auto">
+                        Export
+                    </button>
+                </div>
+            </div>
+            <div className="mt-8 flex flex-col">
+                <div className="-my-2 -mx-4 overflow-x-auto sm:-mx-6 lg:-mx-8">
+                    <div className="inline-block min-w-full py-2 align-middle md:px-6 lg:px-8">
+                        <div className="overflow-hidden shadow ring-1 ring-black ring-opacity-5 md:rounded-lg"></div>
+                        <Main>
+                            {({
+                                table,
+                                columnOrder,
+                                resetColumnOrder,
+                                handleSelectAll,
+                                handleSelectAllCurrentPage,
+                                rowSelectionCount,
+                                isColumnPositioning,
+                                stopColumnPositioning,
+                                selectedRows,
+                                resetRowSelection,
+                                dataQuery,
+                                loading,
+                                options,
+                            }) => (
+                                <div className="max-w-2xl">
+                                    <ColumnVisibility<Person> table={table} onResetColumnOrder={resetColumnOrder} />
 
-                    <Filters loading={loading} />
+                                    <Filters loading={loading} />
 
-                    {rowSelectionCount > 0 && (
-                        <RowSelectionMessage<Person>
-                            mutate={dataQuery.mutate}
-                            loading={loading}
-                            count={rowSelectionCount}
-                            resetRowSelection={resetRowSelection}
-                            selectedRows={selectedRows}
-                        />
-                    )}
+                                    {rowSelectionCount > 0 && (
+                                        <RowSelectionMessage<Person>
+                                            mutate={dataQuery.mutate}
+                                            loading={loading}
+                                            count={rowSelectionCount}
+                                            resetRowSelection={resetRowSelection}
+                                            selectedRows={selectedRows}
+                                        />
+                                    )}
 
-                    <div className="flex justify-between items-center">
-                        <RowSelect
-                            loading={loading}
-                            resetRowSelection={resetRowSelection}
-                            handleSelectAll={handleSelectAll}
-                            handleSelectAllCurrentPage={handleSelectAllCurrentPage}
-                        />
+                                    <div className="flex justify-between items-center">
+                                        <RowSelect
+                                            loading={loading}
+                                            resetRowSelection={resetRowSelection}
+                                            handleSelectAll={handleSelectAll}
+                                            handleSelectAllCurrentPage={handleSelectAllCurrentPage}
+                                        />
 
-                        {isColumnPositioning && (
-                            <ColumnRepositionConfirm<Person>
-                                table={table}
-                                stopColumnPositioning={stopColumnPositioning}
-                                resetColumnPositioning={resetColumnOrder}
-                            />
-                        )}
-                    </div>
+                                        {isColumnPositioning && (
+                                            <ColumnRepositionConfirm<Person>
+                                                table={table}
+                                                stopColumnPositioning={stopColumnPositioning}
+                                                resetColumnPositioning={resetColumnOrder}
+                                            />
+                                        )}
+                                    </div>
 
-                    <div className="flex space-x-1 mx-auto">
-                        <TableRenderer table={table} position="left" />
-                        <div className="overflow-x-auto">
-                            <TableRenderer table={table} position="center" />
-                        </div>
-                        <TableRenderer table={table} position="right" />
-                    </div>
+                                    <div className="flex space-x-1 mx-auto">
+                                        <TableRenderer table={table} position="left" />
+                                        <div className="overflow-x-auto">
+                                            <TableRenderer table={table} position="center" />
+                                        </div>
+                                        <TableRenderer table={table} position="right" />
+                                    </div>
 
-                    <div className="py-4">total {dataQuery.data?.total} results</div>
+                                    <div className="py-4">total {dataQuery.data?.total} results</div>
 
-                    {/* pagination */}
-                    <Pagination table={table} loading={loading} />
+                                    {/* pagination */}
+                                    <Pagination table={table} loading={loading} />
 
-                    <div className="h-5 my-2">{loading && <h4>loading...</h4>}</div>
+                                    <div className="h-5 my-2">{loading && <h4>loading...</h4>}</div>
 
-                    {/* debug interaction */}
-                    <div className="mt-10">
-                        <span className="font-medium text-indigo-500">Selected rows:</span> {JSON.stringify(selectedRows)}
-                    </div>
-                    <hr />
-                    <div>
-                        <span className="font-medium text-indigo-500">Query:</span> {JSON.stringify(options)}
+                                    {/* debug interaction */}
+                                    <div className="mt-10">
+                                        <span className="font-medium text-indigo-500">Selected rows:</span> {JSON.stringify(selectedRows)}
+                                    </div>
+                                    <hr />
+                                    <div>
+                                        <span className="font-medium text-indigo-500">Query:</span> {JSON.stringify(options)}
+                                    </div>
+                                </div>
+                            )}
+                        </Main>
                     </div>
                 </div>
-            )}
-        </Main>
+            </div>
+        </div>
     )
 }
 

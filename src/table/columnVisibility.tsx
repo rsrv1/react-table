@@ -2,6 +2,7 @@ import { Column, Table } from '@tanstack/react-table'
 import React from 'react'
 import { _shuffle } from './utils'
 import { Reorder } from 'framer-motion'
+import { DotsNine } from 'phosphor-react'
 
 function ColumnVisibility<T>({ table, onResetColumnOrder }: { table: Table<T>; onResetColumnOrder?: () => void }) {
     const randomizeColumns = () => {
@@ -12,11 +13,11 @@ function ColumnVisibility<T>({ table, onResetColumnOrder }: { table: Table<T>; o
 
     return (
         <>
-            <details className="w-40">
+            <details className="w-48">
                 <summary className="cursor-pointer">Column Visibility:</summary>
 
-                <div className="inline-block border border-black shadow rounded">
-                    <div className="px-1 border-b border-black">
+                <div className="mt-2 inline-block border bg-white border-gray-100 shadow rounded py-2 w-full">
+                    <div className="px-2 pb-2 border-b border-gray-100">
                         <label>
                             <input
                                 {...{
@@ -33,7 +34,7 @@ function ColumnVisibility<T>({ table, onResetColumnOrder }: { table: Table<T>; o
                         {table.getAllLeafColumns().map(column => {
                             return (
                                 <Reorder.Item transition={{ damping: 0 }} key={column.id} value={column}>
-                                    <div className="px-1">
+                                    <div className="px-2 flex justify-between space-y-1 items-center">
                                         <label>
                                             <input
                                                 {...{
@@ -44,6 +45,9 @@ function ColumnVisibility<T>({ table, onResetColumnOrder }: { table: Table<T>; o
                                             />{' '}
                                             {column.id}
                                         </label>
+                                        <span className="p-1 cursor-grab bg-gray-100">
+                                            <DotsNine weight="regular" className="w-4 h-4 text-gray-800" aria-hidden="true" />
+                                        </span>
                                     </div>
                                 </Reorder.Item>
                             )

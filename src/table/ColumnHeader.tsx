@@ -72,7 +72,10 @@ function ColumnHeader<T>({
     }
 
     return (
-        <th ref={dropRef} colSpan={header.colSpan} className={clsx(isDragging && 'opacity-[0.5]')}>
+        <th
+            ref={dropRef}
+            colSpan={header.colSpan}
+            className={clsx('whitespace-nowrap px-2 py-3.5 text-left text-sm font-semibold text-gray-900', isDragging && 'opacity-[0.5]')}>
             <div ref={previewRef} className="flex items-center justify-between space-x-2">
                 <button onClick={handleSort} disabled={unsortable} type="button" className={clsx('flex justify-between items-center', className)}>
                     <span>{children}</span>
@@ -81,11 +84,11 @@ function ColumnHeader<T>({
                 </button>
 
                 {request.state.columnRePositioning && (
-                    <button ref={dragRef} title="re-position" type="button" className="cursor-grabbing hover:bg-gray-100">
-                        <DotsNine weight="regular" className="w-5 h-5 hover:text-gray-700" aria-hidden="true" />
+                    <button ref={dragRef} title="re-position" type="button" className="cursor-grabbing hover:bg-gray-200/80 p-1">
+                        <DotsNine weight="regular" className="w-5 h-5 text-gray-600 hover:text-gray-800" aria-hidden="true" />
                     </button>
                 )}
-                <Dropdown<T> name={name} header={header} />
+                <Dropdown<T> unsortable={unsortable} name={name} header={header} />
             </div>
         </th>
     )
