@@ -2,7 +2,7 @@ import React from 'react'
 import { getCoreRowModel, ColumnOrderState, useReactTable, PaginationState, TableMeta, ColumnDef } from '@tanstack/react-table'
 import { Response } from './useTableData'
 
-let firstRenderPagination = true
+let renderCount = 0
 
 type Args<T> = {
     data: Response<T> | undefined
@@ -50,13 +50,14 @@ function useTable<T>({ data, lastData, pagination, setPagination, columns, filte
         meta,
     })
 
+    /** if filter / search term / per page changes then reset page to first */
     React.useEffect(() => {
-        if (firstRenderPagination) {
-            firstRenderPagination = false
+        if (renderCount < 2) {
+            renderCount++
             return
         }
 
-        table.resetPagination()
+        table.resetPageIndex()
     }, [filter, searchTerm, pageSize])
 
     return { table, columnOrder, resetColumnOrder }
