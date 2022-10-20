@@ -41,13 +41,12 @@ function useTable<T>({ data, lastData, pagination, setPagination, columns, filte
         manualPagination: true,
         getCoreRowModel: getCoreRowModel(),
         getRowCanExpand: row => true,
-        ...{
-            ...(process.env.NODE_ENV !== 'production' && {
-                debugTable: true,
-                debugHeaders: true,
-                debugColumns: true,
-            }),
-        },
+        ...(process.env.NODE_ENV !== 'production' && {
+            debugTable: true,
+            debugHeaders: true,
+            debugColumns: true,
+        }),
+
         meta,
     })
 
