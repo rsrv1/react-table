@@ -1,5 +1,5 @@
 import React from 'react'
-import { ColumnDef } from '@tanstack/react-table'
+import { ColumnDef, Table, Row } from '@tanstack/react-table'
 import { Person } from './data/fetchData'
 import IndeterminateCheckbox from './components/IndeterminateCheckbox'
 import { Response } from './table/hooks/useTableData'
@@ -41,6 +41,11 @@ function useColumns({
         else handleRemoveFromOnly(id)
     }
 
+    const handleRowExpand = (table: Table<Person>, row: Row<Person>) => {
+        table.resetColumnPinning() // so that expanded row don't break the ui
+        row.getToggleExpandedHandler()()
+    }
+
     const columns: ColumnDef<Person>[] = React.useMemo(
         () => [
             {
@@ -61,11 +66,11 @@ function useColumns({
                 accessorKey: '_expand',
                 id: '_expand',
                 header: () => null,
-                cell: ({ row }) => {
+                cell: ({ row, table }) => {
                     return row.getCanExpand() ? (
                         <button
                             {...{
-                                onClick: row.getToggleExpandedHandler(),
+                                onClick: (e: React.MouseEvent<HTMLButtonElement>) => handleRowExpand(table, row),
                                 style: { cursor: 'pointer' },
                             }}>
                             {row.getIsExpanded() ? '👇' : '👉'}

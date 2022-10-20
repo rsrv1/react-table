@@ -10,6 +10,7 @@ import Main from './main'
 import { Person } from './data/fetchData'
 import RowSelect from './components/RowSelect'
 import clsx from 'clsx'
+import ColumnRepositionConfirm from './components/ColumnRepositionConfirm'
 
 function TableRenderer({ table, position }: { table: TanstackTable<Person>; position?: 'left' | 'center' | 'right' }) {
     const getHeaderGroups = () => {
@@ -81,13 +82,15 @@ function Table() {
                 handleSelectAll,
                 handleSelectAllCurrentPage,
                 rowSelectionCount,
+                isColumnPositioning,
+                stopColumnPositioning,
                 selectedRows,
                 resetRowSelection,
                 dataQuery,
                 loading,
                 options,
             }) => (
-                <div className="max-w-3xl">
+                <div className="max-w-2xl">
                     <ColumnVisibility<Person> table={table} onResetColumnOrder={resetColumnOrder} />
 
                     <Filters loading={loading} />
@@ -102,12 +105,22 @@ function Table() {
                         />
                     )}
 
-                    <RowSelect
-                        loading={loading}
-                        resetRowSelection={resetRowSelection}
-                        handleSelectAll={handleSelectAll}
-                        handleSelectAllCurrentPage={handleSelectAllCurrentPage}
-                    />
+                    <div className="flex justify-between items-center">
+                        <RowSelect
+                            loading={loading}
+                            resetRowSelection={resetRowSelection}
+                            handleSelectAll={handleSelectAll}
+                            handleSelectAllCurrentPage={handleSelectAllCurrentPage}
+                        />
+
+                        {isColumnPositioning && (
+                            <ColumnRepositionConfirm<Person>
+                                table={table}
+                                stopColumnPositioning={stopColumnPositioning}
+                                resetColumnPositioning={resetColumnOrder}
+                            />
+                        )}
+                    </div>
 
                     <div className="flex space-x-1 mx-auto">
                         <TableRenderer table={table} position="left" />

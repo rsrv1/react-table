@@ -16,6 +16,8 @@ export type RenderProps<T> = {
     table: Table<T>
     columnOrder: ColumnOrderState
     resetColumnOrder: () => void
+    isColumnPositioning: boolean
+    stopColumnPositioning: () => void
     rowSelectionCount: number
     selectedRows: selectedRows
     resetRowSelection: () => void
@@ -43,6 +45,7 @@ function Main({ children }: Props) {
         pageSize,
         searchTerm,
         rowSelectionCount,
+        isColumnPositioning,
         allRowSelected,
         selectedRows,
         dataQuery,
@@ -61,6 +64,7 @@ function Main({ children }: Props) {
         handleAddToExcept,
         handleAddToOnly,
         handleRemoveFromOnly,
+        stopColumnPositioning,
     } = useTableHandlers()
 
     const columns = useColumns({
@@ -99,6 +103,8 @@ function Main({ children }: Props) {
                 handleSelectAll,
                 handleSelectAllCurrentPage,
                 resetColumnOrder,
+                isColumnPositioning,
+                stopColumnPositioning,
                 rowSelectionCount,
                 selectedRows,
                 resetRowSelection,

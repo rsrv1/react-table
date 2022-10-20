@@ -4,6 +4,8 @@ import { useTableState } from './context/tableContext'
 import { actionType, sortDirection } from './context/reducer/columnSort'
 import { Column, ColumnOrderState, Header, Table, flexRender } from '@tanstack/react-table'
 import { useDrag, useDrop } from 'react-dnd'
+import Dropdown from './Menu'
+import { DotsNine } from 'phosphor-react'
 
 type Props<T> = {
     table: Table<T>
@@ -31,7 +33,7 @@ function ColumnHeader<T>({
     up = <span>^</span>,
     down = <div className="transform rotate-180">^</div>,
 }: Props<T>) {
-    const { columnSort } = useTableState()
+    const { columnSort, request } = useTableState()
     const dispatch = columnSort.dispatch
     const columns = columnSort.state.column
 
@@ -78,39 +80,12 @@ function ColumnHeader<T>({
                     {columns[name] && <span className="px-2 ml-1 text-base sm:text-sm">{columns[name] === sortDirection.DESC ? up : down}</span>}
                 </button>
 
-                <button ref={dragRef}>🟰</button>
-
-                {!header.isPlaceholder && header.column.getCanPin() && (
-                    <div className="flex gap-1 justify-center">
-                        {header.column.getIsPinned() !== 'left' ? (
-                            <button
-                                className="border rounded px-2"
-                                onClick={() => {
-                                    header.column.pin('left')
-                                }}>
-                                {'<='}
-                            </button>
-                        ) : null}
-                        {header.column.getIsPinned() ? (
-                            <button
-                                className="border rounded px-2"
-                                onClick={() => {
-                                    header.column.pin(false)
-                                }}>
-                                X
-                            </button>
-                        ) : null}
-                        {header.column.getIsPinned() !== 'right' ? (
-                            <button
-                                className="border rounded px-2"
-                                onClick={() => {
-                                    header.column.pin('right')
-                                }}>
-                                {'=>'}
-                            </button>
-                        ) : null}
-                    </div>
+                {request.state.columnRePositioning && (
+                    <button ref={dragRef} title="re-position" type="button" className="cursor-grabbing hover:bg-gray-100">
+                        <DotsNine weight="regular" className="w-5 h-5 hover:text-gray-700" aria-hidden="true" />
+                    </button>
                 )}
+                <Dropdown<T> name={name} header={header} />
             </div>
         </th>
     )

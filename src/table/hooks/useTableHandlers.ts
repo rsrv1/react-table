@@ -2,9 +2,10 @@ import React from 'react'
 import { isSelected } from '../context/reducer/rowSelection'
 import { useTableState } from '../context/tableContext'
 import { actionType } from '../context/reducer/rowSelection'
+import { actionType as requestActionType } from '../context/reducer/request'
 
 function useTableHandlers() {
-    const { rowSelection } = useTableState()
+    const { rowSelection, request } = useTableState()
     const dispatch = rowSelection.dispatch
     const isSelectedGetter = React.useMemo(() => isSelected(rowSelection.state), [rowSelection.state])
 
@@ -24,20 +25,24 @@ function useTableHandlers() {
         dispatch({ type: actionType.WANT_CURRENT_PAGE, payload: true }) // enable the flag
     }, [])
 
-    const handleRemoveFromExcept = (id: string) => {
+    const handleRemoveFromExcept = React.useCallback((id: string) => {
         dispatch({ type: actionType.REMOVE_FROM_EXCEPT, payload: id })
-    }
+    }, [])
 
-    const handleAddToExcept = (id: string) => {
+    const handleAddToExcept = React.useCallback((id: string) => {
         dispatch({ type: actionType.ADD_TO_EXCEPT, payload: id })
-    }
+    }, [])
 
-    const handleAddToOnly = (id: string) => {
+    const handleAddToOnly = React.useCallback((id: string) => {
         dispatch({ type: actionType.ADD_TO_ONLY, payload: id })
-    }
-    const handleRemoveFromOnly = (id: string) => {
+    }, [])
+    const handleRemoveFromOnly = React.useCallback((id: string) => {
         dispatch({ type: actionType.REMOVE_FROM_ONLY, payload: id })
-    }
+    }, [])
+
+    const stopColumnPositioning = React.useCallback(() => {
+        request.dispatch({ type: requestActionType.COLUMN_RE_POSITIONING, payload: false })
+    }, [])
 
     return {
         resetRowSelection,
@@ -48,6 +53,7 @@ function useTableHandlers() {
         handleAddToExcept,
         handleAddToOnly,
         handleRemoveFromOnly,
+        stopColumnPositioning,
     }
 }
 

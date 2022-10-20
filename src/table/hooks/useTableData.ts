@@ -34,7 +34,7 @@ function useTableData<T extends { id: string }>({ filters, fetcher }: TableData<
     const selectedRows = React.useMemo(() => getSelectedRows(rowSelection.state), [rowSelection.state])
     const sort = React.useMemo(() => getSorted(columnSort.state), [columnSort.state])
     const filter = React.useMemo(() => filtersToString(filters), [filters])
-    const { searchTerm, loading } = request.state
+    const { searchTerm, loading, columnRePositioning } = request.state
     const { all, addAllCurrentPageRows } = rowSelection.state
     const [{ pageIndex, pageSize }, setPagination] = React.useState<PaginationState>({
         pageIndex: 0,
@@ -97,6 +97,7 @@ function useTableData<T extends { id: string }>({ filters, fetcher }: TableData<
         pageSize,
         searchTerm,
         rowSelectionCount,
+        isColumnPositioning: columnRePositioning,
         allRowSelected: all,
         selectedRows,
         dataQuery,
