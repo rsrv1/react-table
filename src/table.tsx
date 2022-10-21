@@ -1,5 +1,5 @@
 import React from 'react'
-import { flexRender, Table as TanstackTable, Row } from '@tanstack/react-table'
+import { flexRender, Table as TanstackTable, Row, PaginationState } from '@tanstack/react-table'
 import Pagination from './table/pagination'
 import Filters from './filters'
 import ColumnVisibility from './table/columnVisibility'
@@ -12,7 +12,17 @@ import RowSelect from './components/RowSelect'
 import clsx from 'clsx'
 import ColumnRepositionConfirm from './components/ColumnRepositionConfirm'
 
-function TableRenderer({ table, position }: { table: TanstackTable<Person>; position?: 'left' | 'center' | 'right' }) {
+function TableRenderer({
+    table,
+    rowSelectionCount,
+    pagination,
+    position,
+}: {
+    table: TanstackTable<Person>
+    rowSelectionCount: number
+    pagination: PaginationState
+    position?: 'left' | 'center' | 'right'
+}) {
     const getHeaderGroups = () => {
         if (position === 'left') return table.getLeftHeaderGroups()
         if (position === 'right') return table.getRightHeaderGroups()
@@ -33,14 +43,17 @@ function TableRenderer({ table, position }: { table: TanstackTable<Person>; posi
                 {getHeaderGroups().map(headerGroup => (
                     <tr key={headerGroup.id}>
                         {headerGroup.headers.map(header =>
-                            ['id', '_expand'].includes(header.id) ? (
+                            ['_expand'].includes(header.id) ? (
                                 <th key={header.id}></th>
                             ) : (
                                 <ColumnHeader<Person>
                                     key={header.id}
                                     header={header}
                                     table={table}
+                                    pagination={pagination}
                                     unsortable={header.id.startsWith('_') || ['id'].includes(header.id)}
+                                    rowSelector={header.id === 'id'}
+                                    rowSelectionCount={rowSelectionCount}
                                     name={header.id}
                                     className="whitespace-nowrap">
                                     {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
@@ -99,6 +112,7 @@ function Table() {
                         <Main>
                             {({
                                 table,
+                                pagination,
                                 columnOrder,
                                 resetColumnOrder,
                                 handleSelectAll,
@@ -146,13 +160,28 @@ function Table() {
 
                                     <div className="flex space-x-1 mx-auto">
                                         <div className="overflow-x-scroll">
-                                            <TableRenderer table={table} position="left" />
+                                            <TableRenderer
+                                                rowSelectionCount={rowSelectionCount}
+                                                pagination={pagination}
+                                                table={table}
+                                                position="left"
+                                            />
                                         </div>
                                         <div className="overflow-x-auto">
-                                            <TableRenderer table={table} position="center" />
+                                            <TableRenderer
+                                                rowSelectionCount={rowSelectionCount}
+                                                pagination={pagination}
+                                                table={table}
+                                                position="center"
+                                            />
                                         </div>
                                         <div className="overflow-x-scroll">
-                                            <TableRenderer table={table} position="right" />
+                                            <TableRenderer
+                                                rowSelectionCount={rowSelectionCount}
+                                                pagination={pagination}
+                                                table={table}
+                                                position="right"
+                                            />
                                         </div>
                                     </div>
 

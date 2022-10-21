@@ -3,7 +3,7 @@ import useTableData, { Query, Response, TableData } from './table/hooks/useTable
 import useTableHandlers from './table/hooks/useTableHandlers'
 import useColumns from './useColumns'
 import useTable from './table/hooks/useTable'
-import { ColumnOrderState, Table } from '@tanstack/react-table'
+import { ColumnOrderState, PaginationState, Table } from '@tanstack/react-table'
 import { SWRResponse } from 'swr'
 import { fetchData, Person } from './data/fetchData'
 import { useAppSelector } from './redux/hooks'
@@ -14,6 +14,7 @@ import { HTML5Backend } from 'react-dnd-html5-backend'
 
 export type RenderProps<T> = {
     table: Table<T>
+    pagination: PaginationState
     columnOrder: ColumnOrderState
     resetColumnOrder: () => void
     isColumnPositioning: boolean
@@ -99,6 +100,7 @@ function Main({ children }: Props) {
         <DndProvider backend={HTML5Backend}>
             {children({
                 table,
+                pagination,
                 columnOrder,
                 handleSelectAll,
                 handleSelectAllCurrentPage,

@@ -6,6 +6,7 @@ import { Header } from '@tanstack/react-table'
 import { useTableState } from './context/tableContext'
 import { actionType, sortDirection } from './context/reducer/columnSort'
 import { actionType as requestActionType } from './context/reducer/request'
+import DownArrowIcon from '../components/DownArrowIcon'
 
 const menuClassName = ({ state }) =>
     `box-border absolute z-50 text-sm bg-white p-1.5 border rounded shadow-md select-none text-left focus:outline-none min-w-[9rem] ${
@@ -21,7 +22,17 @@ const Menu = (props: any) => <MenuInner {...props} className="relative" menuClas
 
 const MenuItem = (props: any) => <MenuItemInner {...props} className={menuItemClassName} />
 
-function Dropdown<T>({ unsortable, header, name }: { unsortable: boolean; header: Header<T, unknown>; name: string }) {
+function Dropdown<T>({
+    unsortable,
+    rowSelector,
+    header,
+    name,
+}: {
+    unsortable: boolean
+    rowSelector?: boolean
+    header: Header<T, unknown>
+    name: string
+}) {
     const { columnSort, request } = useTableState()
     const columns = columnSort.state.column
     const canPin = !header.isPlaceholder && header.column.getCanPin()
@@ -63,15 +74,18 @@ function Dropdown<T>({ unsortable, header, name }: { unsortable: boolean; header
     return (
         <Menu
             transition={true}
-            arrow={true}
             direction={'bottom'}
             align={'end'}
             viewScroll={'auto'}
             overflow={'auto'}
             position={'auto'}
             menuButton={
-                <MenuButton className="flex items-center rounded-full hover:bg-gray-100/80 p-1 text-gray-400 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-gray-100">
-                    <DotsThreeVertical weight="regular" className="w-5 h-5 hover:text-gray-700" aria-hidden="true" />
+                <MenuButton className="flex items-center rounded-full group hover:bg-gray-200/80 p-1 text-gray-400 hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-gray-100">
+                    {rowSelector ? (
+                        <DownArrowIcon className="w-5 h-5 fill-gray-400 group-hover:fill-gray-700" />
+                    ) : (
+                        <DotsThreeVertical weight="regular" className="w-5 h-5 hover:text-gray-700" aria-hidden="true" />
+                    )}
                 </MenuButton>
             }>
             {unsortable || (

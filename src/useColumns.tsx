@@ -1,8 +1,10 @@
 import React from 'react'
 import { ColumnDef, Table, Row } from '@tanstack/react-table'
 import { Person } from './data/fetchData'
-import IndeterminateCheckbox from './components/IndeterminateCheckbox'
+import IndeterminateCheckbox from './table/IndeterminateCheckbox'
 import { Response } from './table/hooks/useTableData'
+import ArrowDown from './components/ArrowDown'
+import ArrowRight from './components/ArrowRight'
 
 type Args = {
     isSelectedGetter: (id: string) => boolean
@@ -73,7 +75,7 @@ function useColumns({
                                 onClick: (e: React.MouseEvent<HTMLButtonElement>) => handleRowExpand(table, row),
                                 style: { cursor: 'pointer' },
                             }}>
-                            {row.getIsExpanded() ? '👇' : '👉'}
+                            {row.getIsExpanded() ? <ArrowDown /> : <ArrowRight />}
                         </button>
                     ) : (
                         '🔵'

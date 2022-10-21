@@ -2,16 +2,21 @@ import React from 'react'
 import clsx from 'clsx'
 import { useTableState } from './context/tableContext'
 import { actionType, sortDirection } from './context/reducer/columnSort'
-import { Column, ColumnOrderState, Header, Table, flexRender } from '@tanstack/react-table'
+import { Column, ColumnOrderState, Header, Table, flexRender, PaginationState } from '@tanstack/react-table'
 import { useDrag, useDrop } from 'react-dnd'
 import Dropdown from './Menu'
 import { DotsNine } from 'phosphor-react'
+import IndeterminateCheckbox from './IndeterminateCheckbox'
+import useTableHandlers from './hooks/useTableHandlers'
 
 type Props<T> = {
     table: Table<T>
     header: Header<T, unknown>
     name: string
     unsortable: boolean
+    rowSelector?: boolean
+    rowSelectionCount: number
+    pagination: PaginationState
     children: React.ReactNode
     up?: JSX.Element
     down?: JSX.Element
@@ -28,14 +33,19 @@ function ColumnHeader<T>({
     header,
     name,
     unsortable,
+    rowSelector,
+    rowSelectionCount,
+    pagination,
     children,
     className,
     up = <span>^</span>,
     down = <div className="transform rotate-180">^</div>,
 }: Props<T>) {
-    const { columnSort, request } = useTableState()
+    const { columnSort, request, rowSelection } = useTableState()
+    const { resetRowSelection, handleSelectAllCurrentPage } = useTableHandlers()
     const dispatch = columnSort.dispatch
     const columns = columnSort.state.column
+    const { all: allRowSelected, except } = rowSelection.state
 
     const { getState, setColumnOrder } = table
     const { columnOrder } = getState()
@@ -71,6 +81,22 @@ function ColumnHeader<T>({
         dispatch({ type: actionType.REMOVE, payload: name })
     }
 
+    const isRowSelectionIndeterminate = React.useMemo(
+        () =>
+            (!allRowSelected && rowSelectionCount > 0 && pagination.pageIndex === 0 && rowSelectionCount < pagination.pageSize) ||
+            (!allRowSelected && rowSelectionCount > 0 && pagination.pageIndex > 0) ||
+            (allRowSelected && Object.keys(except).length > 0),
+        [allRowSelected, rowSelectionCount, pagination]
+    )
+
+    const handleBulkRowSelectionChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        resetRowSelection()
+        if (isRowSelectionIndeterminate || e.target.checked) {
+            handleSelectAllCurrentPage()
+            return
+        }
+    }
+
     return (
         <th
             ref={dropRef}
@@ -78,8 +104,20 @@ function ColumnHeader<T>({
             className={clsx('whitespace-nowrap px-2 py-3.5 text-left text-sm font-semibold text-gray-900', isDragging && 'opacity-[0.5]')}>
             <div ref={previewRef} className="flex items-center justify-between space-x-2">
                 <button onClick={handleSort} disabled={unsortable} type="button" className={clsx('flex justify-between items-center', className)}>
-                    <span>{children}</span>
-
+                    <span>
+                        {rowSelector ? (
+                            <IndeterminateCheckbox
+                                {...{
+                                    checked: rowSelectionCount > 0 && !isRowSelectionIndeterminate,
+                                    indeterminate: isRowSelectionIndeterminate,
+                                    onChange: handleBulkRowSelectionChange,
+                                    disabled: request.state.loading,
+                                }}
+                            />
+                        ) : (
+                            children
+                        )}
+                    </span>
                     {columns[name] && <span className="px-2 ml-1 text-base sm:text-sm">{columns[name] === sortDirection.DESC ? up : down}</span>}
                 </button>
 
@@ -88,7 +126,7 @@ function ColumnHeader<T>({
                         <DotsNine weight="regular" className="w-5 h-5 text-gray-600 hover:text-gray-800" aria-hidden="true" />
                     </button>
                 )}
-                <Dropdown<T> unsortable={unsortable} name={name} header={header} />
+                <Dropdown<T> rowSelector={rowSelector} unsortable={unsortable} name={name} header={header} />
             </div>
         </th>
     )
