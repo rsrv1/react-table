@@ -4,10 +4,11 @@ import { useTableState } from './context/tableContext'
 import { actionType, sortDirection } from './context/reducer/columnSort'
 import { Column, ColumnOrderState, Header, Table, flexRender, PaginationState } from '@tanstack/react-table'
 import { useDrag, useDrop } from 'react-dnd'
-import Dropdown from './Menu'
+import ColumnOptionsMenu from './ColumnOptionsMenu'
 import { DotsNine } from 'phosphor-react'
 import IndeterminateCheckbox from './IndeterminateCheckbox'
 import useTableHandlers from './hooks/useTableHandlers'
+import RowSelectorMenu from './RowSelectorMenu'
 
 type Props<T> = {
     table: Table<T>
@@ -126,7 +127,8 @@ function ColumnHeader<T>({
                         <DotsNine weight="regular" className="w-5 h-5 text-gray-600 hover:text-gray-800" aria-hidden="true" />
                     </button>
                 )}
-                <Dropdown<T> rowSelector={rowSelector} unsortable={unsortable} name={name} header={header} />
+                {rowSelector && <RowSelectorMenu rowSelectionCount={rowSelectionCount} />}
+                <ColumnOptionsMenu<T> unsortable={unsortable} name={name} header={header} />
             </div>
         </th>
     )

@@ -115,13 +115,11 @@ function Table() {
                                 pagination,
                                 columnOrder,
                                 resetColumnOrder,
-                                handleSelectAll,
-                                handleSelectAllCurrentPage,
+                                resetRowSelection,
                                 rowSelectionCount,
                                 isColumnPositioning,
                                 stopColumnPositioning,
                                 selectedRows,
-                                resetRowSelection,
                                 dataQuery,
                                 loading,
                                 options,
@@ -141,13 +139,8 @@ function Table() {
                                         />
                                     )}
 
-                                    <div className="flex justify-between items-center">
-                                        <RowSelect
-                                            loading={loading}
-                                            resetRowSelection={resetRowSelection}
-                                            handleSelectAll={handleSelectAll}
-                                            handleSelectAllCurrentPage={handleSelectAllCurrentPage}
-                                        />
+                                    <div className="flex justify-between items-center mb-3">
+                                        <div></div>
 
                                         {isColumnPositioning && (
                                             <ColumnRepositionConfirm<Person>

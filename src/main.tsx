@@ -22,8 +22,6 @@ export type RenderProps<T> = {
     rowSelectionCount: number
     selectedRows: selectedRows
     resetRowSelection: () => void
-    handleSelectAll: () => void
-    handleSelectAllCurrentPage: () => void
     dataQuery: SWRResponse<Response<T>>
     loading: boolean
     options: Query
@@ -102,8 +100,6 @@ function Main({ children }: Props) {
                 table,
                 pagination,
                 columnOrder,
-                handleSelectAll,
-                handleSelectAllCurrentPage,
                 resetColumnOrder,
                 isColumnPositioning,
                 stopColumnPositioning,
