@@ -2,7 +2,7 @@ import React from 'react'
 import clsx from 'clsx'
 import { useTableState } from './context/tableContext'
 import { actionType, sortDirection } from './context/reducer/columnSort'
-import { Column, ColumnOrderState, Header, Table, flexRender, PaginationState } from '@tanstack/react-table'
+import { Column, ColumnOrderState, Header, Table } from '@tanstack/react-table'
 import { useDrag, useDrop } from 'react-dnd'
 import ColumnOptionsMenu from './ColumnOptionsMenu'
 import { DotsNine } from 'phosphor-react'
@@ -17,7 +17,6 @@ type Props<T> = {
     unsortable: boolean
     rowSelector?: boolean
     rowSelectionCount: number
-    pagination: PaginationState
     children: React.ReactNode
     up?: JSX.Element
     down?: JSX.Element
@@ -36,7 +35,6 @@ function ColumnHeader<T>({
     unsortable,
     rowSelector,
     rowSelectionCount,
-    pagination,
     children,
     className,
     up = <span>^</span>,
@@ -47,6 +45,7 @@ function ColumnHeader<T>({
     const dispatch = columnSort.dispatch
     const columns = columnSort.state.column
     const { all: allRowSelected, except } = rowSelection.state
+    const pagination = table.getState().pagination
 
     const { getState, setColumnOrder } = table
     const { columnOrder } = getState()

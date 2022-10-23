@@ -8,19 +8,16 @@ import ColumnHeader from './table/ColumnHeader'
 import renderSubComponent from './components/RowSubExpand'
 import Main from './main'
 import { Person } from './data/fetchData'
-import RowSelect from './components/RowSelect'
 import clsx from 'clsx'
 import ColumnRepositionConfirm from './components/ColumnRepositionConfirm'
 
 function TableRenderer({
     table,
     rowSelectionCount,
-    pagination,
     position,
 }: {
     table: TanstackTable<Person>
     rowSelectionCount: number
-    pagination: PaginationState
     position?: 'left' | 'center' | 'right'
 }) {
     const getHeaderGroups = () => {
@@ -50,7 +47,6 @@ function TableRenderer({
                                     key={header.id}
                                     header={header}
                                     table={table}
-                                    pagination={pagination}
                                     unsortable={header.id.startsWith('_') || ['id'].includes(header.id)}
                                     rowSelector={header.id === 'id'}
                                     rowSelectionCount={rowSelectionCount}
@@ -112,7 +108,6 @@ function Table() {
                         <Main>
                             {({
                                 table,
-                                pagination,
                                 columnOrder,
                                 resetColumnOrder,
                                 resetRowSelection,
@@ -153,28 +148,13 @@ function Table() {
 
                                     <div className="flex space-x-1 mx-auto">
                                         <div className="overflow-x-scroll">
-                                            <TableRenderer
-                                                rowSelectionCount={rowSelectionCount}
-                                                pagination={pagination}
-                                                table={table}
-                                                position="left"
-                                            />
+                                            <TableRenderer rowSelectionCount={rowSelectionCount} table={table} position="left" />
                                         </div>
                                         <div className="overflow-x-auto">
-                                            <TableRenderer
-                                                rowSelectionCount={rowSelectionCount}
-                                                pagination={pagination}
-                                                table={table}
-                                                position="center"
-                                            />
+                                            <TableRenderer rowSelectionCount={rowSelectionCount} table={table} position="center" />
                                         </div>
                                         <div className="overflow-x-scroll">
-                                            <TableRenderer
-                                                rowSelectionCount={rowSelectionCount}
-                                                pagination={pagination}
-                                                table={table}
-                                                position="right"
-                                            />
+                                            <TableRenderer rowSelectionCount={rowSelectionCount} table={table} position="right" />
                                         </div>
                                     </div>
 

@@ -14,7 +14,6 @@ import { HTML5Backend } from 'react-dnd-html5-backend'
 
 export type RenderProps<T> = {
     table: Table<T>
-    pagination: PaginationState
     columnOrder: ColumnOrderState
     resetColumnOrder: () => void
     isColumnPositioning: boolean
@@ -98,7 +97,6 @@ function Main({ children }: Props) {
         <DndProvider backend={HTML5Backend}>
             {children({
                 table,
-                pagination,
                 columnOrder,
                 resetColumnOrder,
                 isColumnPositioning,
