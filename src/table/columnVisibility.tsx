@@ -13,10 +13,10 @@ function ColumnVisibility<T>({ table, onResetColumnOrder }: { table: Table<T>; o
 
     return (
         <>
-            <details className="w-48">
+            <details className="w-52">
                 <summary className="cursor-pointer">Column Visibility:</summary>
 
-                <div className="mt-2 inline-block border bg-white border-gray-100 shadow rounded py-2 w-full">
+                <div className="mt-2 inline-block border bg-white border-gray-100 shadow rounded p-2 w-full">
                     <div className="px-2 pb-2 border-b border-gray-100">
                         <label>
                             <input
@@ -30,11 +30,11 @@ function ColumnVisibility<T>({ table, onResetColumnOrder }: { table: Table<T>; o
                         </label>
                     </div>
 
-                    <Reorder.Group values={table.getAllLeafColumns()} onReorder={reOrderHandler} className="">
+                    <Reorder.Group values={table.getAllLeafColumns()} onReorder={reOrderHandler} className="space-y-2">
                         {table.getAllLeafColumns().map(column => {
                             return (
-                                <Reorder.Item transition={{ damping: 0 }} key={column.id} value={column}>
-                                    <div className="px-2 flex justify-between space-y-1 items-center">
+                                <Reorder.Item transition={{ damping: 0 }} key={column.id} value={column} className="bg-slate-50">
+                                    <div className="px-2 py-1 flex justify-between space-y-1 items-center">
                                         <label>
                                             <input
                                                 {...{
