@@ -9,7 +9,14 @@ function IndeterminateCheckbox({ indeterminate, className = '', ...rest }: { ind
         }
     }, [ref, indeterminate])
 
-    return <input type="checkbox" ref={ref} className={className + ' cursor-pointer'} {...rest} />
+    return (
+        <input
+            type="checkbox"
+            ref={ref}
+            className={className + ' cursor-pointer h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 sm:left-6'}
+            {...rest}
+        />
+    )
 }
 
 export default IndeterminateCheckbox

@@ -15,6 +15,7 @@ import { HTML5Backend } from 'react-dnd-html5-backend'
 export type RenderProps<T> = {
     table: Table<T>
     columnOrder: ColumnOrderState
+    isSelectedGetter: (id: string) => boolean
     resetColumnOrder: () => void
     isColumnPositioning: boolean
     stopColumnPositioning: () => void
@@ -98,6 +99,7 @@ function Main({ children }: Props) {
             {children({
                 table,
                 columnOrder,
+                isSelectedGetter,
                 resetColumnOrder,
                 isColumnPositioning,
                 stopColumnPositioning,

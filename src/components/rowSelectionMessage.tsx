@@ -76,43 +76,35 @@ function RowSelectionMessage<T>({ mutate, loading, count, selectedRows, resetRow
     }
 
     return (
-        <div className="bg-sky-50 px-4 py-2 mb-2">
-            <div className="flex">
-                <div className="ml-3 flex-1 md:flex md:justify-between">
-                    <div className="flex items-center space-x-3">
-                        <div className="text-sm text-sky-700">
-                            {count} row{count > 1 && 's'} selected
-                        </div>
-                        <div className="flex items-center space-x-2">
-                            <Select
-                                value={action}
-                                disabled={loading}
-                                onChange={e => {
-                                    setAction(e.target.value)
-                                }}>
-                                <option value="">action</option>
-                                <option value="update">update</option>
-                                <option value="delete">delete</option>
-                            </Select>
-                            {action !== '' && (
-                                <>
-                                    <button onClick={applyAction} className="p-1 text-xs" type="button">
-                                        ✔
-                                    </button>
-                                    <button onClick={unsetActionSelection} className="p-1 text-xs" type="button">
-                                        ❌
-                                    </button>
-                                </>
-                            )}
-                        </div>
-                    </div>
-                    <p className="mt-3 text-sm md:mt-0 md:ml-6">
-                        <button onClick={resetRowSelection} type="button" className="whitespace-nowrap font-medium text-sky-700 hover:text-sky-600">
-                            <span aria-hidden="true">&times;</span> de-select all
-                        </button>
-                    </p>
-                </div>
-            </div>
+        <div className="absolute z-10 top-0.5 left-0 flex h-12 items-center space-x-3 bg-gray-50 sm:left-16 pr-6">
+            <Select
+                value={action}
+                disabled={loading}
+                className="rounded border border-gray-300 bg-white py-1 text-xs font-medium text-gray-700 shadow-sm hover:bg-gray-50"
+                onChange={e => {
+                    setAction(e.target.value)
+                }}>
+                <option value="">action</option>
+                <option value="update">update</option>
+                <option value="delete">delete</option>
+            </Select>
+            {action === '' ? (
+                <button
+                    type="button"
+                    onClick={resetRowSelection}
+                    className="inline-flex items-center rounded border border-gray-300 bg-white px-2.5 py-1.5 text-xs font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-30">
+                    de-select all
+                </button>
+            ) : (
+                <>
+                    <button onClick={applyAction} className="p-1 text-xs" type="button">
+                        ✔
+                    </button>
+                    <button onClick={unsetActionSelection} className="p-1 text-xs" type="button">
+                        ❌
+                    </button>
+                </>
+            )}
         </div>
     )
 }

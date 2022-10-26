@@ -105,11 +105,11 @@ function ColumnHeader<T>({
             ref={dropRef}
             colSpan={header.colSpan}
             className={clsx(
-                'relative whitespace-nowrap px-2 py-3.5 text-left text-sm font-semibold ',
+                'relative whitespace-nowrap px-2 py-3 text-left text-sm font-semibold ',
                 isDragging && 'opacity-[0.8] bg-cyan-50 text-cyan-700'
             )}>
             {isOver && !isDragging && <div className={clsx('border-2 border-sky-200 border-x-sky-500 overlay absolute inset-0')} />}
-            <div ref={previewRef} className="flex items-center justify-between space-x-2">
+            <div ref={previewRef} className="flex items-center justify-between">
                 <button
                     onClick={handleSort}
                     disabled={unsortable || request.state.columnRePositioning}
@@ -120,6 +120,7 @@ function ColumnHeader<T>({
                             <IndeterminateCheckbox
                                 {...{
                                     checked: rowSelectionCount > 0 && !isRowSelectionIndeterminate,
+                                    className: 'ml-4',
                                     indeterminate: isRowSelectionIndeterminate,
                                     onChange: handleBulkRowSelectionChange,
                                     disabled: request.state.loading,
@@ -134,12 +135,12 @@ function ColumnHeader<T>({
 
                 {request.state.columnRePositioning ? (
                     <button ref={dragRef} title="re-position" type="button" className="cursor-grabbing hover:bg-gray-200/80 p-1">
-                        <DotsNine weight="regular" className="w-5 h-5 text-gray-600 hover:text-gray-800" aria-hidden="true" />
+                        <DotsNine weight="regular" className="w-5 h-5 text-gray-600 hover:text-gray-800 ml-2" aria-hidden="true" />
                     </button>
                 ) : (
                     <>
                         {rowSelector && <RowSelectorMenu rowSelectionCount={rowSelectionCount} />}
-                        <ColumnOptionsMenu<T> unsortable={unsortable} name={name} header={header} />
+                        {rowSelector || <ColumnOptionsMenu<T> unsortable={unsortable} name={name} header={header} />}
                     </>
                 )}
             </div>

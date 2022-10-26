@@ -19,7 +19,7 @@ function RowSelectorMenu<T>({ rowSelectionCount }: { rowSelectionCount: number }
             overflow={'auto'}
             position={'auto'}
             menuButton={
-                <MenuButton className="flex items-center rounded-full group hover:bg-gray-200/80 p-1 text-gray-400 hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-gray-100">
+                <MenuButton className="flex items-center group hover:bg-gray-200/80 px-0 text-gray-400 hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-gray-100">
                     <DownArrowIcon className="w-5 h-5 fill-gray-400 group-hover:fill-gray-700" />
                 </MenuButton>
             }>

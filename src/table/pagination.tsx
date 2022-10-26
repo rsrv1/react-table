@@ -41,7 +41,7 @@ function Pagination({ table, loading }: { table: Table<Person>; loading: boolean
                 />
             </span>
             <Select
-                className="!w-24"
+                className="!w-24 pr-6"
                 value={table.getState().pagination.pageSize}
                 disabled={loading}
                 onChange={e => {

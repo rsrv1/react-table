@@ -14,10 +14,12 @@ import ColumnRepositionConfirm from './components/ColumnRepositionConfirm'
 function TableRenderer({
     table,
     rowSelectionCount,
+    isSelectedGetter,
     position,
 }: {
     table: TanstackTable<Person>
     rowSelectionCount: number
+    isSelectedGetter: (id: string) => boolean
     position?: 'left' | 'center' | 'right'
 }) {
     const getHeaderGroups = () => {
@@ -32,6 +34,14 @@ function TableRenderer({
         if (position === 'right') return row.getRightVisibleCells()
         if (position === 'center') return row.getCenterVisibleCells()
         return row.getVisibleCells()
+    }
+
+    const isRowSelected = (row: Row<Person>) => {
+        const idCell = getCells(row).filter(cell => cell.column.id === 'id')
+
+        if (idCell.length === 0) return false
+
+        return isSelectedGetter(idCell[0].getValue() as string)
     }
 
     return (
@@ -62,10 +72,15 @@ function TableRenderer({
             <tbody className="divide-y divide-gray-200 bg-white">
                 {table.getRowModel().rows.map(row => (
                     <React.Fragment key={row.id}>
-                        <tr>
+                        <tr className={clsx(isRowSelected(row) && 'bg-gray-50')}>
                             {getCells(row).map(cell => {
                                 return (
-                                    <td key={cell.id} className="whitespace-nowrap px-2 py-2 text-sm text-gray-500">
+                                    <td
+                                        key={cell.id}
+                                        className={clsx(cell.column.id === 'id' && 'relative', 'whitespace-nowrap px-2 py-2 text-sm text-gray-500')}>
+                                        {isRowSelected(row) && cell.column.id === 'id' && (
+                                            <div className="absolute inset-y-0 left-0 w-0.5 bg-indigo-600" />
+                                        )}
                                         {flexRender(cell.column.columnDef.cell, cell.getContext())}
                                     </td>
                                 )
@@ -97,85 +112,103 @@ function Table() {
                     <button
                         type="button"
                         className="inline-flex items-center justify-center rounded-md border border-transparent bg-gray-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:w-auto">
-                        Export
+                        Log
                     </button>
                 </div>
             </div>
             <div className="mt-8 flex flex-col">
                 <div className="-my-2 -mx-4 overflow-x-auto sm:-mx-6 lg:-mx-8">
                     <div className="inline-block min-w-full py-2 align-middle md:px-6 lg:px-8">
-                        <div className="overflow-hidden shadow ring-1 ring-black ring-opacity-5 md:rounded-lg"></div>
-                        <Main>
-                            {({
-                                table,
-                                columnOrder,
-                                resetColumnOrder,
-                                resetRowSelection,
-                                rowSelectionCount,
-                                isColumnPositioning,
-                                stopColumnPositioning,
-                                selectedRows,
-                                dataQuery,
-                                loading,
-                                options,
-                            }) => (
-                                <div className="max-w-2xl">
-                                    <ColumnVisibility<Person> table={table} onResetColumnOrder={resetColumnOrder} />
+                        <div className="overflow-hidden">
+                            <Main>
+                                {({
+                                    table,
+                                    columnOrder,
+                                    isSelectedGetter,
+                                    resetColumnOrder,
+                                    resetRowSelection,
+                                    rowSelectionCount,
+                                    isColumnPositioning,
+                                    stopColumnPositioning,
+                                    selectedRows,
+                                    dataQuery,
+                                    loading,
+                                    options,
+                                }) => (
+                                    <div className="max-w-3xl">
+                                        <ColumnVisibility<Person> table={table} onResetColumnOrder={resetColumnOrder} />
 
-                                    <Filters loading={loading} />
+                                        <Filters loading={loading} />
 
-                                    {rowSelectionCount > 0 && (
-                                        <RowSelectionMessage<Person>
-                                            mutate={dataQuery.mutate}
-                                            loading={loading}
-                                            count={rowSelectionCount}
-                                            resetRowSelection={resetRowSelection}
-                                            selectedRows={selectedRows}
-                                        />
-                                    )}
+                                        <div className="flex justify-between items-center mb-3">
+                                            <div></div>
 
-                                    <div className="flex justify-between items-center mb-3">
-                                        <div></div>
+                                            {isColumnPositioning && (
+                                                <ColumnRepositionConfirm<Person>
+                                                    table={table}
+                                                    stopColumnPositioning={stopColumnPositioning}
+                                                    resetColumnPositioning={resetColumnOrder}
+                                                />
+                                            )}
+                                        </div>
 
-                                        {isColumnPositioning && (
-                                            <ColumnRepositionConfirm<Person>
+                                        <div className="flex space-x-1 mx-auto">
+                                            <TableRenderer
+                                                isSelectedGetter={isSelectedGetter}
+                                                rowSelectionCount={rowSelectionCount}
                                                 table={table}
-                                                stopColumnPositioning={stopColumnPositioning}
-                                                resetColumnPositioning={resetColumnOrder}
+                                                position="left"
                                             />
+                                            <div className="overflow-x-auto relative">
+                                                {rowSelectionCount > 0 && (
+                                                    <RowSelectionMessage<Person>
+                                                        mutate={dataQuery.mutate}
+                                                        loading={loading}
+                                                        count={rowSelectionCount}
+                                                        resetRowSelection={resetRowSelection}
+                                                        selectedRows={selectedRows}
+                                                    />
+                                                )}
+                                                <TableRenderer
+                                                    isSelectedGetter={isSelectedGetter}
+                                                    rowSelectionCount={rowSelectionCount}
+                                                    table={table}
+                                                    position="center"
+                                                />
+                                            </div>
+                                            <TableRenderer
+                                                isSelectedGetter={isSelectedGetter}
+                                                rowSelectionCount={rowSelectionCount}
+                                                table={table}
+                                                position="right"
+                                            />
+                                        </div>
+
+                                        {rowSelectionCount > 0 && (
+                                            <div className="text-sm text-sky-700 bg-sky-100 px-4 py-2 mb-2">
+                                                {rowSelectionCount} row{rowSelectionCount > 1 && 's'} selected
+                                            </div>
                                         )}
-                                    </div>
 
-                                    <div className="flex space-x-1 mx-auto">
-                                        <div className="overflow-x-scroll">
-                                            <TableRenderer rowSelectionCount={rowSelectionCount} table={table} position="left" />
+                                        <div className="py-4">total {dataQuery.data?.total} results</div>
+
+                                        {/* pagination */}
+                                        <Pagination table={table} loading={loading} />
+
+                                        <div className="h-5 my-2">{loading && <h4>loading...</h4>}</div>
+
+                                        {/* debug interaction */}
+                                        <div className="mt-10">
+                                            <span className="font-medium text-indigo-500">Selected rows:</span> {JSON.stringify(selectedRows)}
                                         </div>
-                                        <div className="overflow-x-auto">
-                                            <TableRenderer rowSelectionCount={rowSelectionCount} table={table} position="center" />
-                                        </div>
-                                        <div className="overflow-x-scroll">
-                                            <TableRenderer rowSelectionCount={rowSelectionCount} table={table} position="right" />
+                                        <hr />
+                                        <div>
+                                            <span className="font-medium text-indigo-500">Query:</span> {JSON.stringify(options)}
                                         </div>
                                     </div>
-
-                                    <div className="py-4">total {dataQuery.data?.total} results</div>
-
-                                    {/* pagination */}
-                                    <Pagination table={table} loading={loading} />
-
-                                    <div className="h-5 my-2">{loading && <h4>loading...</h4>}</div>
-
-                                    {/* debug interaction */}
-                                    <div className="mt-10">
-                                        <span className="font-medium text-indigo-500">Selected rows:</span> {JSON.stringify(selectedRows)}
-                                    </div>
-                                    <hr />
-                                    <div>
-                                        <span className="font-medium text-indigo-500">Query:</span> {JSON.stringify(options)}
-                                    </div>
-                                </div>
-                            )}
-                        </Main>
+                                )}
+                            </Main>
+                        </div>
                     </div>
                 </div>
             </div>
