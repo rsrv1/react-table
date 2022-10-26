@@ -110,7 +110,11 @@ function ColumnHeader<T>({
             )}>
             {isOver && !isDragging && <div className={clsx('border-2 border-sky-200 border-x-sky-500 overlay absolute inset-0')} />}
             <div ref={previewRef} className="flex items-center justify-between space-x-2">
-                <button onClick={handleSort} disabled={unsortable} type="button" className={clsx('flex justify-between items-center', className)}>
+                <button
+                    onClick={handleSort}
+                    disabled={unsortable || request.state.columnRePositioning}
+                    type="button"
+                    className={clsx('flex justify-between items-center', className)}>
                     <span>
                         {rowSelector ? (
                             <IndeterminateCheckbox
