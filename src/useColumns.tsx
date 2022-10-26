@@ -135,7 +135,7 @@ function useColumns({
                     <button
                         onClick={() => {
                             table.options.meta?.customFn(index, id, getValue)
-                            console.log('clicked', index, getValue, id)
+                            console.log('clicked id', getValue())
                         }}
                         type="button">
                         call
