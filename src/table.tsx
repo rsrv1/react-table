@@ -55,6 +55,7 @@ function TableRenderer({
                             ) : (
                                 <ColumnHeader<Person>
                                     key={header.id}
+                                    position={position}
                                     header={header}
                                     table={table}
                                     unsortable={header.id.startsWith('_') || ['id'].includes(header.id)}

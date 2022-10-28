@@ -18,6 +18,7 @@ type Props<T> = {
     rowSelector?: boolean
     rowSelectionCount: number
     children: React.ReactNode
+    position?: 'left' | 'center' | 'right'
     up?: JSX.Element
     down?: JSX.Element
     className?: string
@@ -30,6 +31,7 @@ const reorderColumn = (draggedColumnId: string, targetColumnId: string, columnOr
 
 function ColumnHeader<T>({
     table,
+    position,
     header,
     name,
     unsortable,
@@ -143,7 +145,7 @@ function ColumnHeader<T>({
                 </button>
 
                 {request.state.columnRePositioning ? (
-                    rowSelector || (
+                    rowSelector || (position && ['left', 'right'].includes(position)) ? null : (
                         <button ref={dragRef} title="re-position" type="button" className="cursor-grabbing hover:bg-gray-200/80 p-1">
                             <DotsNine weight="regular" className="w-5 h-5 text-gray-600 hover:text-gray-800 ml-2" aria-hidden="true" />
                         </button>
