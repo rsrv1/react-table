@@ -13,59 +13,55 @@ function ColumnVisibility<T>({ table, onResetColumnOrder }: { table: Table<T>; o
 
     return (
         <>
-            <details className="w-52">
-                <summary className="cursor-pointer">Column Visibility:</summary>
-
-                <div className="mt-2 inline-block border bg-white border-gray-100 shadow rounded p-2 w-full">
-                    <div className="px-2 pb-2 border-b border-gray-100">
-                        <label>
-                            <input
-                                {...{
-                                    type: 'checkbox',
-                                    checked: table.getIsAllColumnsVisible(),
-                                    onChange: table.getToggleAllColumnsVisibilityHandler(),
-                                }}
-                            />{' '}
-                            Toggle All
-                        </label>
-                    </div>
-
-                    <Reorder.Group values={table.getAllLeafColumns()} onReorder={reOrderHandler} className="space-y-2">
-                        {table.getAllLeafColumns().map(column => {
-                            return (
-                                <Reorder.Item transition={{ damping: 0 }} key={column.id} value={column} className="bg-slate-50">
-                                    <div className="px-2 py-1 flex justify-between space-y-1 items-center">
-                                        <label>
-                                            <input
-                                                {...{
-                                                    type: 'checkbox',
-                                                    checked: column.getIsVisible(),
-                                                    onChange: column.getToggleVisibilityHandler(),
-                                                }}
-                                            />{' '}
-                                            {column.id}
-                                        </label>
-                                        <span className="p-1 cursor-grab bg-gray-100">
-                                            <DotsNine weight="regular" className="w-4 h-4 text-gray-800" aria-hidden="true" />
-                                        </span>
-                                    </div>
-                                </Reorder.Item>
-                            )
-                        })}
-                    </Reorder.Group>
+            <div className="mt-2 inline-block border bg-white border-gray-100 shadow rounded p-2 w-full">
+                <div className="px-2 pb-2 border-b border-gray-100">
+                    <label>
+                        <input
+                            {...{
+                                type: 'checkbox',
+                                checked: table.getIsAllColumnsVisible(),
+                                onChange: table.getToggleAllColumnsVisibilityHandler(),
+                            }}
+                        />{' '}
+                        Toggle All
+                    </label>
                 </div>
 
-                <div className="h-4" />
-                <div className="flex flex-wrap gap-2">
-                    <button onClick={randomizeColumns} className="border p-1">
-                        Reorder Columns
-                    </button>
+                <Reorder.Group values={table.getAllLeafColumns()} onReorder={reOrderHandler} className="space-y-2">
+                    {table.getAllLeafColumns().map(column => {
+                        return (
+                            <Reorder.Item transition={{ damping: 0 }} key={column.id} value={column} className="bg-slate-50">
+                                <div className="px-2 py-1 flex justify-between space-y-1 items-center">
+                                    <label>
+                                        <input
+                                            {...{
+                                                type: 'checkbox',
+                                                checked: column.getIsVisible(),
+                                                onChange: column.getToggleVisibilityHandler(),
+                                            }}
+                                        />{' '}
+                                        {column.id}
+                                    </label>
+                                    <span className="p-1 cursor-grab bg-gray-100">
+                                        <DotsNine weight="regular" className="w-4 h-4 text-gray-800" aria-hidden="true" />
+                                    </span>
+                                </div>
+                            </Reorder.Item>
+                        )
+                    })}
+                </Reorder.Group>
+            </div>
 
-                    <button onClick={onResetColumnOrder} className="border p-1">
-                        Reset Order
-                    </button>
-                </div>
-            </details>
+            <div className="h-4" />
+            <div className="flex flex-wrap gap-2">
+                <button onClick={randomizeColumns} className="border p-1">
+                    Reorder Columns
+                </button>
+
+                <button onClick={onResetColumnOrder} className="border p-1">
+                    Reset Order
+                </button>
+            </div>
 
             <div className="h-4" />
         </>
