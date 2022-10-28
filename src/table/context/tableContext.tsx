@@ -13,28 +13,35 @@ export type TableContext = {
     rowSelection: { state: rowSelectionState; dispatch: React.Dispatch<rowSelectionActions> }
 }
 
-export type TableProviderProps<T> = {
+export type TableProviderProps = {
     children: React.ReactNode
     search?: string
     sort?: {
-        [K in keyof T]?: sortDirection
+        [k: string]: sortDirection
     }
+    page?: number
+    perPage?: number
 }
 
 const TableContext = React.createContext<TableContext | undefined>(undefined)
 
-function TableProvider<T>({ children, search, sort }: TableProviderProps<T>) {
+const DEFAULT_PERPAGE = 10
+
+function TableProvider({ children, search, sort, page, perPage }: TableProviderProps) {
     const [requestState, requestDispatch] = React.useReducer(RequestReducer, {
         loading: false,
         lastSearchTerm: '',
         searchTerm: search ?? '',
         columnRePositioning: false,
+        page: page || 0,
+        perPage: perPage || DEFAULT_PERPAGE,
     })
+
     const [columnSortState, columnSortDispatch] = React.useReducer(ColumnSortReducer, {
         column: sort
-            ? Object.keys(sort)
-                  .filter(k => sort[k] !== undefined)
-                  .reduce((acc: { [K in keyof T]?: sortDirection }, key) => Object.assign({}, acc, { [key]: sort[key] }), {})
+            ? (Object.keys(sort) as Array<string>)
+                  .filter(k => sort[k])
+                  .reduce((acc: { [k: string]: sortDirection }, key) => Object.assign({}, acc, { [key]: sort[key] }), {})
             : {},
     })
     const [rowSelectionState, rowSelectionDispatch] = React.useReducer(RowSelectionReducer, initialRowSelectionState)

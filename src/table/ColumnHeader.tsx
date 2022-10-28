@@ -1,7 +1,7 @@
 import React from 'react'
 import clsx from 'clsx'
 import { useTableState } from './context/tableContext'
-import { actionType, sortDirection } from './context/reducer/columnSort'
+import { actionType, sortDirection, state as columnSortStateType } from './context/reducer/columnSort'
 import { Column, ColumnOrderState, Header, Table } from '@tanstack/react-table'
 import { useDrag, useDrop } from 'react-dnd'
 import ColumnOptionsMenu from './ColumnOptionsMenu'
@@ -45,7 +45,7 @@ function ColumnHeader<T>({
     const { columnSort, request, rowSelection } = useTableState()
     const { resetRowSelection, handleSelectAllCurrentPage } = useTableHandlers()
     const dispatch = columnSort.dispatch
-    const columns = columnSort.state.column
+    const columns = columnSort.state.column as columnSortStateType['column']
     const { all: allRowSelected, except } = rowSelection.state
     const pagination = table.getState().pagination
 

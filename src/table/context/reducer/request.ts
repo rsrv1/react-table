@@ -3,6 +3,8 @@ export type state = {
     searchTerm: string
     lastSearchTerm: string
     columnRePositioning: boolean
+    page: number
+    perPage: number
 }
 
 export enum actionType {

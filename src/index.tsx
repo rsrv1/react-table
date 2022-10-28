@@ -20,7 +20,13 @@ function App() {
             }}>
             {/* user provided redux provider */}
             <ReduxProvider store={store}>
-                <TableProvider<Person> search="tom" sort={{ firstName: sortDirection.ASC, visits: sortDirection.DESC }}>
+                <TableProvider
+                /** good sopt to initialize from url state */
+                // sort={{ firstName: sortDirection.ASC, visits: sortDirection.DESC }}
+                // search="tom"
+                // page={2}
+                // perPage={20}
+                >
                     <Table />
                 </TableProvider>
             </ReduxProvider>

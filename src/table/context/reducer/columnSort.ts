@@ -5,7 +5,7 @@ export enum sortDirection {
 
 export type state = {
     column: {
-        [name: string]: sortDirection
+        [key: string]: sortDirection
     }
 }
 
