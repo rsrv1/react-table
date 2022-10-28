@@ -51,14 +51,16 @@ function ColumnHeader<T>({
     const { columnOrder } = getState()
     const { column } = header
 
-    const [{ isOver }, dropRef] = useDrop({
+    const [{ isOver, canDrop }, dropRef] = useDrop({
         accept: 'column',
+        canDrop: () => !rowSelector,
         drop: (draggedColumn: Column<T>) => {
             const newColumnOrder = reorderColumn(draggedColumn.id, column.id, columnOrder)
             setColumnOrder(newColumnOrder)
         },
         collect: monitor => ({
             isOver: !!monitor.isOver(),
+            canDrop: !!monitor.canDrop(),
         }),
     })
 
@@ -108,7 +110,14 @@ function ColumnHeader<T>({
                 'relative whitespace-nowrap px-2 py-3 text-left text-sm font-semibold ',
                 isDragging && 'opacity-[0.8] bg-cyan-50 text-cyan-700'
             )}>
-            {isOver && !isDragging && <div className={clsx('border-2 border-sky-200 border-x-sky-500 overlay absolute inset-0')} />}
+            {isOver && !isDragging && (
+                <div
+                    className={clsx(
+                        canDrop ? 'border-sky-200 border-x-sky-500' : 'text-red-700 border-red-200 border-y-red-500',
+                        'border-2 absolute inset-0'
+                    )}
+                />
+            )}
             <div ref={previewRef} className="flex items-center justify-between">
                 <button
                     onClick={handleSort}
@@ -134,9 +143,11 @@ function ColumnHeader<T>({
                 </button>
 
                 {request.state.columnRePositioning ? (
-                    <button ref={dragRef} title="re-position" type="button" className="cursor-grabbing hover:bg-gray-200/80 p-1">
-                        <DotsNine weight="regular" className="w-5 h-5 text-gray-600 hover:text-gray-800 ml-2" aria-hidden="true" />
-                    </button>
+                    rowSelector || (
+                        <button ref={dragRef} title="re-position" type="button" className="cursor-grabbing hover:bg-gray-200/80 p-1">
+                            <DotsNine weight="regular" className="w-5 h-5 text-gray-600 hover:text-gray-800 ml-2" aria-hidden="true" />
+                        </button>
+                    )
                 ) : (
                     <>
                         {rowSelector && <RowSelectorMenu rowSelectionCount={rowSelectionCount} />}
