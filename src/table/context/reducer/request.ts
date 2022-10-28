@@ -18,13 +18,6 @@ export type actions =
     | { type: actionType.STORE_LAST_SEARCH_TERM }
     | { type: actionType.COLUMN_RE_POSITIONING; payload: boolean }
 
-export const initialState: state = {
-    loading: false,
-    lastSearchTerm: '',
-    searchTerm: '',
-    columnRePositioning: false,
-}
-
 export default function reducer(state: state, action: actions) {
     switch (action.type) {
         case actionType.LOADING:

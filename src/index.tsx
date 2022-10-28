@@ -4,6 +4,8 @@ import Table from './table'
 import { Provider as ReduxProvider } from 'react-redux'
 import store from './redux/store'
 import { TableProvider } from './table/context/tableContext'
+import { Person } from './data/fetchData'
+import { sortDirection } from './table/context/reducer/columnSort'
 
 function App() {
     return (
@@ -18,7 +20,7 @@ function App() {
             }}>
             {/* user provided redux provider */}
             <ReduxProvider store={store}>
-                <TableProvider>
+                <TableProvider<Person> search="tom" sort={{ firstName: sortDirection.ASC, visits: sortDirection.DESC }}>
                     <Table />
                 </TableProvider>
             </ReduxProvider>

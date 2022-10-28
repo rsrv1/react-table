@@ -1,6 +1,7 @@
 import React from 'react'
 import { getCoreRowModel, ColumnOrderState, useReactTable, PaginationState, TableMeta, ColumnDef } from '@tanstack/react-table'
 import { Response } from './useTableData'
+import { useTableState } from '../context/tableContext'
 
 let renderCount = 0
 
@@ -11,14 +12,21 @@ type Args<T> = {
     setPagination: React.Dispatch<React.SetStateAction<PaginationState>>
     columns: ColumnDef<T, any>[]
     filter: string | null
-    searchTerm: string
     pageSize: number
     meta?: TableMeta<T> | undefined
 }
 
-function useTable<T>({ data, lastData, pagination, setPagination, columns, filter, searchTerm, pageSize, meta }: Args<T>) {
+function useTable<T>({ data, lastData, pagination, setPagination, columns, filter, pageSize, meta }: Args<T>) {
     const [columnVisibility, setColumnVisibility] = React.useState({})
     const [columnPinning, setColumnPinning] = React.useState({})
+    const {
+        request: {
+            state: { searchTerm },
+        },
+        columnSort: {
+            state: { column },
+        },
+    } = useTableState()
     const [columnOrder, setColumnOrder] = React.useState<ColumnOrderState>(
         columns.map(column => column.id as string) //must start out with populated columnOrder so we can splice
     )
@@ -50,7 +58,7 @@ function useTable<T>({ data, lastData, pagination, setPagination, columns, filte
         meta,
     })
 
-    /** if filter / search term / per page changes then reset page to first */
+    /** if filter / search term / per page / sorting changes then reset page to first */
     React.useEffect(() => {
         if (renderCount < 2) {
             renderCount++
@@ -58,7 +66,7 @@ function useTable<T>({ data, lastData, pagination, setPagination, columns, filte
         }
 
         table.resetPageIndex()
-    }, [filter, searchTerm, pageSize])
+    }, [filter, searchTerm, pageSize, column])
 
     return { table, columnOrder, resetColumnOrder }
 }

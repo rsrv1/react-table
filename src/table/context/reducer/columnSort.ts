@@ -9,10 +9,6 @@ export type state = {
     }
 }
 
-export const initialState: state = {
-    column: {},
-}
-
 export enum actionType {
     MUTATE = 'MUTATE',
     REMOVE = 'REMOVE',

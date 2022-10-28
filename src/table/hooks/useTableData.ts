@@ -22,14 +22,20 @@ export type Query = {
     sort?: string
 }
 
+export type initialPageState = {
+    page?: number
+    perPage?: number
+}
+
 export type TableData<T> = {
     fetcher: (args: Query) => Promise<Response<T>>
+    initialPageState?: initialPageState
     filters?: {
         [key: string]: unknown | unknown[]
     }
 }
 
-function useTableData<T extends { id: string }>({ filters, fetcher }: TableData<T>) {
+function useTableData<T extends { id: string }>({ filters, initialPageState, fetcher }: TableData<T>) {
     const { request, columnSort, rowSelection } = useTableState()
     const selectedRows = React.useMemo(() => getSelectedRows(rowSelection.state), [rowSelection.state])
     const sort = React.useMemo(() => getSorted(columnSort.state), [columnSort.state])
@@ -37,8 +43,8 @@ function useTableData<T extends { id: string }>({ filters, fetcher }: TableData<
     const { searchTerm, loading, columnRePositioning } = request.state
     const { all, addAllCurrentPageRows } = rowSelection.state
     const [{ pageIndex, pageSize }, setPagination] = React.useState<PaginationState>({
-        pageIndex: 0,
-        pageSize: 10,
+        pageIndex: initialPageState?.page || 0,
+        pageSize: initialPageState?.perPage || 10,
     })
 
     const fetcherOptions: Query = {

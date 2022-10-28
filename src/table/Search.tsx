@@ -39,6 +39,11 @@ function Search({ value: initialValue = '', debounce = 500, className, ...rest }
         return () => clearTimeout(timeout)
     }, [value])
 
+    /** so anytime direct global state changes then local state stays in sync */
+    React.useEffect(() => {
+        setValue(searchTerm)
+    }, [searchTerm])
+
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setValue(e.target.value)
     }

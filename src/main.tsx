@@ -1,5 +1,5 @@
 import React from 'react'
-import useTableData, { Query, Response, TableData } from './table/hooks/useTableData'
+import useTableData, { initialPageState, Query, Response, TableData } from './table/hooks/useTableData'
 import useTableHandlers from './table/hooks/useTableHandlers'
 import useColumns from './useColumns'
 import useTable from './table/hooks/useTable'
@@ -33,6 +33,10 @@ export type Props = {
 
 function Main({ children }: Props) {
     const filters = useAppSelector((state: RootState) => state.filters)
+    const initialPageState: initialPageState = {
+        page: 2,
+        perPage: 20,
+    }
 
     const fetcher = React.useCallback((args: Query): Promise<Response<Person>> => {
         return fetchData(args)
@@ -52,7 +56,7 @@ function Main({ children }: Props) {
         loading,
         filter,
         options,
-    } = useTableData<Person>({ filters, fetcher })
+    } = useTableData<Person>({ filters, initialPageState, fetcher })
 
     const {
         resetRowSelection,
@@ -83,10 +87,9 @@ function Main({ children }: Props) {
         lastData,
         pagination,
         setPagination,
+        pageSize,
         columns,
         filter,
-        searchTerm,
-        pageSize,
         meta: {
             customFn: (rowIndex, columnId, value) => {
                 console.log('customFn', rowIndex, columnId, value)
