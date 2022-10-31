@@ -136,8 +136,11 @@ function Table() {
                                     loading,
                                     options,
                                 }) => (
-                                    <div className="max-w-3xl">
-                                        <ColumnVisibility<Person> table={table} onResetColumnOrder={resetColumnOrder} />
+                                    <div className="max-w-4xl">
+                                        <div className="flex justify-between">
+                                            <div></div>
+                                            <ColumnVisibility<Person> table={table} onResetColumnOrder={resetColumnOrder} />
+                                        </div>
 
                                         <Filters loading={loading} />
 
