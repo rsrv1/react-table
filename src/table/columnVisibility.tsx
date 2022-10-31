@@ -6,13 +6,21 @@ import { DotsNine } from 'phosphor-react'
 import { MenuButton, MenuDivider } from '@szhsin/react-menu'
 import { Menu, MenuItem } from './Menu'
 import { Gear } from 'phosphor-react'
+import { useTableState } from './context/tableContext'
+import { actionType as requestActionType } from './context/reducer/request'
 
 function ColumnVisibility<T>({ table, onResetColumnOrder }: { table: Table<T>; onResetColumnOrder?: () => void }) {
+    const { request } = useTableState()
+
     const randomizeColumns = () => {
         table.setColumnOrder(_shuffle(table.getAllLeafColumns().map(d => d.id)))
     }
 
-    const reOrderHandler = (data: Column<T>[]) => table.setColumnOrder(data.map((c: Column<T>) => c.id))
+    const reOrderHandler = (data: Column<T>[]) => {
+        request.dispatch({ type: requestActionType.COLUMN_RE_POSITIONING, payload: true })
+
+        table.setColumnOrder(data.map((c: Column<T>) => c.id))
+    }
 
     return (
         <div>
