@@ -144,15 +144,16 @@ function Table() {
                                         />
                                     )}
                                 </div>
-                                <div className="shadow ring-1 ring-black ring-opacity-5 md:rounded-lg max-w-3xl">
-                                    <div className="flex space-x-1 mx-auto">
+                                <div className="shadow ring-1 ring-black ring-opacity-5 md:rounded-md">
+                                    <div className={clsx(table.getIsSomeColumnsPinned() && 'flex space-x-1', 'mx-auto')}>
                                         <TableRenderer
                                             isSelectedGetter={isSelectedGetter}
                                             rowSelectionCount={rowSelectionCount}
                                             table={table}
                                             position="left"
                                         />
-                                        <div className="overflow-x-auto relative">
+                                        <div className={clsx(table.getIsSomeColumnsPinned() && 'overflow-x-auto max-w-2xl', 'relative')}>
+                                            {/** set overflow-x-auto to make the column pinning work, to server better y overflow for inf pagination this setup is good for now */}
                                             {rowSelectionCount > 0 && (
                                                 <RowSelectionMessage<Person>
                                                     mutate={dataQuery.mutate}
