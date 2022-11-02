@@ -1,11 +1,12 @@
 import React from 'react'
-import RequestReducer, { actions as requestActions, state as requestState } from './reducer/request'
+import RequestReducer, { actions as requestActions, actionType, state as requestState } from './reducer/request'
 import ColumnSortReducer, { actions as columnSortActions, state as columnSortState, sortDirection } from './reducer/columnSort'
 import RowSelectionReducer, {
     initialState as initialRowSelectionState,
     actions as rowSelectionActions,
     state as rowSelectionState,
 } from './reducer/rowSelection'
+import { useRouter } from 'next/router'
 
 export type TableContext = {
     request: { state: requestState; dispatch: React.Dispatch<requestActions> }
@@ -15,34 +16,33 @@ export type TableContext = {
 
 export type TableProviderProps = {
     children: React.ReactNode
-    search?: string
-    sort?: {
-        [k: string]: sortDirection
-    }
-    page?: number
-    perPage?: number
 }
 
 const TableContext = React.createContext<TableContext | undefined>(undefined)
 
-const DEFAULT_PERPAGE = 10
+function TableProvider({ children }: TableProviderProps) {
+    const router = useRouter()
 
-function TableProvider({ children, search, sort, page, perPage }: TableProviderProps) {
+    const { search = '', sort } = router.query as { search?: string; sort?: string }
+    const sortColumns = sort
+        ? (router.query?.sort as string).split(',').reduce(
+              (acc, col) =>
+                  Object.assign(acc, {
+                      [col.replace(/^-/, '')]: col.startsWith('-') ? sortDirection.DESC : sortDirection.ASC,
+                  }),
+              {}
+          )
+        : {}
+
     const [requestState, requestDispatch] = React.useReducer(RequestReducer, {
         loading: false,
         lastSearchTerm: '',
-        searchTerm: search ?? '',
+        searchTerm: search,
         columnRePositioning: false,
-        page: page || 0,
-        perPage: perPage || DEFAULT_PERPAGE,
     })
 
     const [columnSortState, columnSortDispatch] = React.useReducer(ColumnSortReducer, {
-        column: sort
-            ? (Object.keys(sort) as Array<string>)
-                  .filter(k => sort[k])
-                  .reduce((acc: { [k: string]: sortDirection }, key) => Object.assign({}, acc, { [key]: sort[key] }), {})
-            : {},
+        column: sortColumns,
     })
     const [rowSelectionState, rowSelectionDispatch] = React.useReducer(RowSelectionReducer, initialRowSelectionState)
 

@@ -3,6 +3,7 @@ import React from 'react'
 import Spinner from '../components/Spinner'
 import { useTableState } from './context/tableContext'
 import { actionType } from './context/reducer/request'
+import { useRouter } from 'next/router'
 
 type Props = {
     value?: string
@@ -11,12 +12,36 @@ type Props = {
 } & Omit<React.InputHTMLAttributes<HTMLInputElement>, 'onChange'>
 
 function Search({ value: initialValue = '', debounce = 500, className, ...rest }: Props) {
+    const router = useRouter()
     const { request } = useTableState()
     const { searchTerm, lastSearchTerm, loading } = request.state
     const [searching, setSearching] = React.useState(false)
     const [value, setValue] = React.useState(initialValue)
     const termDiff = React.useMemo(() => searchTerm !== lastSearchTerm, [searchTerm, lastSearchTerm])
     const inputRef = React.useRef<HTMLInputElement>(null)
+
+    const setQuerySearchTerm = (term: string) => {
+        router.push(
+            {
+                pathname: router.pathname,
+                query: Object.assign({}, router.query, { search: term }),
+            },
+            undefined,
+            { shallow: true }
+        )
+    }
+    const removeQuerySearchTerm = () => {
+        delete router.query.search
+
+        router.push(
+            {
+                pathname: router.pathname,
+                query: router.query,
+            },
+            undefined,
+            { shallow: true }
+        )
+    }
 
     React.useEffect(() => {
         setValue(initialValue)
@@ -45,10 +70,12 @@ function Search({ value: initialValue = '', debounce = 500, className, ...rest }
     }, [searchTerm])
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setQuerySearchTerm(e.target.value)
         setValue(e.target.value)
     }
 
     const handleClear = () => {
+        removeQuerySearchTerm()
         setValue('')
         inputRef.current?.focus()
     }

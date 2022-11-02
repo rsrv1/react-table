@@ -10,18 +10,25 @@ export type state = {
 }
 
 export enum actionType {
+    BULK_SET = 'BULK_SET',
     MUTATE = 'MUTATE',
     REMOVE = 'REMOVE',
     RESET = 'RESET',
 }
 
 export type actions =
+    | { type: actionType.BULK_SET; payload: { [column: string]: sortDirection } }
     | { type: actionType.MUTATE; payload: { column: string; direction: sortDirection } }
     | { type: actionType.REMOVE; payload: string }
     | { type: actionType.RESET }
 
 export default function reducer(state: state, action: actions) {
     switch (action.type) {
+        case actionType.BULK_SET:
+            return _g(state, {
+                column: Object.assign(state.column, action.payload),
+            })
+
         case actionType.MUTATE:
             return _g(state, {
                 column: Object.assign(state.column, {

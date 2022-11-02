@@ -5,8 +5,9 @@ import useTotalRowSelectionCount from './useTotalRowSelectionCount'
 import { filtersToString } from '../utils'
 import { useTableState } from '../context/tableContext'
 import { actionType } from '../context/reducer/request'
-import { getSorted } from '../context/reducer/columnSort'
+import { getSorted, sortDirection, actionType as columnSortActionType, state as columnSortStateType } from '../context/reducer/columnSort'
 import { actionType as rowSelectionActionType, getSelectedRows } from '../context/reducer/rowSelection'
+import { useRouter } from 'next/router'
 
 export type Response<T> = {
     rows: T[]
@@ -29,16 +30,22 @@ export type TableData<T> = {
     }
 }
 
+const DEFAULT_PERPAGE = 10
+
+let initialQueryParamRead = false
+
 function useTableData<T extends { id: string }>({ filters, fetcher }: TableData<T>) {
+    const router = useRouter()
     const { request, columnSort, rowSelection } = useTableState()
+    const { page = 0, perPage = DEFAULT_PERPAGE } = router.query as { page?: number; perPage?: number }
     const selectedRows = React.useMemo(() => getSelectedRows(rowSelection.state), [rowSelection.state])
     const sort = React.useMemo(() => getSorted(columnSort.state), [columnSort.state])
     const filter = React.useMemo(() => filtersToString(filters), [filters])
-    const { searchTerm, loading, columnRePositioning, page, perPage } = request.state
+    const { searchTerm, loading, columnRePositioning } = request.state
     const { all, addAllCurrentPageRows } = rowSelection.state
     const [{ pageIndex, pageSize }, setPagination] = React.useState<PaginationState>({
-        pageIndex: page,
-        pageSize: perPage,
+        pageIndex: Number(page),
+        pageSize: Number(perPage),
     })
 
     const fetcherOptions: Query = {
@@ -90,6 +97,39 @@ function useTableData<T extends { id: string }>({ filters, fetcher }: TableData<
             rowSelection.dispatch({ type: rowSelectionActionType.WANT_CURRENT_PAGE, payload: false }) // disable the flag
         }
     }, [addAllCurrentPageRows, dataQuery.data])
+
+    /** first load set from url params */
+    React.useEffect(() => {
+        if (initialQueryParamRead) return
+        if (Object.keys(router.query).some(item => ['page', 'perPage', 'search', 'sort'].includes(item))) initialQueryParamRead = true
+
+        /**set pagination */
+        if (router.query?.page || router.query?.perPage) {
+            setPagination(({ pageSize, pageIndex }) => ({
+                pageSize: router.query?.perPage ? Number(router.query.perPage) : pageSize,
+                pageIndex: router.query?.page ? Number(router.query.page) : pageIndex,
+            }))
+        }
+
+        /**search match with initial router query - effective if hard url reload with query params */
+        if (router.query?.search) {
+            request.dispatch({ type: actionType.SET_SEARCH_TERM, payload: router.query.search as string })
+        }
+
+        /**sorting  match with initial router query - effective if hard url reload with query params */
+        if (router.query?.sort) {
+            const columns = (router.query?.sort as string).split(',')
+            const sorted = columns.reduce(
+                (acc, col) =>
+                    Object.assign(acc, {
+                        [col.replace(/^-/, '')]: col.startsWith('-') ? sortDirection.DESC : sortDirection.ASC,
+                    }),
+                {}
+            )
+
+            columnSort.dispatch({ type: columnSortActionType.BULK_SET, payload: sorted })
+        }
+    }, [router.query])
 
     return {
         pagination,
