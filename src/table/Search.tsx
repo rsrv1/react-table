@@ -23,7 +23,6 @@ function Search({ value: initialValue = '', debounce = 500, className, ...rest }
     const setQuerySearchTerm = (term: string) => {
         router.push(
             {
-                pathname: router.pathname,
                 query: Object.assign({}, router.query, { search: term }),
             },
             undefined,
@@ -35,7 +34,6 @@ function Search({ value: initialValue = '', debounce = 500, className, ...rest }
 
         router.push(
             {
-                pathname: router.pathname,
                 query: router.query,
             },
             undefined,
