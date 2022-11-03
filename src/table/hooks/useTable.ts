@@ -1,9 +1,6 @@
 import React from 'react'
 import { getCoreRowModel, ColumnOrderState, useReactTable, PaginationState, TableMeta, ColumnDef } from '@tanstack/react-table'
 import { Response } from './useTableData'
-import { useTableState } from '../context/tableContext'
-
-let renderCount = 0
 
 type Args<T> = {
     data: Response<T> | undefined
@@ -19,14 +16,6 @@ type Args<T> = {
 function useTable<T>({ data, lastData, pagination, setPagination, columns, filter, pageSize, meta }: Args<T>) {
     const [columnVisibility, setColumnVisibility] = React.useState({})
     const [columnPinning, setColumnPinning] = React.useState({})
-    const {
-        request: {
-            state: { searchTerm },
-        },
-        columnSort: {
-            state: { column },
-        },
-    } = useTableState()
     const [columnOrder, setColumnOrder] = React.useState<ColumnOrderState>(
         columns.map(column => column.id as string) //must start out with populated columnOrder so we can splice
     )
@@ -50,23 +39,16 @@ function useTable<T>({ data, lastData, pagination, setPagination, columns, filte
         getCoreRowModel: getCoreRowModel(),
         getRowCanExpand: row => true,
         ...(process.env.NODE_ENV !== 'production' && {
-            debugTable: true,
-            debugHeaders: true,
-            debugColumns: true,
+            debugTable: false,
+            debugHeaders: false,
+            debugColumns: false,
+            // debugTable: true,
+            // debugHeaders: true,
+            // debugColumns: true,
         }),
 
         meta,
     })
-
-    /** if filter / search term / per page / sorting changes then reset page to first */
-    React.useEffect(() => {
-        if (renderCount < 2) {
-            renderCount++
-            return
-        }
-
-        table.resetPageIndex()
-    }, [filter, searchTerm, pageSize, column])
 
     return { table, columnOrder, resetColumnOrder }
 }

@@ -131,7 +131,7 @@ function Table() {
                             <div className="inline-block py-2 align-middle md:px-6 lg:px-8">
                                 <ColumnVisibility<Person> table={table} onResetColumnOrder={resetColumnOrder} />
 
-                                <Filters loading={loading} />
+                                <Filters table={table} loading={loading} />
 
                                 <div className="flex justify-between items-center mb-3">
                                     <div></div>

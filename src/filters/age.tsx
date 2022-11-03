@@ -1,15 +1,18 @@
+import { Table } from '@tanstack/react-table'
 import React from 'react'
 import Select from '../components/Select'
+import { Person } from '../data/fetchData'
 import { useAppDispatch } from '../redux/hooks'
 import { filterByAge } from '../redux/slice/filters'
 
 type props = {
+    table: Table<Person>
     id: string
     loading: boolean
     className?: string
 }
 
-function Age({ id, loading }: props) {
+function Age({ table, id, loading }: props) {
     const dispatch = useAppDispatch()
     const [age, setAge] = React.useState<number | 'ALL'>('ALL')
 
@@ -18,6 +21,7 @@ function Age({ id, loading }: props) {
         setAge(value)
 
         dispatch(filterByAge(value))
+        table.resetPageIndex()
     }
 
     return (

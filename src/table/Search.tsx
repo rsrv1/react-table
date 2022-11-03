@@ -4,14 +4,16 @@ import Spinner from '../components/Spinner'
 import { useTableState } from './context/tableContext'
 import { actionType } from './context/reducer/request'
 import { useRouter } from 'next/router'
+import { Table } from '@tanstack/react-table'
 
-type Props = {
+type Props<T> = {
+    table: Table<T>
     value?: string
     debounce?: number
     className?: string
 } & Omit<React.InputHTMLAttributes<HTMLInputElement>, 'onChange'>
 
-function Search({ value: initialValue = '', debounce = 500, className, ...rest }: Props) {
+function Search<T>({ table, value: initialValue = '', debounce = 500, className, ...rest }: Props<T>) {
     const router = useRouter()
     const { request } = useTableState()
     const { searchTerm, lastSearchTerm, loading } = request.state
@@ -62,19 +64,23 @@ function Search({ value: initialValue = '', debounce = 500, className, ...rest }
         return () => clearTimeout(timeout)
     }, [value])
 
-    /** so anytime direct global state changes then local state stays in sync */
+    /** useful when initially hydrating from url param */
     React.useEffect(() => {
-        setValue(searchTerm)
-    }, [searchTerm])
+        if (!router.query?.search || value === router.query?.search) return
+
+        setValue(router.query.search as string)
+    }, [value, router.query.search])
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setQuerySearchTerm(e.target.value)
         setValue(e.target.value)
+        table.resetPageIndex()
     }
 
     const handleClear = () => {
         removeQuerySearchTerm()
         setValue('')
+        table.resetPageIndex()
         inputRef.current?.focus()
     }
 

@@ -97,6 +97,8 @@ function ColumnHeader<T>({
     }
 
     const handleSort = () => {
+        table.resetPageIndex()
+
         if (!columns[name]) {
             resetSortUrlQuery(Object.assign({}, columnSort.state.column, { [name]: sortDirection.ASC }))
             dispatch({ type: actionType.MUTATE, payload: { column: name, direction: sortDirection.ASC } })

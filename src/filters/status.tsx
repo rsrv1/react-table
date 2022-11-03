@@ -1,15 +1,18 @@
 import React from 'react'
 import { useAppDispatch } from '../redux/hooks'
-import { Status } from '../data/fetchData'
+import { Person, Status } from '../data/fetchData'
 import { useAppSelector } from '../redux/hooks'
 import { filterByStatuses } from '../redux/slice/filters'
 import { RootState } from '../redux/store'
+import { Table } from '@tanstack/react-table'
 
-function StatusFilter() {
+function StatusFilter({ table }: { table: Table<Person> }) {
     const dispatch = useAppDispatch()
     const { status } = useAppSelector((state: RootState) => state.filters)
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>, option: Status) => {
+        table.resetPageIndex()
+
         if (e.target.checked) {
             dispatch(filterByStatuses(status.concat(option)))
             return
