@@ -103,7 +103,7 @@ function TableRenderer({
 
 function Table() {
     return (
-        <div className="px-4 sm:px-6 lg:px-8 mx-auto">
+        <div className="px-4 sm:px-6 lg:px-8">
             <div className="sm:flex sm:items-center">
                 <div className="sm:flex-auto">
                     <h1 className="text-xl font-semibold text-gray-900">Users</h1>
@@ -130,7 +130,7 @@ function Table() {
                 }) => (
                     <div className="mt-8 flex flex-col">
                         <div className="-my-2 -mx-4 sm:-mx-6 lg:-mx-8">
-                            <div className="inline-block py-2 align-middle md:px-6 lg:px-8">
+                            <div className="lg:inline-block min-w-full py-2 align-middle md:px-6 lg:px-8">
                                 <ColumnVisibility<Person> table={table} onResetColumnOrder={resetColumnOrder} />
 
                                 <Filters table={table} loading={loading} />
@@ -146,8 +146,8 @@ function Table() {
                                         />
                                     )}
                                 </div>
-                                <div className="shadow ring-1 ring-black ring-opacity-5 md:rounded-md">
-                                    <div className={clsx(table.getIsSomeColumnsPinned() && 'flex space-x-1', 'mx-auto')}>
+                                <div className="overflow-hidden shadow ring-1 ring-black ring-opacity-5 md:rounded-md">
+                                    <div className={clsx(table.getIsSomeColumnsPinned() && 'flex space-x-1', 'mx-auto overflow-x-auto')}>
                                         <TableRenderer
                                             isSelectedGetter={isSelectedGetter}
                                             rowSelectionCount={rowSelectionCount}

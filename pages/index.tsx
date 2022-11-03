@@ -14,7 +14,7 @@ const Home: NextPage = () => {
                 <link rel="icon" href="/favicon.ico" />
             </Head>
 
-            <main className="min-h-screen px-2">
+            <main className="min-h-screen max-w-xl">
                 <Table />
             </main>
 

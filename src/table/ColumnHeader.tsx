@@ -138,7 +138,7 @@ function ColumnHeader<T>({
             ref={dropRef}
             colSpan={header.colSpan}
             className={clsx(
-                'relative whitespace-nowrap px-2 py-3 text-left text-sm font-semibold ',
+                'relative whitespace-nowrap lg:px-2 py-3 text-left text-sm font-semibold ',
                 isDragging && 'opacity-[0.8] bg-cyan-50 text-cyan-700'
             )}>
             {isOver && !isDragging && (
