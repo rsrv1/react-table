@@ -13,7 +13,9 @@ type Props<T> = {
     className?: string
 } & Omit<React.InputHTMLAttributes<HTMLInputElement>, 'onChange'>
 
-function Search<T>({ table, value: initialValue = '', debounce = 500, className, ...rest }: Props<T>) {
+let queryParamToHydrated = false
+
+function Search<T>({ table, value: initialValue = '', debounce = 900, className, ...rest }: Props<T>) {
     const router = useRouter()
     const { request } = useTableState()
     const { searchTerm, lastSearchTerm, loading } = request.state
@@ -44,10 +46,6 @@ function Search<T>({ table, value: initialValue = '', debounce = 500, className,
     }
 
     React.useEffect(() => {
-        setValue(initialValue)
-    }, [initialValue])
-
-    React.useEffect(() => {
         if (termDiff && loading) {
             setSearching(true)
             return
@@ -57,6 +55,12 @@ function Search<T>({ table, value: initialValue = '', debounce = 500, className,
     }, [loading, termDiff])
 
     React.useEffect(() => {
+        if (value === '') {
+            // no debounce wants immediate clear
+            request.dispatch({ type: actionType.SET_SEARCH_TERM, payload: value })
+            return
+        }
+
         const timeout = setTimeout(() => {
             request.dispatch({ type: actionType.SET_SEARCH_TERM, payload: value })
         }, debounce)
@@ -66,10 +70,12 @@ function Search<T>({ table, value: initialValue = '', debounce = 500, className,
 
     /** useful when initially hydrating from url param */
     React.useEffect(() => {
-        if (!router.query?.search || value === router.query?.search) return
+        if (queryParamToHydrated) return
+        if (!router.query?.search || router.query?.search === '') return
 
+        queryParamToHydrated = true
         setValue(router.query.search as string)
-    }, [value, router.query.search])
+    }, [router.query.search])
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setQuerySearchTerm(e.target.value)

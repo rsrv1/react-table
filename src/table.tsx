@@ -10,6 +10,7 @@ import Main from './main'
 import { Person } from './data/fetchData'
 import clsx from 'clsx'
 import ColumnRepositionConfirm from './components/ColumnRepositionConfirm'
+import styles from './table/loader.module.css'
 
 function TableRenderer({
     table,
@@ -147,6 +148,7 @@ function Table() {
                                     )}
                                 </div>
                                 <div className="overflow-hidden shadow ring-1 ring-black ring-opacity-5 md:rounded-md">
+                                    {loading && <div className={styles.loading}></div>}
                                     <div className={clsx(table.getIsSomeColumnsPinned() && 'flex space-x-1', 'mx-auto overflow-x-auto')}>
                                         <TableRenderer
                                             isSelectedGetter={isSelectedGetter}
@@ -189,7 +191,7 @@ function Table() {
                                 <div className="py-4">total {dataQuery.data?.total} results</div>
 
                                 {/* pagination */}
-                                <Pagination table={table} loading={loading} />
+                                <Pagination<Person> table={table} loading={loading} />
                             </div>
                         </div>
                         <div className="h-5 my-2">{loading && <h4>loading...</h4>}</div>

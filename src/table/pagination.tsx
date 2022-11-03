@@ -2,9 +2,8 @@ import { Table } from '@tanstack/react-table'
 import { useRouter } from 'next/router'
 import React from 'react'
 import Select from '../components/Select'
-import { Person } from '../data/fetchData'
 
-function Pagination({ table, loading }: { table: Table<Person>; loading: boolean }) {
+function Pagination<T>({ table, loading }: { table: Table<T>; loading: boolean }) {
     const router = useRouter()
     const { pageIndex, pageSize } = table.getState().pagination
 
@@ -76,8 +75,8 @@ function Pagination({ table, loading }: { table: Table<Person>; loading: boolean
                 disabled={loading}
                 onChange={e => {
                     table.resetPageIndex()
-                    table.setPageSize(Number(e.target.value))
-                    syncPaginationUrlQuery({ perPage: Number(e.target.value), page: 0 })
+                    table.setPageSize(Number(e.target?.value))
+                    syncPaginationUrlQuery({ perPage: Number(e.target?.value), page: 0 })
                 }}>
                 {[10, 20, 30, 40, 50].map(pageSize => (
                     <option key={pageSize} value={pageSize}>
