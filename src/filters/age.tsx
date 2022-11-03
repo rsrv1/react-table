@@ -1,4 +1,5 @@
 import { Table } from '@tanstack/react-table'
+import { useRouter } from 'next/router'
 import React from 'react'
 import Select from '../components/Select'
 import { Person } from '../data/fetchData'
@@ -14,10 +15,20 @@ type props = {
 
 function Age({ table, id, loading }: props) {
     const dispatch = useAppDispatch()
+    const router = useRouter()
     const [age, setAge] = React.useState<number | 'ALL'>('ALL')
+
+    const valueInUrl = React.useMemo(() => router.query['filter[age]'], [router.query])
+    React.useEffect(() => {
+        let value: number | 'ALL' = valueInUrl === 'ALL' ? 'ALL' : Number(valueInUrl)
+        setAge(value)
+    }, [valueInUrl])
 
     const handleAgeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         const value = e.target.value === 'ALL' ? 'ALL' : Number(e.target.value)
+
+        router.push({ query: Object.assign({}, router.query, { 'filter[age]': value }) }, undefined, { shallow: true })
+
         setAge(value)
 
         dispatch(filterByAge(value))

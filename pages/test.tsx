@@ -7,7 +7,14 @@ function Test() {
     const handleClick = () => {
         router.push({
             pathname: '/',
-            query: { page: 1, search: 'tom', perPage: 20, sort: 'firstName,-age' },
+            query: {
+                page: 1,
+                search: 'tom',
+                perPage: 20,
+                sort: 'firstName,-age',
+                'filter[age]': 20,
+                'filter[status]': encodeURIComponent('In Relationship, Single'),
+            },
         })
     }
 

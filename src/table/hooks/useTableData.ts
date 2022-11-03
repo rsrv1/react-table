@@ -58,7 +58,7 @@ function useTableData<T extends { id: string }>({ filters, fetcher }: TableData<
 
     const lastData = React.useRef<Response<T>>({ rows: [], pageCount: 0, total: 0 })
 
-    const dataQuery = useSWR(fetcherOptions, fetcher)
+    const dataQuery = useSWR(initialQueryParamRead ? fetcherOptions : null, fetcher)
 
     const rowSelectionCount = useTotalRowSelectionCount<T>(lastData.current)
 
@@ -69,6 +69,41 @@ function useTableData<T extends { id: string }>({ filters, fetcher }: TableData<
         }),
         [pageIndex, pageSize]
     )
+
+    /** first load set from url params */
+    React.useEffect(() => {
+        if (initialQueryParamRead) return
+
+        /**set pagination */
+        if (router.query?.page || router.query?.perPage) {
+            setPagination(({ pageSize, pageIndex }) => ({
+                pageSize: router.query?.perPage ? Number(router.query.perPage) : pageSize,
+                pageIndex: router.query?.page ? Number(router.query.page) : pageIndex,
+            }))
+        }
+
+        /**search match with initial router query - effective if hard url reload with query params */
+        if (router.query?.search) {
+            request.dispatch({ type: actionType.SET_SEARCH_TERM, payload: router.query.search as string })
+        }
+
+        /**sorting  match with initial router query - effective if hard url reload with query params */
+        if (router.query?.sort) {
+            const columns = (router.query?.sort as string).split(',')
+            const sorted = columns.reduce(
+                (acc, col) =>
+                    Object.assign(acc, {
+                        [col.replace(/^-/, '')]: col.startsWith('-') ? sortDirection.DESC : sortDirection.ASC,
+                    }),
+                {}
+            )
+
+            columnSort.dispatch({ type: columnSortActionType.BULK_SET, payload: sorted })
+        }
+
+        if (Object.keys(router.query).some(item => ['page', 'perPage', 'search', 'sort'].includes(item) || item.startsWith('filter')))
+            initialQueryParamRead = true
+    }, [router.query])
 
     /** keeping the last data as - when SWR fetches the current data becomes undefined (to avoid the flickering) */
     React.useEffect(() => {
@@ -97,39 +132,6 @@ function useTableData<T extends { id: string }>({ filters, fetcher }: TableData<
             rowSelection.dispatch({ type: rowSelectionActionType.WANT_CURRENT_PAGE, payload: false }) // disable the flag
         }
     }, [addAllCurrentPageRows, dataQuery.data])
-
-    /** first load set from url params */
-    React.useEffect(() => {
-        if (initialQueryParamRead) return
-        if (Object.keys(router.query).some(item => ['page', 'perPage', 'search', 'sort'].includes(item))) initialQueryParamRead = true
-
-        /**set pagination */
-        if (router.query?.page || router.query?.perPage) {
-            setPagination(({ pageSize, pageIndex }) => ({
-                pageSize: router.query?.perPage ? Number(router.query.perPage) : pageSize,
-                pageIndex: router.query?.page ? Number(router.query.page) : pageIndex,
-            }))
-        }
-
-        /**search match with initial router query - effective if hard url reload with query params */
-        if (router.query?.search) {
-            request.dispatch({ type: actionType.SET_SEARCH_TERM, payload: router.query.search as string })
-        }
-
-        /**sorting  match with initial router query - effective if hard url reload with query params */
-        if (router.query?.sort) {
-            const columns = (router.query?.sort as string).split(',')
-            const sorted = columns.reduce(
-                (acc, col) =>
-                    Object.assign(acc, {
-                        [col.replace(/^-/, '')]: col.startsWith('-') ? sortDirection.DESC : sortDirection.ASC,
-                    }),
-                {}
-            )
-
-            columnSort.dispatch({ type: columnSortActionType.BULK_SET, payload: sorted })
-        }
-    }, [router.query])
 
     return {
         pagination,
