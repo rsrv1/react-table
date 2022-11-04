@@ -1,4 +1,5 @@
 import { Query } from '../table/hooks/useTableData'
+import { filtersToString } from '../table/utils'
 
 export enum Status {
     IN_RELATIONSHIP = 'In Relationship',
@@ -20,7 +21,7 @@ export async function fetchData({ page, perPage, search, sort, filter }: Query) 
     // Simulate some network latency
     await new Promise(r => setTimeout(r, 500))
 
-    return fetch(`/api/persons?page=${page}&perPage=${perPage}&sort=${sort}&${filter}&search=${search}`)
+    return fetch(`/api/persons?page=${page}&perPage=${perPage}&sort=${sort}&${filtersToString(filter)}&search=${search}`)
         .then(r => r.json())
         .then(result => result)
         .catch(e => ({

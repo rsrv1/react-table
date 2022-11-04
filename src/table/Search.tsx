@@ -23,6 +23,7 @@ function Search<T>({ table, value: initialValue = '', debounce = 900, className,
     const [value, setValue] = React.useState(initialValue)
     const termDiff = React.useMemo(() => searchTerm !== lastSearchTerm, [searchTerm, lastSearchTerm])
     const inputRef = React.useRef<HTMLInputElement>(null)
+    const lastDebounceTimer = React.useRef<null | NodeJS.Timeout>(null)
 
     const setQuerySearchTerm = (term: string) => {
         router.push(
@@ -54,20 +55,6 @@ function Search<T>({ table, value: initialValue = '', debounce = 900, className,
         setSearching(false)
     }, [loading, termDiff])
 
-    React.useEffect(() => {
-        if (value === '') {
-            // no debounce wants immediate clear
-            request.dispatch({ type: actionType.SET_SEARCH_TERM, payload: value })
-            return
-        }
-
-        const timeout = setTimeout(() => {
-            request.dispatch({ type: actionType.SET_SEARCH_TERM, payload: value })
-        }, debounce)
-
-        return () => clearTimeout(timeout)
-    }, [value])
-
     /** useful when initially hydrating from url param */
     React.useEffect(() => {
         if (queryParamToHydrated) return
@@ -75,17 +62,31 @@ function Search<T>({ table, value: initialValue = '', debounce = 900, className,
 
         queryParamToHydrated = true
         setValue(router.query.search as string)
+        request.dispatch({ type: actionType.SET_SEARCH_TERM, payload: router.query.search as string })
     }, [router.query.search])
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setQuerySearchTerm(e.target.value)
         setValue(e.target.value)
-        table.resetPageIndex()
+
+        if (e.target.value.trim() === '') {
+            // no debounce wants immediate clear
+            request.dispatch({ type: actionType.SET_SEARCH_TERM, payload: '' })
+            table.resetPageIndex()
+            return
+        }
+
+        lastDebounceTimer.current && clearTimeout(lastDebounceTimer.current)
+        lastDebounceTimer.current = setTimeout(() => {
+            request.dispatch({ type: actionType.SET_SEARCH_TERM, payload: e.target.value.trim() })
+            table.resetPageIndex()
+        }, debounce)
     }
 
     const handleClear = () => {
         removeQuerySearchTerm()
         setValue('')
+        request.dispatch({ type: actionType.SET_SEARCH_TERM, payload: '' })
         table.resetPageIndex()
         inputRef.current?.focus()
     }

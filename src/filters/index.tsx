@@ -23,7 +23,7 @@ function Filters({ table, loading }: { table: Table<Person>; loading: boolean })
             dispatch(filterByAge(router.query['filter[age]'] as any))
         }
         if (router.query['filter[status]']) {
-            const statuses = decodeURIComponent(router.query['filter[status]']).split(',')
+            const statuses = decodeURIComponent(router.query['filter[status]'] as string).split(',')
             dispatch(filterByStatuses(statuses as Status[]))
         }
     }, [router.query])

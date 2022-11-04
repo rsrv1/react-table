@@ -20,7 +20,7 @@ export const filters = createSlice({
             state.age = action.payload
         },
         filterByStatuses: (state, action: PayloadAction<initialState['status']>) => {
-            state.status = action.payload
+            state.status = action.payload.map(s => s.trim()) as Status[]
         },
 
         reset: state => {
@@ -31,12 +31,5 @@ export const filters = createSlice({
 })
 
 export const { filterByAge, filterByStatuses, reset } = filters.actions
-
-export const getFiltered = (state: RootState): string | null => {
-    const entries = Object.entries(state.filters)
-    if (entries.length === 0) return null
-
-    return entries.map(([key, value]) => (Array.isArray(value) ? `${key}=[${value.join(',')}]` : `${key}=${value}`)).join('&')
-}
 
 export default filters.reducer

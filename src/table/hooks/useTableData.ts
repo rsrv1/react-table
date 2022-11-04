@@ -19,7 +19,7 @@ export type Query = {
     page: number | string
     perPage: number | string
     search: string
-    filter: string | null
+    filter: undefined | { [key: string]: unknown | unknown[] }
     sort?: string
 }
 
@@ -40,7 +40,6 @@ function useTableData<T extends { id: string }>({ filters, fetcher }: TableData<
     const { page = 0, perPage = DEFAULT_PERPAGE } = router.query as { page?: number; perPage?: number }
     const selectedRows = React.useMemo(() => getSelectedRows(rowSelection.state), [rowSelection.state])
     const sort = React.useMemo(() => getSorted(columnSort.state), [columnSort.state])
-    const filter = React.useMemo(() => filtersToString(filters), [filters])
     const { searchTerm, loading, columnRePositioning } = request.state
     const { all, addAllCurrentPageRows } = rowSelection.state
     const [{ pageIndex, pageSize }, setPagination] = React.useState<PaginationState>({
@@ -53,7 +52,7 @@ function useTableData<T extends { id: string }>({ filters, fetcher }: TableData<
         perPage: pageSize,
         search: searchTerm,
         sort,
-        filter,
+        filter: filters,
     }
 
     const lastData = React.useRef<Response<T>>({ rows: [], pageCount: 0, total: 0 })
@@ -105,6 +104,11 @@ function useTableData<T extends { id: string }>({ filters, fetcher }: TableData<
             initialQueryParamRead = true
     }, [router.query])
 
+    /** as a fallback if nothing present in url, so first query can happen atleast after 500 ms*/
+    React.useEffect(() => {
+        if (initialQueryParamRead) return
+    }, [])
+
     /** keeping the last data as - when SWR fetches the current data becomes undefined (to avoid the flickering) */
     React.useEffect(() => {
         if (dataQuery.data) lastData.current = dataQuery.data
@@ -145,7 +149,7 @@ function useTableData<T extends { id: string }>({ filters, fetcher }: TableData<
         dataQuery,
         lastData,
         loading,
-        filter,
+        filters,
         options: fetcherOptions,
     }
 }
