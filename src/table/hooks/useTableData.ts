@@ -37,6 +37,7 @@ let initialQueryParamRead = false
 function useTableData<T extends { id: string }>({ filters, fetcher }: TableData<T>) {
     const router = useRouter()
     const { request, columnSort, rowSelection } = useTableState()
+    const [fallbackInitialQueryParamRead, setFallbackInitialQueryParamRead] = React.useState(false)
     const { page = 0, perPage = DEFAULT_PERPAGE } = router.query as { page?: number; perPage?: number }
     const selectedRows = React.useMemo(() => getSelectedRows(rowSelection.state), [rowSelection.state])
     const sort = React.useMemo(() => getSorted(columnSort.state), [columnSort.state])
@@ -57,7 +58,7 @@ function useTableData<T extends { id: string }>({ filters, fetcher }: TableData<
 
     const lastData = React.useRef<Response<T>>({ rows: [], pageCount: 0, total: 0 })
 
-    const dataQuery = useSWR(initialQueryParamRead ? fetcherOptions : null, fetcher)
+    const dataQuery = useSWR(initialQueryParamRead || fallbackInitialQueryParamRead ? fetcherOptions : null, fetcher)
 
     const rowSelectionCount = useTotalRowSelectionCount<T>(lastData.current)
 
@@ -106,7 +107,14 @@ function useTableData<T extends { id: string }>({ filters, fetcher }: TableData<
 
     /** as a fallback if nothing present in url, so first query can happen atleast after 500 ms*/
     React.useEffect(() => {
-        if (initialQueryParamRead) return
+        const timer = setTimeout(() => {
+            if (initialQueryParamRead) return
+            setFallbackInitialQueryParamRead(true)
+        }, 1000)
+
+        return () => {
+            clearTimeout(timer)
+        }
     }, [])
 
     /** keeping the last data as - when SWR fetches the current data becomes undefined (to avoid the flickering) */
