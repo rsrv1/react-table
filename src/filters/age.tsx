@@ -3,6 +3,7 @@ import { useRouter } from 'next/router'
 import React from 'react'
 import Select from '../components/Select'
 import { Person } from '../data/fetchData'
+import useRouteFilter from '../table/hooks/useRouteFilter'
 
 type props = {
     table: Table<Person>
@@ -15,6 +16,7 @@ let urlQuerToHydrated = false
 
 function Age({ table, id, loading }: props) {
     const router = useRouter()
+    const dispatch = useRouteFilter()
     const [age, setAge] = React.useState<number | 'ALL'>('ALL')
 
     const valueInUrl = React.useMemo(() => router.query['filter[age]'], [router.query])
@@ -31,17 +33,7 @@ function Age({ table, id, loading }: props) {
         const value = e.target.value === 'ALL' ? 'ALL' : Number(e.target.value)
         table.resetPageIndex()
 
-        router.push(
-            {
-                query: Object.assign({}, router.query, {
-                    page: 0,
-                    filter: router.query?.filter ? [...new Set([...decodeURIComponent(router.query?.filter).split(','), 'age'])].join(',') : 'age',
-                    'filter[age]': value,
-                }),
-            },
-            undefined,
-            { shallow: true }
-        )
+        dispatch('age', value as string)
 
         setAge(value)
     }

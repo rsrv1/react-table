@@ -30,7 +30,7 @@ export type Props = {
     children: (args: RenderProps<Person>) => JSX.Element
 }
 
-function Main({ children }: Props) {
+function useHydrateFiltersFromRouteQuery() {
     const router = useRouter()
     const ageFilterValue = router.query['filter[age]']
     const statusFilterValue = router.query['filter[status]']
@@ -42,6 +42,12 @@ function Main({ children }: Props) {
             .split(',')
             .reduce((acc: { [k: string]: string }, key: string) => Object.assign({}, acc, { [key]: router.query[`filter[${key}]`] }), {})
     }, [ageFilterValue, statusFilterValue])
+
+    return filter
+}
+
+function Main({ children }: Props) {
+    const filter = useHydrateFiltersFromRouteQuery()
 
     const fetcher = React.useCallback((args: Query): Promise<Response<Person>> => {
         return fetchData(args)
