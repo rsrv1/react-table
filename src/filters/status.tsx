@@ -1,32 +1,66 @@
 import React from 'react'
-import { useAppDispatch } from '../redux/hooks'
 import { Person, Status } from '../data/fetchData'
-import { useAppSelector } from '../redux/hooks'
-import { filterByStatuses } from '../redux/slice/filters'
-import { RootState } from '../redux/store'
 import { Table } from '@tanstack/react-table'
 import { useRouter } from 'next/router'
 
+let urlQuerToHydrated = false
+
 function StatusFilter({ table }: { table: Table<Person> }) {
-    const dispatch = useAppDispatch()
     const router = useRouter()
-    const { status } = useAppSelector((state: RootState) => state.filters)
+    const [statusFilters, setStatusFilters] = React.useState<Status[]>([])
+
+    const valueInUrl = React.useMemo(() => router.query['filter[status]'], [router.query])
+    React.useEffect(() => {
+        if (urlQuerToHydrated) return
+        if (!valueInUrl) return
+
+        let value = decodeURIComponent(valueInUrl as string).split(',') as Status[]
+        setStatusFilters(value.map(v => v.trim()))
+        urlQuerToHydrated = true
+    }, [valueInUrl])
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>, option: Status) => {
         table.resetPageIndex()
 
+        const uniqueFilterList = [...new Set([...decodeURIComponent(router.query?.filter).split(','), 'status'])].join(',')
+
         if (e.target.checked) {
-            router.push({ query: Object.assign({}, router.query, { 'filter[status]': status.concat(option).join(',') }) }, undefined, {
-                shallow: true,
-            })
-            dispatch(filterByStatuses(status.concat(option)))
+            router.push(
+                {
+                    query: Object.assign({}, router.query, {
+                        page: 0,
+                        filter: router.query?.filter ? uniqueFilterList : 'status',
+                        'filter[status]': statusFilters.concat(option).join(','),
+                    }),
+                },
+                undefined,
+                {
+                    shallow: true,
+                }
+            )
+
+            setStatusFilters(s => s.concat(option))
             return
         }
 
-        router.push({ query: Object.assign({}, router.query, { 'filter[status]': status.filter(o => o !== option).join(',') }) }, undefined, {
-            shallow: true,
-        })
-        dispatch(filterByStatuses(status.filter(o => o !== option)))
+        const selected = statusFilters.filter(o => o !== option)
+        const urlFilter = router.query?.filter ? uniqueFilterList : 'status'
+
+        router.push(
+            {
+                query: Object.assign({}, router.query, {
+                    page: 0,
+                    filter: urlFilter,
+                    'filter[status]': selected.join(','),
+                }),
+            },
+            undefined,
+            {
+                shallow: true,
+            }
+        )
+
+        setStatusFilters(selected)
     }
 
     return (
@@ -37,7 +71,7 @@ function StatusFilter({ table }: { table: Table<Person> }) {
                         id={`status:${option}`}
                         type="checkbox"
                         onChange={e => handleChange(e, option)}
-                        checked={status.includes(option)}
+                        checked={statusFilters.includes(option)}
                         className="pr-2"
                     />{' '}
                     <label htmlFor={`status:${option}`} className="cursor-pointer">

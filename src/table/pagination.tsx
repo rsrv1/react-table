@@ -74,8 +74,7 @@ function Pagination<T>({ table, loading }: { table: Table<T>; loading: boolean }
                 value={table.getState().pagination.pageSize}
                 disabled={loading}
                 onChange={e => {
-                    table.resetPageIndex()
-                    table.setPageSize(Number(e.target?.value))
+                    table.setPagination({ pageIndex: 0, pageSize: Number(e.target?.value) })
                     syncPaginationUrlQuery({ perPage: Number(e.target?.value), page: 0 })
                 }}>
                 {[10, 20, 30, 40, 50].map(pageSize => (

@@ -6,11 +6,10 @@ import useTable from './table/hooks/useTable'
 import { ColumnOrderState, PaginationState, Table } from '@tanstack/react-table'
 import { SWRResponse } from 'swr'
 import { fetchData, Person } from './data/fetchData'
-import { useAppSelector } from './redux/hooks'
-import { RootState } from './redux/store'
 import { selectedRows } from './table/context/reducer/rowSelection'
 import { DndProvider } from 'react-dnd'
 import { HTML5Backend } from 'react-dnd-html5-backend'
+import { useRouter } from 'next/router'
 
 export type RenderProps<T> = {
     table: Table<T>
@@ -32,7 +31,17 @@ export type Props = {
 }
 
 function Main({ children }: Props) {
-    const filters = useAppSelector((state: RootState) => state.filters)
+    const router = useRouter()
+    const ageFilterValue = router.query['filter[age]']
+    const statusFilterValue = router.query['filter[status]']
+
+    const filter = React.useMemo(() => {
+        if (!router.query?.filter) return undefined
+
+        return (router.query?.filter as string)
+            .split(',')
+            .reduce((acc: { [k: string]: string }, key: string) => Object.assign({}, acc, { [key]: router.query[`filter[${key}]`] }), {})
+    }, [ageFilterValue, statusFilterValue])
 
     const fetcher = React.useCallback((args: Query): Promise<Response<Person>> => {
         return fetchData(args)
@@ -50,9 +59,8 @@ function Main({ children }: Props) {
         dataQuery,
         lastData,
         loading,
-        filter,
         options,
-    } = useTableData<Person>({ filters, fetcher })
+    } = useTableData<Person>({ filter, fetcher })
 
     const {
         resetRowSelection,

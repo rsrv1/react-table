@@ -7,6 +7,7 @@ import RowSelectionReducer, {
     state as rowSelectionState,
 } from './reducer/rowSelection'
 import { useRouter } from 'next/router'
+import { routeQueryToColumnsortState } from '../utils'
 
 export type TableContext = {
     request: { state: requestState; dispatch: React.Dispatch<requestActions> }
@@ -24,15 +25,7 @@ function TableProvider({ children }: TableProviderProps) {
     const router = useRouter()
 
     const { search = '', sort } = router.query as { search?: string; sort?: string }
-    const sortColumns = sort
-        ? (router.query?.sort as string).split(',').reduce(
-              (acc, col) =>
-                  Object.assign(acc, {
-                      [col.replace(/^-/, '')]: col.startsWith('-') ? sortDirection.DESC : sortDirection.ASC,
-                  }),
-              {}
-          )
-        : {}
+    const sortColumns = sort ? routeQueryToColumnsortState(router.query?.sort as string) : {}
 
     const [requestState, requestDispatch] = React.useReducer(RequestReducer, {
         loading: false,

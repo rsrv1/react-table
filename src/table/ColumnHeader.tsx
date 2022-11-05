@@ -78,14 +78,14 @@ function ColumnHeader<T>({
 
     const resetSortUrlQuery = (columns: { [key: string]: sortDirection }) => {
         if (Object.keys(columns).length === 0) {
-            delete router.query.sort
-            router.push({ query: router.query }, undefined, { shallow: true })
+            router.push({ query: Object.assign({}, router.query, { page: 0, sort: '' }) }, undefined, { shallow: true })
             return
         }
 
         router.push(
             {
                 query: Object.assign({}, router.query, {
+                    page: 0,
                     sort: Object.keys(columns)
                         .map(column => `${columns[column] === sortDirection.ASC ? '' : '-'}${column}`)
                         .join(','),

@@ -3,8 +3,6 @@ import { useRouter } from 'next/router'
 import React from 'react'
 import Select from '../components/Select'
 import { Person } from '../data/fetchData'
-import { useAppDispatch } from '../redux/hooks'
-import { filterByAge } from '../redux/slice/filters'
 
 type props = {
     table: Table<Person>
@@ -13,26 +11,39 @@ type props = {
     className?: string
 }
 
+let urlQuerToHydrated = false
+
 function Age({ table, id, loading }: props) {
-    const dispatch = useAppDispatch()
     const router = useRouter()
     const [age, setAge] = React.useState<number | 'ALL'>('ALL')
 
     const valueInUrl = React.useMemo(() => router.query['filter[age]'], [router.query])
     React.useEffect(() => {
+        if (urlQuerToHydrated) return
+        if (!valueInUrl) return
+
         let value: number | 'ALL' = valueInUrl === 'ALL' ? 'ALL' : Number(valueInUrl)
         setAge(value)
+        urlQuerToHydrated = true
     }, [valueInUrl])
 
     const handleAgeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         const value = e.target.value === 'ALL' ? 'ALL' : Number(e.target.value)
+        table.resetPageIndex()
 
-        router.push({ query: Object.assign({}, router.query, { 'filter[age]': value }) }, undefined, { shallow: true })
+        router.push(
+            {
+                query: Object.assign({}, router.query, {
+                    page: 0,
+                    filter: router.query?.filter ? [...new Set([...decodeURIComponent(router.query?.filter).split(','), 'age'])].join(',') : 'age',
+                    'filter[age]': value,
+                }),
+            },
+            undefined,
+            { shallow: true }
+        )
 
         setAge(value)
-
-        dispatch(filterByAge(value))
-        table.resetPageIndex()
     }
 
     return (

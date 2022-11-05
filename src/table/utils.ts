@@ -1,5 +1,11 @@
+import { sortDirection } from './context/reducer/columnSort'
+
 function _shuffle(list: string[]) {
     return list.sort(() => Math.random() - 0.5)
+}
+
+function _isObjEmpty(obj: object) {
+    return Object.keys(obj).length === 0
 }
 
 const filtersToString = (filters: undefined | { [key: string]: unknown | unknown[] }): string | null => {
@@ -11,6 +17,17 @@ const filtersToString = (filters: undefined | { [key: string]: unknown | unknown
     return entries.map(([key, value]) => (Array.isArray(value) ? `${key}=[${value.join(',')}]` : `${key}=${value}`)).join('&')
 }
 
+const routeQueryToColumnsortState = (query: string): { [column: string]: sortDirection } => {
+    const columns = query.split(',')
+    return columns.reduce(
+        (acc, col) =>
+            Object.assign(acc, {
+                [col.replace(/^-/, '')]: col.startsWith('-') ? sortDirection.DESC : sortDirection.ASC,
+            }),
+        {}
+    )
+}
+
 const range = (len: number) => {
     const arr = []
     for (let i = 0; i < len; i++) {
@@ -19,4 +36,4 @@ const range = (len: number) => {
     return arr
 }
 
-export { _shuffle, range, filtersToString }
+export { _shuffle, range, filtersToString, _isObjEmpty, routeQueryToColumnsortState }

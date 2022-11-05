@@ -28,18 +28,16 @@ function Search<T>({ table, value: initialValue = '', debounce = 900, className,
     const setQuerySearchTerm = (term: string) => {
         router.push(
             {
-                query: Object.assign({}, router.query, { search: term }),
+                query: Object.assign({}, router.query, { page: 0, search: term }),
             },
             undefined,
             { shallow: true }
         )
     }
     const removeQuerySearchTerm = () => {
-        delete router.query.search
-
         router.push(
             {
-                query: router.query,
+                query: Object.assign({}, router.query, { page: 0, search: '' }),
             },
             undefined,
             { shallow: true }
@@ -66,11 +64,12 @@ function Search<T>({ table, value: initialValue = '', debounce = 900, className,
     }, [router.query.search])
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setQuerySearchTerm(e.target.value)
-        setValue(e.target.value)
+        const value = e.target.value.trim()
+        setValue(value)
 
-        if (e.target.value.trim() === '') {
+        if (value === '') {
             // no debounce wants immediate clear
+            setQuerySearchTerm(value)
             request.dispatch({ type: actionType.SET_SEARCH_TERM, payload: '' })
             table.resetPageIndex()
             return
@@ -78,7 +77,8 @@ function Search<T>({ table, value: initialValue = '', debounce = 900, className,
 
         lastDebounceTimer.current && clearTimeout(lastDebounceTimer.current)
         lastDebounceTimer.current = setTimeout(() => {
-            request.dispatch({ type: actionType.SET_SEARCH_TERM, payload: e.target.value.trim() })
+            setQuerySearchTerm(value)
+            request.dispatch({ type: actionType.SET_SEARCH_TERM, payload: value })
             table.resetPageIndex()
         }, debounce)
     }

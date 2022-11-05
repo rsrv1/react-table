@@ -2,12 +2,12 @@ import React from 'react'
 import { PaginationState, Table, ColumnOrderState } from '@tanstack/react-table'
 import useSWR, { SWRResponse } from 'swr'
 import useTotalRowSelectionCount from './useTotalRowSelectionCount'
-import { filtersToString } from '../utils'
 import { useTableState } from '../context/tableContext'
 import { actionType } from '../context/reducer/request'
 import { getSorted, sortDirection, actionType as columnSortActionType, state as columnSortStateType } from '../context/reducer/columnSort'
 import { actionType as rowSelectionActionType, getSelectedRows } from '../context/reducer/rowSelection'
 import { useRouter } from 'next/router'
+import { routeQueryToColumnsortState } from '../utils'
 
 export type Response<T> = {
     rows: T[]
@@ -25,22 +25,19 @@ export type Query = {
 
 export type TableData<T> = {
     fetcher: (args: Query) => Promise<Response<T>>
-    filters?: {
-        [key: string]: unknown | unknown[]
-    }
+    filter: undefined | { [col: string]: string }
 }
 
 const DEFAULT_PERPAGE = 10
 
 let initialQueryParamRead = false
 
-function useTableData<T extends { id: string }>({ filters, fetcher }: TableData<T>) {
+function useTableData<T extends { id: string }>({ filter, fetcher }: TableData<T>) {
     const router = useRouter()
     const { request, columnSort, rowSelection } = useTableState()
     const [fallbackInitialQueryParamRead, setFallbackInitialQueryParamRead] = React.useState(false)
-    const { page = 0, perPage = DEFAULT_PERPAGE } = router.query as { page?: number; perPage?: number }
+    const { page = 0, perPage = DEFAULT_PERPAGE, search = '' } = router.query as { page?: number; perPage?: number; search?: string }
     const selectedRows = React.useMemo(() => getSelectedRows(rowSelection.state), [rowSelection.state])
-    const sort = React.useMemo(() => getSorted(columnSort.state), [columnSort.state])
     const { searchTerm, loading, columnRePositioning } = request.state
     const { all, addAllCurrentPageRows } = rowSelection.state
     const [{ pageIndex, pageSize }, setPagination] = React.useState<PaginationState>({
@@ -49,11 +46,11 @@ function useTableData<T extends { id: string }>({ filters, fetcher }: TableData<
     })
 
     const fetcherOptions: Query = {
-        page: pageIndex,
-        perPage: pageSize,
-        search: searchTerm,
-        sort,
-        filter: filters,
+        page: Number(page),
+        perPage: Number(perPage),
+        search,
+        sort: router.query?.sort ? getSorted({ column: routeQueryToColumnsortState(router.query?.sort as string) }) : '',
+        filter,
     }
 
     const lastData = React.useRef<Response<T>>({ rows: [], pageCount: 0, total: 0 })
@@ -87,16 +84,9 @@ function useTableData<T extends { id: string }>({ filters, fetcher }: TableData<
             request.dispatch({ type: actionType.SET_SEARCH_TERM, payload: router.query.search as string })
         }
 
-        /**sorting  match with initial router query - effective if hard url reload with query params */
+        /**sorting match with initial router query - effective if hard url reload with query params */
         if (router.query?.sort) {
-            const columns = (router.query?.sort as string).split(',')
-            const sorted = columns.reduce(
-                (acc, col) =>
-                    Object.assign(acc, {
-                        [col.replace(/^-/, '')]: col.startsWith('-') ? sortDirection.DESC : sortDirection.ASC,
-                    }),
-                {}
-            )
+            const sorted = routeQueryToColumnsortState(router.query?.sort as string)
 
             columnSort.dispatch({ type: columnSortActionType.BULK_SET, payload: sorted })
         }
@@ -157,7 +147,6 @@ function useTableData<T extends { id: string }>({ filters, fetcher }: TableData<
         dataQuery,
         lastData,
         loading,
-        filters,
         options: fetcherOptions,
     }
 }

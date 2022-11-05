@@ -10,6 +10,7 @@ function Test() {
             search: 'tom',
             perPage: 20,
             sort: 'firstName,-age',
+            filter: 'status,age',
             'filter[age]': 20,
             'filter[status]': encodeURIComponent('In Relationship, Single'),
         }
@@ -31,6 +32,7 @@ function Test() {
                 search: 'tom',
                 perPage: 20,
                 sort: 'firstName,-age',
+                filter: 'status,age',
                 'filter[age]': 20,
                 'filter[status]': encodeURIComponent('In Relationship, Single'),
             },
