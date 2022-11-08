@@ -108,9 +108,9 @@ function ColumnHeader<T>({
     const isRowSelectionIndeterminate = React.useMemo(
         () =>
             (!allRowSelected && rowSelectionCount > 0 && pagination.pageIndex === 0 && rowSelectionCount < pagination.pageSize) ||
-            (!allRowSelected && rowSelectionCount > 0 && pagination.pageIndex > 0) ||
+            (!allRowSelected && rowSelectionCount > 0 && pagination.pageIndex > 0 && rowSelectionCount > pagination.pageSize) ||
             (allRowSelected && Object.keys(except).length > 0),
-        [allRowSelected, rowSelectionCount, pagination, except]
+        [allRowSelected, rowSelectionCount, pagination.pageIndex, pagination.pageSize, except]
     )
 
     const handleBulkRowSelectionChange = React.useCallback(
