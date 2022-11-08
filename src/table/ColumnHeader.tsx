@@ -9,7 +9,6 @@ import { DotsNine } from 'phosphor-react'
 import IndeterminateCheckbox from './IndeterminateCheckbox'
 import useTableHandlers from './hooks/useTableHandlers'
 import RowSelectorMenu from './RowSelectorMenu'
-import { NextRouter, useRouter } from 'next/router'
 
 type Props<T> = {
     table: Table<T>
@@ -30,26 +29,6 @@ const reorderColumn = (draggedColumnId: string, targetColumnId: string, columnOr
     return [...columnOrder]
 }
 
-const resetSortUrlQuery = (router: NextRouter, columns: { [key: string]: sortDirection }) => {
-    if (Object.keys(columns).length === 0) {
-        router.push({ query: Object.assign({}, router.query, { page: 0, sort: '' }) }, undefined, { shallow: true })
-        return
-    }
-
-    router.push(
-        {
-            query: Object.assign({}, router.query, {
-                page: 0,
-                sort: Object.keys(columns)
-                    .map(column => `${columns[column] === sortDirection.ASC ? '' : '-'}${column}`)
-                    .join(','),
-            }),
-        },
-        undefined,
-        { shallow: true }
-    )
-}
-
 function ColumnHeader<T>({
     table,
     position,
@@ -68,8 +47,7 @@ function ColumnHeader<T>({
     const rowSelection = useRowSelectionState()
     const loading = useLoadingState()
     const { columnRePositioning } = useSettingsState()
-    const router = useRouter()
-    const { resetRowSelection, handleSelectAllCurrentPage } = useTableHandlers()
+    const { resetRowSelection, handleSelectAllCurrentPage, resetSortUrlQuery } = useTableHandlers()
     const dispatch = dispatcher.columnSort
     const columns = columnSort.column as columnSortStateType['column']
     const { all: allRowSelected, except } = rowSelection
@@ -104,20 +82,20 @@ function ColumnHeader<T>({
         table.resetPageIndex()
 
         if (!columns[name]) {
-            resetSortUrlQuery(router, Object.assign({}, columnSort.column, { [name]: sortDirection.ASC }))
+            resetSortUrlQuery(Object.assign({}, columnSort.column, { [name]: sortDirection.ASC }))
             dispatch({ type: actionType.MUTATE, payload: { column: name, direction: sortDirection.ASC } })
             return
         }
 
         if (columns[name] === sortDirection.ASC) {
-            resetSortUrlQuery(router, Object.assign({}, columnSort.column, { [name]: sortDirection.DESC }))
+            resetSortUrlQuery(Object.assign({}, columnSort.column, { [name]: sortDirection.DESC }))
             dispatch({ type: actionType.MUTATE, payload: { column: name, direction: sortDirection.DESC } })
             return
         }
 
         let clonedColumnState = { ...columnSort.column }
         delete clonedColumnState[name]
-        resetSortUrlQuery(router, clonedColumnState)
+        resetSortUrlQuery(clonedColumnState)
         dispatch({ type: actionType.REMOVE, payload: name })
     }
 

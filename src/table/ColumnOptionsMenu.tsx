@@ -6,11 +6,14 @@ import { useColumnSortState, useDispatch, useSettingsState } from './context/tab
 import { actionType, sortDirection } from './context/reducer/columnSort'
 import { actionType as requestActionType } from './context/reducer/request'
 import { Menu, MenuItem } from './Menu'
+import useTableHandlers from './hooks/useTableHandlers'
+import { useRouter } from 'next/router'
 
 function ColumnOptionsDropdown<T>({ unsortable, header, name }: { unsortable: boolean; header: Header<T, unknown>; name: string }) {
     const dispatch = useDispatch()
     const columnSort = useColumnSortState()
     const { columnRePositioning } = useSettingsState()
+    const { resetSortUrlQuery } = useTableHandlers()
     const columns = columnSort.column
     const canPin = !header.isPlaceholder && header.column.getCanPin()
 
@@ -31,16 +34,22 @@ function ColumnOptionsDropdown<T>({ unsortable, header, name }: { unsortable: bo
     }, [header])
 
     const sortAsc = React.useCallback(() => {
+        resetSortUrlQuery(Object.assign({}, columnSort.column, { [name]: sortDirection.ASC }))
         dispatch.columnSort({ type: actionType.MUTATE, payload: { column: name, direction: sortDirection.ASC } })
-    }, [name, dispatch])
+    }, [name, dispatch, resetSortUrlQuery, columnSort.column])
 
     const sortDesc = React.useCallback(() => {
+        resetSortUrlQuery(Object.assign({}, columnSort.column, { [name]: sortDirection.DESC }))
         dispatch.columnSort({ type: actionType.MUTATE, payload: { column: name, direction: sortDirection.DESC } })
-    }, [name, dispatch])
+    }, [name, dispatch, resetSortUrlQuery, columnSort.column])
 
     const unsort = React.useCallback(() => {
+        let clonedColumnState = { ...columnSort.column }
+        delete clonedColumnState[name]
+        resetSortUrlQuery(clonedColumnState)
+
         dispatch.columnSort({ type: actionType.REMOVE, payload: name })
-    }, [name, dispatch])
+    }, [name, dispatch, resetSortUrlQuery, columnSort.column])
 
     const startColumnRepositioning = React.useCallback(() => {
         dispatch.settings({ type: requestActionType.COLUMN_RE_POSITIONING, payload: true })
