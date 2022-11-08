@@ -107,13 +107,16 @@ function ColumnHeader<T>({
         [allRowSelected, rowSelectionCount, pagination, except]
     )
 
-    const handleBulkRowSelectionChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        resetRowSelection()
-        if (isRowSelectionIndeterminate || e.target.checked) {
-            handleSelectAllCurrentPage()
-            return
-        }
-    }
+    const handleBulkRowSelectionChange = React.useCallback(
+        (e: React.ChangeEvent<HTMLInputElement>) => {
+            resetRowSelection()
+            if (isRowSelectionIndeterminate || e.target.checked) {
+                handleSelectAllCurrentPage()
+                return
+            }
+        },
+        [isRowSelectionIndeterminate, resetRowSelection, handleSelectAllCurrentPage]
+    )
 
     return (
         <th
