@@ -1,13 +1,13 @@
 import React from 'react'
 import { MenuButton } from '@szhsin/react-menu'
-import { useTableState } from './context/tableContext'
+import { useRowSelectionState } from './context/tableContext'
 import { Menu, MenuItem } from './Menu'
 import DownArrowIcon from '../components/DownArrowIcon'
 import useTableHandlers from './hooks/useTableHandlers'
 
-function RowSelectorMenu<T>({ rowSelectionCount }: { rowSelectionCount: number }) {
-    const { rowSelection } = useTableState()
-    const { all } = rowSelection.state
+function RowSelectorMenu({ rowSelectionCount }: { rowSelectionCount: number }) {
+    const rowSelection = useRowSelectionState()
+    const { all } = rowSelection
     const { resetRowSelection, handleSelectAll, handleSelectAllCurrentPage } = useTableHandlers()
 
     return (

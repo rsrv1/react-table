@@ -8,12 +8,10 @@ type Args<T> = {
     pagination: PaginationState
     setPagination: React.Dispatch<React.SetStateAction<PaginationState>>
     columns: ColumnDef<T, any>[]
-    filter: string | null
-    pageSize: number
     meta?: TableMeta<T> | undefined
 }
 
-function useTable<T>({ data, lastData, pagination, setPagination, columns, filter, pageSize, meta }: Args<T>) {
+function useTable<T>({ data, lastData, pagination, setPagination, columns, meta }: Args<T>) {
     const [columnVisibility, setColumnVisibility] = React.useState({})
     const [columnPinning, setColumnPinning] = React.useState({})
     const [columnOrder, setColumnOrder] = React.useState<ColumnOrderState>(

@@ -95,7 +95,7 @@ export default function reducer(state: state, action: actions) {
     }
 }
 
-function _g(state: state, modifications: Partial<state>) {
+function _g(state: state, modifications: Partial<state>): state {
     return Object.assign({}, state, modifications)
 }
 

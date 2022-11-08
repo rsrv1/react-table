@@ -12,43 +12,48 @@ import clsx from 'clsx'
 import ColumnRepositionConfirm from './components/ColumnRepositionConfirm'
 import styles from './table/loader.module.css'
 
+type tablePosition = 'left' | 'center' | 'right'
+
+const getHeaderGroups = (position: tablePosition, table: TanstackTable<Person>) => {
+    if (position === 'left') return table.getLeftHeaderGroups()
+    if (position === 'right') return table.getRightHeaderGroups()
+    if (position === 'center') return table.getCenterHeaderGroups()
+    return table.getHeaderGroups()
+}
+
+const getCells = (position: tablePosition, row: Row<Person>) => {
+    if (position === 'left') return row.getLeftVisibleCells()
+    if (position === 'right') return row.getRightVisibleCells()
+    if (position === 'center') return row.getCenterVisibleCells()
+    return row.getVisibleCells()
+}
+
 function TableRenderer({
     table,
     rowSelectionCount,
     isSelectedGetter,
-    position,
+    position = 'center',
 }: {
     table: TanstackTable<Person>
     rowSelectionCount: number
     isSelectedGetter: (id: string) => boolean
-    position?: 'left' | 'center' | 'right'
+    position?: tablePosition
 }) {
-    const getHeaderGroups = () => {
-        if (position === 'left') return table.getLeftHeaderGroups()
-        if (position === 'right') return table.getRightHeaderGroups()
-        if (position === 'center') return table.getCenterHeaderGroups()
-        return table.getHeaderGroups()
-    }
+    const isRowSelected = React.useCallback(
+        (row: Row<Person>) => {
+            const idCell = getCells(position, row).filter(cell => cell.column.id === 'id')
 
-    const getCells = (row: Row<Person>) => {
-        if (position === 'left') return row.getLeftVisibleCells()
-        if (position === 'right') return row.getRightVisibleCells()
-        if (position === 'center') return row.getCenterVisibleCells()
-        return row.getVisibleCells()
-    }
+            if (idCell.length === 0) return false
 
-    const isRowSelected = (row: Row<Person>) => {
-        const idCell = getCells(row).filter(cell => cell.column.id === 'id')
-
-        if (idCell.length === 0) return false
-
-        return isSelectedGetter(idCell[0].getValue() as string)
-    }
+            return isSelectedGetter(idCell[0].getValue() as string)
+        },
+        [isSelectedGetter, position]
+    )
 
     return (
         <table className={clsx('divide-y divide-gray-300', position === 'center' || 'shadow bg-gray-100/80')}>
             <thead className="bg-gray-50">
-                {getHeaderGroups().map(headerGroup => (
+                {getHeaderGroups(position, table).map(headerGroup => (
                     <tr key={headerGroup.id}>
                         {headerGroup.headers.map(header =>
                             ['_expand'].includes(header.id) ? (
@@ -75,7 +80,7 @@ function TableRenderer({
                 {table.getRowModel().rows.map(row => (
                     <React.Fragment key={row.id}>
                         <tr className={clsx(isRowSelected(row) && 'bg-gray-50')}>
-                            {getCells(row).map(cell => {
+                            {getCells(position, row).map(cell => {
                                 return (
                                     <td
                                         key={cell.id}
@@ -88,9 +93,9 @@ function TableRenderer({
                                 )
                             })}
                         </tr>
-                        {row.getIsExpanded() && getHeaderGroups()[0].headers.length > 0 && (
+                        {row.getIsExpanded() && getHeaderGroups(position, table)[0].headers.length > 0 && (
                             <tr>
-                                <td colSpan={getCells(row).length}>
+                                <td colSpan={getCells(position, row).length}>
                                     {(position === 'center' || position === undefined) && renderSubComponent({ row })}
                                 </td>
                             </tr>

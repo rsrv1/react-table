@@ -59,6 +59,7 @@ function Pagination<T>({ table, loading }: { table: Table<T>; loading: boolean }
                 | Go to page:
                 <input
                     type="number"
+                    aria-label="enter page number"
                     defaultValue={table.getState().pagination.pageIndex + 1}
                     onChange={e => {
                         const page = e.target.value ? Number(e.target.value) - 1 : 0

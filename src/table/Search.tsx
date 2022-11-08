@@ -1,9 +1,9 @@
 import clsx from 'clsx'
 import React from 'react'
 import Spinner from '../components/Spinner'
-import { useTableState } from './context/tableContext'
+import { useDispatch, useLoadingState, useSearchState } from './context/tableContext'
 import { actionType } from './context/reducer/request'
-import { useRouter } from 'next/router'
+import { NextRouter, useRouter } from 'next/router'
 import { Table } from '@tanstack/react-table'
 
 type Props<T> = {
@@ -15,34 +15,35 @@ type Props<T> = {
 
 let queryParamToHydrated = false
 
+const setQuerySearchTerm = (router: NextRouter, term: string) => {
+    router.push(
+        {
+            query: Object.assign({}, router.query, { page: 0, search: term }),
+        },
+        undefined,
+        { shallow: true }
+    )
+}
+const removeQuerySearchTerm = (router: NextRouter) => {
+    router.push(
+        {
+            query: Object.assign({}, router.query, { page: 0, search: '' }),
+        },
+        undefined,
+        { shallow: true }
+    )
+}
+
 function Search<T>({ table, value: initialValue = '', debounce = 900, className, ...rest }: Props<T>) {
     const router = useRouter()
-    const { request } = useTableState()
-    const { searchTerm, lastSearchTerm, loading } = request.state
+    const dispatch = useDispatch()
+    const { searchTerm, lastSearchTerm } = useSearchState()
+    const loading = useLoadingState()
     const [searching, setSearching] = React.useState(false)
     const [value, setValue] = React.useState(initialValue)
     const termDiff = React.useMemo(() => searchTerm !== lastSearchTerm, [searchTerm, lastSearchTerm])
     const inputRef = React.useRef<HTMLInputElement>(null)
     const lastDebounceTimer = React.useRef<null | NodeJS.Timeout>(null)
-
-    const setQuerySearchTerm = (term: string) => {
-        router.push(
-            {
-                query: Object.assign({}, router.query, { page: 0, search: term }),
-            },
-            undefined,
-            { shallow: true }
-        )
-    }
-    const removeQuerySearchTerm = () => {
-        router.push(
-            {
-                query: Object.assign({}, router.query, { page: 0, search: '' }),
-            },
-            undefined,
-            { shallow: true }
-        )
-    }
 
     React.useEffect(() => {
         if (termDiff && loading) {
@@ -60,7 +61,7 @@ function Search<T>({ table, value: initialValue = '', debounce = 900, className,
 
         queryParamToHydrated = true
         setValue(router.query.search as string)
-        request.dispatch({ type: actionType.SET_SEARCH_TERM, payload: router.query.search as string })
+        dispatch.search({ type: actionType.SET_SEARCH_TERM, payload: router.query.search as string })
     }, [router.query.search])
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -69,24 +70,24 @@ function Search<T>({ table, value: initialValue = '', debounce = 900, className,
 
         if (value === '') {
             // no debounce wants immediate clear
-            setQuerySearchTerm(value)
-            request.dispatch({ type: actionType.SET_SEARCH_TERM, payload: '' })
+            setQuerySearchTerm(router, value)
+            dispatch.search({ type: actionType.SET_SEARCH_TERM, payload: '' })
             table.resetPageIndex()
             return
         }
 
         lastDebounceTimer.current && clearTimeout(lastDebounceTimer.current)
         lastDebounceTimer.current = setTimeout(() => {
-            setQuerySearchTerm(value)
-            request.dispatch({ type: actionType.SET_SEARCH_TERM, payload: value })
+            setQuerySearchTerm(router, value)
+            dispatch.search({ type: actionType.SET_SEARCH_TERM, payload: value })
             table.resetPageIndex()
         }, debounce)
     }
 
     const handleClear = () => {
-        removeQuerySearchTerm()
+        removeQuerySearchTerm(router)
         setValue('')
-        request.dispatch({ type: actionType.SET_SEARCH_TERM, payload: '' })
+        dispatch.search({ type: actionType.SET_SEARCH_TERM, payload: '' })
         table.resetPageIndex()
         inputRef.current?.focus()
     }

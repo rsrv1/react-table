@@ -1,6 +1,6 @@
 import React from 'react'
 import clsx from 'clsx'
-import { useTableState } from './context/tableContext'
+import { useColumnSortState, useDispatch, useLoadingState, useRowSelectionState, useSettingsState } from './context/tableContext'
 import { actionType, sortDirection, state as columnSortStateType } from './context/reducer/columnSort'
 import { Column, ColumnOrderState, Header, Table } from '@tanstack/react-table'
 import { useDrag, useDrop } from 'react-dnd'
@@ -9,7 +9,7 @@ import { DotsNine } from 'phosphor-react'
 import IndeterminateCheckbox from './IndeterminateCheckbox'
 import useTableHandlers from './hooks/useTableHandlers'
 import RowSelectorMenu from './RowSelectorMenu'
-import { useRouter } from 'next/router'
+import { NextRouter, useRouter } from 'next/router'
 
 type Props<T> = {
     table: Table<T>
@@ -30,6 +30,26 @@ const reorderColumn = (draggedColumnId: string, targetColumnId: string, columnOr
     return [...columnOrder]
 }
 
+const resetSortUrlQuery = (router: NextRouter, columns: { [key: string]: sortDirection }) => {
+    if (Object.keys(columns).length === 0) {
+        router.push({ query: Object.assign({}, router.query, { page: 0, sort: '' }) }, undefined, { shallow: true })
+        return
+    }
+
+    router.push(
+        {
+            query: Object.assign({}, router.query, {
+                page: 0,
+                sort: Object.keys(columns)
+                    .map(column => `${columns[column] === sortDirection.ASC ? '' : '-'}${column}`)
+                    .join(','),
+            }),
+        },
+        undefined,
+        { shallow: true }
+    )
+}
+
 function ColumnHeader<T>({
     table,
     position,
@@ -43,12 +63,16 @@ function ColumnHeader<T>({
     up = <span>^</span>,
     down = <div className="transform rotate-180">^</div>,
 }: Props<T>) {
-    const { columnSort, request, rowSelection } = useTableState()
+    const dispatcher = useDispatch()
+    const columnSort = useColumnSortState()
+    const rowSelection = useRowSelectionState()
+    const loading = useLoadingState()
+    const { columnRePositioning } = useSettingsState()
     const router = useRouter()
     const { resetRowSelection, handleSelectAllCurrentPage } = useTableHandlers()
-    const dispatch = columnSort.dispatch
-    const columns = columnSort.state.column as columnSortStateType['column']
-    const { all: allRowSelected, except } = rowSelection.state
+    const dispatch = dispatcher.columnSort
+    const columns = columnSort.column as columnSortStateType['column']
+    const { all: allRowSelected, except } = rowSelection
     const pagination = table.getState().pagination
 
     const { getState, setColumnOrder } = table
@@ -76,44 +100,24 @@ function ColumnHeader<T>({
         type: 'column',
     })
 
-    const resetSortUrlQuery = (columns: { [key: string]: sortDirection }) => {
-        if (Object.keys(columns).length === 0) {
-            router.push({ query: Object.assign({}, router.query, { page: 0, sort: '' }) }, undefined, { shallow: true })
-            return
-        }
-
-        router.push(
-            {
-                query: Object.assign({}, router.query, {
-                    page: 0,
-                    sort: Object.keys(columns)
-                        .map(column => `${columns[column] === sortDirection.ASC ? '' : '-'}${column}`)
-                        .join(','),
-                }),
-            },
-            undefined,
-            { shallow: true }
-        )
-    }
-
     const handleSort = () => {
         table.resetPageIndex()
 
         if (!columns[name]) {
-            resetSortUrlQuery(Object.assign({}, columnSort.state.column, { [name]: sortDirection.ASC }))
+            resetSortUrlQuery(router, Object.assign({}, columnSort.column, { [name]: sortDirection.ASC }))
             dispatch({ type: actionType.MUTATE, payload: { column: name, direction: sortDirection.ASC } })
             return
         }
 
         if (columns[name] === sortDirection.ASC) {
-            resetSortUrlQuery(Object.assign({}, columnSort.state.column, { [name]: sortDirection.DESC }))
+            resetSortUrlQuery(router, Object.assign({}, columnSort.column, { [name]: sortDirection.DESC }))
             dispatch({ type: actionType.MUTATE, payload: { column: name, direction: sortDirection.DESC } })
             return
         }
 
-        let clonedColumnState = { ...columnSort.state.column }
+        let clonedColumnState = { ...columnSort.column }
         delete clonedColumnState[name]
-        resetSortUrlQuery(clonedColumnState)
+        resetSortUrlQuery(router, clonedColumnState)
         dispatch({ type: actionType.REMOVE, payload: name })
     }
 
@@ -122,7 +126,7 @@ function ColumnHeader<T>({
             (!allRowSelected && rowSelectionCount > 0 && pagination.pageIndex === 0 && rowSelectionCount < pagination.pageSize) ||
             (!allRowSelected && rowSelectionCount > 0 && pagination.pageIndex > 0) ||
             (allRowSelected && Object.keys(except).length > 0),
-        [allRowSelected, rowSelectionCount, pagination]
+        [allRowSelected, rowSelectionCount, pagination, except]
     )
 
     const handleBulkRowSelectionChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -152,7 +156,7 @@ function ColumnHeader<T>({
             <div ref={previewRef} className="flex items-center justify-between">
                 <button
                     onClick={handleSort}
-                    disabled={unsortable || request.state.columnRePositioning}
+                    disabled={unsortable || columnRePositioning}
                     type="button"
                     className={clsx('flex justify-between items-center', className)}>
                     <span>
@@ -163,7 +167,7 @@ function ColumnHeader<T>({
                                     className: 'ml-4',
                                     indeterminate: isRowSelectionIndeterminate,
                                     onChange: handleBulkRowSelectionChange,
-                                    disabled: request.state.loading,
+                                    disabled: loading,
                                 }}
                             />
                         ) : (
@@ -173,7 +177,7 @@ function ColumnHeader<T>({
                     {columns[name] && <span className="px-2 ml-1 text-base sm:text-sm">{columns[name] === sortDirection.DESC ? up : down}</span>}
                 </button>
 
-                {request.state.columnRePositioning ? (
+                {columnRePositioning ? (
                     rowSelector || (position && ['left', 'right'].includes(position)) ? null : (
                         <button ref={dragRef} title="re-position" type="button" className="cursor-grabbing hover:bg-gray-200/80 p-1">
                             <DotsNine weight="regular" className="w-5 h-5 text-gray-600 hover:text-gray-800 ml-2" aria-hidden="true" />

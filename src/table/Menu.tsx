@@ -15,8 +15,9 @@ const menuItemClassName =
             disabled ? 'text-gray-400' : 'text-gray-600'
         } ${submenu && 'flex items-center'} ${className}`
 
-const Menu = (props: any) => <MenuInner {...props} className="relative" menuClassName={menuClassName(props?.className ?? '')} />
+const MenuComponent = (props: any) => <MenuInner {...props} className="relative" menuClassName={menuClassName(props?.className ?? '')} />
 
-const MenuItem = (props: any) => <MenuItemInner {...props} className={menuItemClassName(props?.className ?? '')} />
+const MenuItemComponent = (props: any) => <MenuItemInner {...props} className={menuItemClassName(props?.className ?? '')} />
 
-export { Menu, MenuItem }
+export const Menu = React.memo(MenuComponent)
+export const MenuItem = React.memo(MenuItemComponent)

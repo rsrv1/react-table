@@ -97,9 +97,7 @@ function Main({ children }: Props) {
         lastData,
         pagination,
         setPagination,
-        pageSize,
         columns,
-        filter,
         meta: {
             customFn: (rowIndex, columnId, value) => {
                 console.log('customFn', rowIndex, columnId, value)

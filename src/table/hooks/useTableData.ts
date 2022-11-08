@@ -1,8 +1,8 @@
 import React from 'react'
-import { PaginationState, Table, ColumnOrderState } from '@tanstack/react-table'
+import { PaginationState } from '@tanstack/react-table'
 import useSWR, { SWRResponse } from 'swr'
 import useTotalRowSelectionCount from './useTotalRowSelectionCount'
-import { useTableState } from '../context/tableContext'
+import { useDispatch, useLoadingState, useRowSelectionState, useSearchState, useSettingsState } from '../context/tableContext'
 import { actionType } from '../context/reducer/request'
 import { getSorted, sortDirection, actionType as columnSortActionType, state as columnSortStateType } from '../context/reducer/columnSort'
 import { actionType as rowSelectionActionType, getSelectedRows } from '../context/reducer/rowSelection'
@@ -34,12 +34,15 @@ let initialQueryParamRead = false
 
 function useTableData<T extends { id: string }>({ filter, fetcher }: TableData<T>) {
     const router = useRouter()
-    const { request, columnSort, rowSelection } = useTableState()
+    const rowSelection = useRowSelectionState()
+    const dispatch = useDispatch()
     const [fallbackInitialQueryParamRead, setFallbackInitialQueryParamRead] = React.useState(false)
     const { page = 0, perPage = DEFAULT_PERPAGE, search = '' } = router.query as { page?: number; perPage?: number; search?: string }
-    const selectedRows = React.useMemo(() => getSelectedRows(rowSelection.state), [rowSelection.state])
-    const { searchTerm, loading, columnRePositioning } = request.state
-    const { all, addAllCurrentPageRows } = rowSelection.state
+    const selectedRows = React.useMemo(() => getSelectedRows(rowSelection), [rowSelection])
+    const loading = useLoadingState()
+    const { columnRePositioning } = useSettingsState()
+    const { searchTerm } = useSearchState()
+    const { all, addAllCurrentPageRows } = rowSelection
     const [{ pageIndex, pageSize }, setPagination] = React.useState<PaginationState>({
         pageIndex: Number(page),
         pageSize: Number(perPage),
@@ -81,19 +84,19 @@ function useTableData<T extends { id: string }>({ filter, fetcher }: TableData<T
 
         /**search match with initial router query - effective if hard url reload with query params */
         if (router.query?.search) {
-            request.dispatch({ type: actionType.SET_SEARCH_TERM, payload: router.query.search as string })
+            dispatch.search({ type: actionType.SET_SEARCH_TERM, payload: router.query.search as string })
         }
 
         /**sorting match with initial router query - effective if hard url reload with query params */
         if (router.query?.sort) {
             const sorted = routeQueryToColumnsortState(router.query?.sort as string)
 
-            columnSort.dispatch({ type: columnSortActionType.BULK_SET, payload: sorted })
+            dispatch.columnSort({ type: columnSortActionType.BULK_SET, payload: sorted })
         }
 
         if (Object.keys(router.query).some(item => ['page', 'perPage', 'search', 'sort'].includes(item) || item.startsWith('filter')))
             initialQueryParamRead = true
-    }, [router.query])
+    }, [router.query, dispatch])
 
     /** as a fallback if nothing present in url, so first query can happen atleast after 500 ms*/
     React.useEffect(() => {
@@ -115,25 +118,25 @@ function useTableData<T extends { id: string }>({ filter, fetcher }: TableData<T
     /** track loading state */
     React.useEffect(() => {
         if (!dataQuery.data && !dataQuery.error) {
-            request.dispatch({ type: actionType.LOADING, payload: true })
+            dispatch.loading({ type: actionType.LOADING, payload: true })
             return
         }
 
-        request.dispatch({ type: actionType.LOADING, payload: false })
-    }, [dataQuery.data, dataQuery.error])
+        dispatch.loading({ type: actionType.LOADING, payload: false })
+    }, [dataQuery.data, dataQuery.error, dispatch])
 
     /** when a request ends then set the last search term if applicable */
     React.useEffect(() => {
-        dataQuery.data && request.dispatch({ type: actionType.STORE_LAST_SEARCH_TERM })
-    }, [dataQuery.data])
+        dataQuery.data && dispatch.search({ type: actionType.STORE_LAST_SEARCH_TERM })
+    }, [dataQuery.data, dispatch])
 
     /** select all current page rows */
     React.useEffect(() => {
         if (dataQuery.data && addAllCurrentPageRows) {
-            rowSelection.dispatch({ type: rowSelectionActionType.SELECT_CURRENT_PAGE, payload: dataQuery.data.rows.map((row: T) => row.id) })
-            rowSelection.dispatch({ type: rowSelectionActionType.WANT_CURRENT_PAGE, payload: false }) // disable the flag
+            dispatch.rowSelection({ type: rowSelectionActionType.SELECT_CURRENT_PAGE, payload: dataQuery.data.rows.map((row: T) => row.id) })
+            dispatch.rowSelection({ type: rowSelectionActionType.WANT_CURRENT_PAGE, payload: false }) // disable the flag
         }
-    }, [addAllCurrentPageRows, dataQuery.data])
+    }, [addAllCurrentPageRows, dataQuery.data, dispatch])
 
     return {
         pagination,
