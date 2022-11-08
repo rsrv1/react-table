@@ -1,14 +1,15 @@
-import React from 'react'
+import React, { Suspense } from 'react'
 import clsx from 'clsx'
 import { useColumnSortState, useDispatch, useLoadingState, useRowSelectionState, useSettingsState } from './context/tableContext'
 import { actionType, sortDirection, state as columnSortStateType } from './context/reducer/columnSort'
 import { Column, ColumnOrderState, Header, Table } from '@tanstack/react-table'
 import { useDrag, useDrop } from 'react-dnd'
-import ColumnOptionsMenu from './ColumnOptionsMenu'
 import { DotsNine } from 'phosphor-react'
 import IndeterminateCheckbox from './IndeterminateCheckbox'
 import useTableHandlers from './hooks/useTableHandlers'
 import RowSelectorMenu from './RowSelectorMenu'
+import { FakeColumnMenuButton } from './ColumnMenuButton'
+import dynamic from 'next/dynamic'
 
 type Props<T> = {
     table: Table<T>
@@ -28,6 +29,10 @@ const reorderColumn = (draggedColumnId: string, targetColumnId: string, columnOr
     columnOrder.splice(columnOrder.indexOf(targetColumnId), 0, columnOrder.splice(columnOrder.indexOf(draggedColumnId), 1)[0] as string)
     return [...columnOrder]
 }
+
+const ColumnOptionsMenu = dynamic(() => import('./ColumnOptionsMenu'), {
+    suspense: true,
+})
 
 function ColumnHeader<T>({
     table,
@@ -50,6 +55,7 @@ function ColumnHeader<T>({
     const { resetRowSelection, handleSelectAllCurrentPage, resetSortUrlQuery } = useTableHandlers()
     const dispatch = dispatcher.columnSort
     const columns = columnSort.column as columnSortStateType['column']
+    const [showColumnOptionsMenu, setShowColumnOptionsMenu] = React.useState(false)
     const { all: allRowSelected, except } = rowSelection
     const pagination = table.getState().pagination
 
@@ -122,6 +128,7 @@ function ColumnHeader<T>({
         <th
             ref={dropRef}
             colSpan={header.colSpan}
+            onMouseEnter={() => setShowColumnOptionsMenu(true)}
             className={clsx(
                 'relative whitespace-nowrap lg:px-2 py-3 text-left text-sm font-semibold ',
                 isDragging && 'opacity-[0.8] bg-cyan-50 text-cyan-700'
@@ -167,7 +174,13 @@ function ColumnHeader<T>({
                 ) : (
                     <>
                         {rowSelector && <RowSelectorMenu rowSelectionCount={rowSelectionCount} />}
-                        {rowSelector || <ColumnOptionsMenu<T> unsortable={unsortable} name={name} header={header} />}
+                        {!rowSelector && !showColumnOptionsMenu && <FakeColumnMenuButton />}
+
+                        {!rowSelector && showColumnOptionsMenu && (
+                            <Suspense fallback={<FakeColumnMenuButton />}>
+                                <ColumnOptionsMenu<T> unsortable={unsortable} name={name} header={header} />
+                            </Suspense>
+                        )}
                     </>
                 )}
             </div>
