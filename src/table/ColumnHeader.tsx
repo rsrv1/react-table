@@ -33,12 +33,12 @@ const ColumnOptionsMenu = dynamic(() => import('./ColumnOptionsMenu'), {
 })
 
 const IconNotSorting = () => (
-    <div className="hover:bg-slate-100 p-1.5 inline-flex w-8 rounded-full text-gray-300 hover:text-gray-500">
+    <div className="hover:bg-slate-200 p-1.5 inline-flex rounded-full text-gray-300 hover:text-gray-600">
         <ArrowsDownUp size={16} className="font-medium" />
     </div>
 )
 const IconDescending = () => (
-    <div className="bg-sky-50 p-1 inline-flex w-6 rounded-full">
+    <div className="bg-sky-50 hover:bg-sky-100 p-1 inline-flex w-6 rounded-full">
         <SortDescending size={18} weight="bold" className="font-medium text-sky-500" />
     </div>
 )
@@ -176,7 +176,7 @@ function ColumnHeader<T>({ table, position, header, name, unsortable, rowSelecto
                     {columnRePositioning ? (
                         rowSelector || (position && ['left', 'right'].includes(position)) ? null : (
                             <button ref={dragRef} title="re-position" type="button" className="cursor-grabbing hover:bg-gray-200/80 p-1">
-                                <DotsNine weight="regular" className="w-5 h-5 text-gray-600 hover:text-gray-800 ml-2" aria-hidden="true" />
+                                <DotsNine weight="regular" className="w-5 h-5 text-gray-600 hover:text-gray-800" aria-hidden="true" />
                             </button>
                         )
                     ) : (

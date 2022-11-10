@@ -147,8 +147,6 @@ function Table() {
                     <div className="mt-8 flex flex-col">
                         <div className="-my-2 -mx-4 sm:-mx-6 lg:-mx-8">
                             <div className="lg:inline-block min-w-full py-2 align-middle md:px-6 lg:px-8">
-                                <ColumnVisibility<Person> table={table} onResetColumnOrder={resetColumnOrder} />
-
                                 <Filters table={table} loading={loading} />
 
                                 <div className="flex justify-between items-center mb-3">
@@ -164,14 +162,14 @@ function Table() {
                                 </div>
                                 <div className="overflow-hidden shadow ring-1 ring-black ring-opacity-5 md:rounded-md">
                                     <div className="px-2 py-2 bg-gray-50 border-b">
-                                        <div className="flex justify-between px-4">
+                                        <div className="flex justify-between px-2 lg:px-4 flex-col-reverse lg:flex-row">
                                             <div className="flex flex-1">
                                                 <div className="flex w-full md:ml-0">
                                                     <label htmlFor="search-field" className="sr-only">
                                                         Search
                                                     </label>
 
-                                                    <div className="relative w-96 text-gray-400 focus-within:text-gray-600">
+                                                    <div className="relative w-full lg:w-96 text-gray-400 focus-within:text-gray-600">
                                                         <div
                                                             className="pointer-events-none absolute inset-y-0 left-0 top-1.5 flex items-center"
                                                             aria-hidden="true">
@@ -186,7 +184,7 @@ function Table() {
                                                     </div>
                                                 </div>
                                             </div>
-                                            <div className="mt-6 flex items-center space-x-4 md:mt-0 md:ml-4">
+                                            <div className="flex items-center space-x-4 mt-0 lg:ml-4">
                                                 <button
                                                     type="button"
                                                     className="inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-1.5 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
@@ -198,6 +196,7 @@ function Table() {
                                                     Send money
                                                     <CaretDown size={15} className="text-md mx-2 my-0.5 mt-0.5" aria-hidden="true" />
                                                 </button>
+                                                <ColumnVisibility<Person> table={table} onResetColumnOrder={resetColumnOrder} />
                                             </div>
                                         </div>
                                     </div>
