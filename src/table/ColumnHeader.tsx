@@ -4,7 +4,7 @@ import { useColumnSortState, useDispatch, useLoadingState, useRowSelectionState,
 import { actionType, sortDirection, state as columnSortStateType } from './context/reducer/columnSort'
 import { Column, ColumnOrderState, Header, Table } from '@tanstack/react-table'
 import { useDrag, useDrop } from 'react-dnd'
-import { DotsNine } from 'phosphor-react'
+import { ArrowsDownUp, DotsNine, SortAscending, SortDescending } from 'phosphor-react'
 import IndeterminateCheckbox from './IndeterminateCheckbox'
 import useTableHandlers from './hooks/useTableHandlers'
 import RowSelectorMenu from './RowSelectorMenu'
@@ -20,8 +20,6 @@ type Props<T> = {
     rowSelectionCount: number
     children: React.ReactNode
     position?: 'left' | 'center' | 'right'
-    up?: JSX.Element
-    down?: JSX.Element
     className?: string
 }
 
@@ -34,19 +32,23 @@ const ColumnOptionsMenu = dynamic(() => import('./ColumnOptionsMenu'), {
     suspense: true,
 })
 
-function ColumnHeader<T>({
-    table,
-    position,
-    header,
-    name,
-    unsortable,
-    rowSelector,
-    rowSelectionCount,
-    children,
-    className,
-    up = <span>^</span>,
-    down = <div className="transform rotate-180">^</div>,
-}: Props<T>) {
+const IconNotSorting = () => (
+    <div className="hover:bg-slate-100 p-1.5 inline-flex w-8 rounded-full text-gray-300 hover:text-gray-500">
+        <ArrowsDownUp size={16} className="font-medium" />
+    </div>
+)
+const IconDescending = () => (
+    <div className="bg-sky-50 p-1 inline-flex w-6 rounded-full">
+        <SortDescending size={18} weight="bold" className="font-medium text-sky-500" />
+    </div>
+)
+const IconAscending = () => (
+    <div className="bg-sky-50 p-1 inline-flex w-6 rounded-full">
+        <SortAscending size={18} weight="bold" className="font-medium text-sky-500" />
+    </div>
+)
+
+function ColumnHeader<T>({ table, position, header, name, unsortable, rowSelector, rowSelectionCount, children, className }: Props<T>) {
     const dispatcher = useDispatch()
     const columnSort = useColumnSortState()
     const rowSelection = useRowSelectionState()
@@ -130,7 +132,8 @@ function ColumnHeader<T>({
             colSpan={header.colSpan}
             onMouseEnter={() => setShowColumnOptionsMenu(true)}
             className={clsx(
-                'relative whitespace-nowrap lg:px-2 py-3 text-left text-sm font-semibold ',
+                className,
+                'relative whitespace-nowrap lg:px-2 py-2.5 text-left text-sm font-semibold text-gray-400',
                 isDragging && 'opacity-[0.8] bg-cyan-50 text-cyan-700'
             )}>
             {isOver && !isDragging && (
@@ -141,12 +144,8 @@ function ColumnHeader<T>({
                     )}
                 />
             )}
-            <div ref={previewRef} className="flex items-center justify-between">
-                <button
-                    onClick={handleSort}
-                    disabled={unsortable || columnRePositioning}
-                    type="button"
-                    className={clsx('flex justify-between items-center', className)}>
+            <div ref={previewRef} className={clsx(!rowSelector && 'justify-between items-center', 'flex')}>
+                <div className={clsx(!rowSelector && 'flex items-center justify-between')}>
                     <span>
                         {rowSelector ? (
                             <IndeterminateCheckbox
@@ -162,27 +161,37 @@ function ColumnHeader<T>({
                             children
                         )}
                     </span>
-                    {columns[name] && <span className="px-2 ml-1 text-base sm:text-sm">{columns[name] === sortDirection.DESC ? up : down}</span>}
-                </button>
 
-                {columnRePositioning ? (
-                    rowSelector || (position && ['left', 'right'].includes(position)) ? null : (
-                        <button ref={dragRef} title="re-position" type="button" className="cursor-grabbing hover:bg-gray-200/80 p-1">
-                            <DotsNine weight="regular" className="w-5 h-5 text-gray-600 hover:text-gray-800 ml-2" aria-hidden="true" />
-                        </button>
-                    )
-                ) : (
-                    <>
-                        {rowSelector && <RowSelectorMenu rowSelectionCount={rowSelectionCount} />}
-                        {!rowSelector && !showColumnOptionsMenu && <FakeColumnMenuButton />}
+                    <button
+                        onClick={handleSort}
+                        disabled={unsortable || columnRePositioning}
+                        type="button"
+                        className={clsx('flex px-2 ml-1 text-base sm:text-sm')}>
+                        {!columns[name] && !unsortable && <IconNotSorting />}
+                        {columns[name] && <>{columns[name] === sortDirection.DESC ? <IconDescending /> : <IconAscending />}</>}
+                    </button>
+                </div>
 
-                        {!rowSelector && showColumnOptionsMenu && (
-                            <Suspense fallback={<FakeColumnMenuButton />}>
-                                <ColumnOptionsMenu<T> unsortable={unsortable} name={name} header={header} />
-                            </Suspense>
-                        )}
-                    </>
-                )}
+                <div>
+                    {columnRePositioning ? (
+                        rowSelector || (position && ['left', 'right'].includes(position)) ? null : (
+                            <button ref={dragRef} title="re-position" type="button" className="cursor-grabbing hover:bg-gray-200/80 p-1">
+                                <DotsNine weight="regular" className="w-5 h-5 text-gray-600 hover:text-gray-800 ml-2" aria-hidden="true" />
+                            </button>
+                        )
+                    ) : (
+                        <>
+                            {rowSelector && <RowSelectorMenu rowSelectionCount={rowSelectionCount} />}
+                            {!rowSelector && !showColumnOptionsMenu && <FakeColumnMenuButton />}
+
+                            {!rowSelector && showColumnOptionsMenu && (
+                                <Suspense fallback={<FakeColumnMenuButton />}>
+                                    <ColumnOptionsMenu<T> unsortable={unsortable} name={name} header={header} />
+                                </Suspense>
+                            )}
+                        </>
+                    )}
+                </div>
             </div>
         </th>
     )

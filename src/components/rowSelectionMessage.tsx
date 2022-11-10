@@ -76,7 +76,7 @@ function RowSelectionMessage<T>({ mutate, loading, count, selectedRows, resetRow
     }
 
     return (
-        <div className="absolute z-10 top-0.5 left-0 flex h-12 items-center space-x-3 bg-gray-50 sm:left-16 pr-6">
+        <div className="absolute z-10 left-0 flex h-12 items-center space-x-3 bg-gray-50 sm:left-16 pr-6">
             <Select
                 value={action}
                 disabled={loading}

@@ -11,6 +11,8 @@ import { Person } from './data/fetchData'
 import clsx from 'clsx'
 import ColumnRepositionConfirm from './components/ColumnRepositionConfirm'
 import styles from './table/loader.module.css'
+import { CaretDown, MagnifyingGlass } from 'phosphor-react'
+import Search from './table/Search'
 
 type tablePosition = 'left' | 'center' | 'right'
 
@@ -51,7 +53,7 @@ function TableRenderer({
     )
 
     return (
-        <table className={clsx('divide-y divide-gray-300', position === 'center' || 'shadow bg-gray-100/80')}>
+        <table className={clsx('divide-y divide-gray-300 table-fixed', position === 'center' || 'shadow bg-gray-100/80')}>
             <thead className="bg-gray-50">
                 {getHeaderGroups(position, table).map(headerGroup => (
                     <tr key={headerGroup.id}>
@@ -68,7 +70,7 @@ function TableRenderer({
                                     rowSelector={header.id === 'id'}
                                     rowSelectionCount={rowSelectionCount}
                                     name={header.id}
-                                    className="whitespace-nowrap">
+                                    className={clsx(header.id === 'firstName' && 'min-w-[20rem]', 'whitespace-nowrap')}>
                                     {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
                                 </ColumnHeader>
                             )
@@ -84,11 +86,19 @@ function TableRenderer({
                                 return (
                                     <td
                                         key={cell.id}
-                                        className={clsx(cell.column.id === 'id' && 'relative', 'whitespace-nowrap px-2 py-2 text-sm text-gray-500')}>
-                                        {isRowSelected(row) && cell.column.id === 'id' && (
-                                            <div className="absolute inset-y-0 left-0 w-0.5 bg-indigo-600" />
+                                        className={clsx(
+                                            cell.column.id === 'id' && 'relative',
+                                            cell.column.id === 'firstName' && 'py-4 pr-3',
+                                            'whitespace-nowrap px-2 py-2 text-sm text-gray-500'
+                                        )}>
+                                        {cell.column.id === 'id' ? (
+                                            <div className="w-12 px-6 sm:w-16 sm:px-8">
+                                                {isRowSelected(row) && <div className="absolute inset-y-0 left-0 w-0.5 bg-indigo-600" />}
+                                                {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                                            </div>
+                                        ) : (
+                                            flexRender(cell.column.columnDef.cell, cell.getContext())
                                         )}
-                                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
                                     </td>
                                 )
                             })}
@@ -153,6 +163,45 @@ function Table() {
                                     )}
                                 </div>
                                 <div className="overflow-hidden shadow ring-1 ring-black ring-opacity-5 md:rounded-md">
+                                    <div className="px-2 py-2 bg-gray-50 border-b">
+                                        <div className="flex justify-between px-4">
+                                            <div className="flex flex-1">
+                                                <div className="flex w-full md:ml-0">
+                                                    <label htmlFor="search-field" className="sr-only">
+                                                        Search
+                                                    </label>
+
+                                                    <div className="relative w-96 text-gray-400 focus-within:text-gray-600">
+                                                        <div
+                                                            className="pointer-events-none absolute inset-y-0 left-0 top-1.5 flex items-center"
+                                                            aria-hidden="true">
+                                                            <MagnifyingGlass size={15} className="h-5 w-5" aria-hidden="true" />
+                                                        </div>
+                                                        <Search<Person>
+                                                            table={table}
+                                                            debounce={800}
+                                                            placeholder="Search..."
+                                                            className="block w-full rounded-md sm:text-sm"
+                                                        />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div className="mt-6 flex items-center space-x-4 md:mt-0 md:ml-4">
+                                                <button
+                                                    type="button"
+                                                    className="inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-1.5 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+                                                    Filter
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    className="inline-flex items-center rounded-md border border-transparent bg-indigo-600 px-4 py-1.5 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+                                                    Send money
+                                                    <CaretDown size={15} className="text-md mx-2 my-0.5 mt-0.5" aria-hidden="true" />
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+
                                     {loading && <div className={styles.loading}></div>}
                                     <div className={clsx(table.getIsSomeColumnsPinned() && 'flex space-x-1', 'mx-auto overflow-x-auto')}>
                                         <TableRenderer

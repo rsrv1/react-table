@@ -93,7 +93,7 @@ function Search<T>({ table, value: initialValue = '', debounce = 900, className,
     }
 
     return (
-        <div className="relative mt-1 flex items-center">
+        <div className="relative mt-1 flex items-center bg-transparent">
             <input
                 type="text"
                 name="table_search"
@@ -101,7 +101,7 @@ function Search<T>({ table, value: initialValue = '', debounce = 900, className,
                 value={value}
                 onChange={handleChange}
                 className={clsx(
-                    'block w-full rounded-md border-gray-300 pr-12 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm',
+                    'block h-full w-full bg-transparent border-transparent py-2 pl-8 pr-3 text-gray-900 placeholder-gray-500 focus:border-transparent focus:outline-none focus:ring-0 sm:text-sm',
                     className
                 )}
                 {...rest}
