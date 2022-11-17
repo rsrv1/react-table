@@ -34,13 +34,18 @@ function TableRenderer({
     table,
     rowSelectionCount,
     isSelectedGetter,
+    validating,
+    loading,
     position = 'center',
 }: {
     table: TanstackTable<Person>
     rowSelectionCount: number
     isSelectedGetter: (id: string) => boolean
+    validating: boolean
+    loading: boolean
     position?: tablePosition
 }) {
+    const [refreshing, setRefreshing] = React.useState(false)
     const isRowSelected = React.useCallback(
         (row: Row<Person>) => {
             const idCell = getCells(position, row).filter(cell => cell.column.id === 'id')
@@ -52,11 +57,29 @@ function TableRenderer({
         [isSelectedGetter, position]
     )
 
+    React.useEffect(() => {
+        if (validating && !loading) {
+            setRefreshing(true)
+        }
+    }, [validating, loading])
+
+    React.useEffect(() => {
+        if (!refreshing) return
+
+        const timer = setTimeout(() => {
+            setRefreshing(false)
+        }, 550)
+
+        return () => {
+            clearTimeout(timer)
+        }
+    }, [refreshing])
+
     return (
         <table className={clsx('divide-y divide-gray-300 table-fixed', position === 'center' || 'shadow bg-gray-100/80')}>
-            <thead className="bg-gray-50">
+            <thead className={clsx(refreshing ? 'bg-white' : 'bg-gray-50')}>
                 {getHeaderGroups(position, table).map(headerGroup => (
-                    <tr key={headerGroup.id}>
+                    <tr key={headerGroup.id} className="relative">
                         {headerGroup.headers.map(header =>
                             ['_expand'].includes(header.id) ? (
                                 <th key={header.id}></th>
@@ -75,6 +98,12 @@ function TableRenderer({
                                 </ColumnHeader>
                             )
                         )}
+                        <th
+                            className={clsx(
+                                'absolute inset-0',
+                                refreshing ? 'transition-[width] duration-500 ease-in-out w-full bg-slate-300/20' : 'w-0 bg-transparent'
+                            )}
+                        />
                     </tr>
                 ))}
             </thead>
@@ -207,6 +236,8 @@ function Table() {
                                             isSelectedGetter={isSelectedGetter}
                                             rowSelectionCount={rowSelectionCount}
                                             table={table}
+                                            validating={dataQuery.isValidating}
+                                            loading={!dataQuery.data && !dataQuery.error}
                                             position="left"
                                         />
                                         <div className={clsx(table.getIsSomeColumnsPinned() && 'overflow-x-auto max-w-2xl', 'relative')}>
@@ -224,6 +255,8 @@ function Table() {
                                                 isSelectedGetter={isSelectedGetter}
                                                 rowSelectionCount={rowSelectionCount}
                                                 table={table}
+                                                validating={dataQuery.isValidating}
+                                                loading={!dataQuery.data && !dataQuery.error}
                                                 position="center"
                                             />
                                         </div>
@@ -231,6 +264,8 @@ function Table() {
                                             isSelectedGetter={isSelectedGetter}
                                             rowSelectionCount={rowSelectionCount}
                                             table={table}
+                                            validating={dataQuery.isValidating}
+                                            loading={!dataQuery.data && !dataQuery.error}
                                             position="right"
                                         />
                                     </div>
