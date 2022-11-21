@@ -66,6 +66,8 @@ function useTableData<T extends { id: string }>({ filter, fetcher }: TableData<T
 
     const dataQuery = useSWR(initialQueryParamRead || fallbackInitialQueryParamRead ? fetcherOptions : null, fetcher)
 
+    const isLoading = !dataQuery.data && !dataQuery.error
+
     const rowSelectionCount = useTotalRowSelectionCount<T>(lastData.current)
 
     const pagination = React.useMemo(
@@ -129,13 +131,13 @@ function useTableData<T extends { id: string }>({ filter, fetcher }: TableData<T
 
     /** track loading state */
     React.useEffect(() => {
-        if (!dataQuery.data && !dataQuery.error) {
+        if (isLoading) {
             dispatch.loading({ type: actionType.LOADING, payload: true })
             return
         }
 
         dispatch.loading({ type: actionType.LOADING, payload: false })
-    }, [dataQuery.data, dataQuery.error, dispatch])
+    }, [isLoading, dispatch])
 
     /** when a request ends then set the last search term if applicable */
     React.useEffect(() => {

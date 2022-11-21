@@ -46,16 +46,13 @@ function TableRenderer({
     position?: tablePosition
 }) {
     const [refreshing, setRefreshing] = React.useState(false)
-    const isRowSelected = React.useCallback(
-        (row: Row<Person>) => {
-            const idCell = getCells(position, row).filter(cell => cell.column.id === 'id')
+    const isRowSelected = (row: Row<Person>) => {
+        const idCell = getCells(position, row).filter(cell => cell.column.id === 'id')
 
-            if (idCell.length === 0) return false
+        if (idCell.length === 0) return false
 
-            return isSelectedGetter(idCell[0].getValue() as string)
-        },
-        [isSelectedGetter, position]
-    )
+        return isSelectedGetter(idCell[0].getValue() as string)
+    }
 
     /** handling swr validating state UI */
     React.useEffect(() => {
@@ -103,7 +100,7 @@ function TableRenderer({
                         <th
                             className={clsx(
                                 'absolute inset-0',
-                                refreshing ? 'transition-[width] duration-500 ease-in-out w-full bg-slate-300/20' : 'w-0 bg-transparent'
+                                refreshing ? 'transition-[width] duration-700 ease-in-out w-full bg-slate-300/20' : 'w-0 bg-transparent'
                             )}
                         />
                     </tr>
