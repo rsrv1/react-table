@@ -121,25 +121,20 @@ export const isSelected = (state: state): isSelectedGetter => {
     }
 }
 
-type totalSelectionCountGetter = {
-    (total: number): number
-}
-export const selectionCount = (state: state): totalSelectionCountGetter => {
+export const selectionCount = (state: state, total: number): number => {
     const { all, only, except } = state
     const totalOnly = Object.keys(only).length
     const totalExcept = Object.keys(except).length
 
-    return (total: number) => {
-        if (totalOnly) {
-            return totalOnly
-        }
-
-        if (all) {
-            return total - totalExcept
-        }
-
-        return 0
+    if (totalOnly) {
+        return totalOnly
     }
+
+    if (all) {
+        return total - totalExcept
+    }
+
+    return 0
 }
 
 type selectedAllRows = {

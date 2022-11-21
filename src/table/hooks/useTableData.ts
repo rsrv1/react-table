@@ -1,11 +1,10 @@
 import React from 'react'
 import { PaginationState } from '@tanstack/react-table'
 import useSWR, { SWRResponse } from 'swr'
-import useTotalRowSelectionCount from './useTotalRowSelectionCount'
 import { useDispatch, useLoadingState, useRowSelectionState, useSearchState, useSettingsState } from '../context/tableContext'
 import { actionType } from '../context/reducer/request'
 import { getSorted, sortDirection, actionType as columnSortActionType, state as columnSortStateType } from '../context/reducer/columnSort'
-import { actionType as rowSelectionActionType, getSelectedRows } from '../context/reducer/rowSelection'
+import { actionType as rowSelectionActionType, getSelectedRows, selectionCount } from '../context/reducer/rowSelection'
 import { useRouter } from 'next/router'
 import { getQueryKey, routeQueryToColumnsortState } from '../utils'
 import useRouteKey from './useRouteKey'
@@ -68,7 +67,7 @@ function useTableData<T extends { id: string }>({ filter, fetcher }: TableData<T
 
     const isLoading = !dataQuery.data && !dataQuery.error
 
-    const rowSelectionCount = useTotalRowSelectionCount<T>(lastData.current)
+    const rowSelectionCount = lastData.current ? selectionCount(rowSelection, lastData.current.total) : 0
 
     const pagination = React.useMemo(
         () => ({

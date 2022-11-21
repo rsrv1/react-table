@@ -292,8 +292,6 @@ function Table() {
                                 </div>
                             </div>
                         </div>
-                        <div className="h-5 my-2">{loading && <h4>loading...</h4>}</div>
-
                         {/* debug interaction */}
                         <div className="mt-10">
                             <span className="font-medium text-indigo-500">Selected rows:</span> {JSON.stringify(selectedRows)}
