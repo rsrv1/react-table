@@ -75,7 +75,12 @@ function TableRenderer({
     /** handling swr validating state UI */
 
     return (
-        <table className={clsx('divide-y divide-gray-300 table-fixed', position === 'center' || 'shadow bg-gray-100/80')}>
+        <table
+            className={clsx(
+                'divide-y divide-gray-300 table-fixed',
+                position === 'center' || 'shadow bg-gray-100/80',
+                position !== 'center' && !table.getIsSomeColumnsPinned() && 'hidden'
+            )}>
             <thead className={clsx(refreshing ? 'bg-white' : 'bg-gray-50')}>
                 {getHeaderGroups(position, table).map(headerGroup => (
                     <tr key={headerGroup.id} className="relative">
@@ -152,7 +157,7 @@ function Table() {
                 <div className="sm:flex-auto">
                     <h1 className="text-xl font-semibold text-gray-900">Users</h1>
                     <p className="mt-2 text-sm text-gray-700">
-                        A list of all the users in your account including their name, title, email and role. <a href="/test">test</a>
+                        A list of all the users in your account including their name, title, email and role. <a href="/test">Jump</a>
                     </p>
                 </div>
             </div>
@@ -220,8 +225,8 @@ function Table() {
                                                 </button>
                                                 <button
                                                     type="button"
-                                                    className="inline-flex items-center rounded-md border border-transparent bg-indigo-600 px-4 py-1.5 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
-                                                    Send money
+                                                    className="inline-flex items-center rounded-md border border-transparent bg-blue-600 px-4 py-1.5 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                                                    Add Person
                                                     <CaretDown size={15} className="text-md mx-2 my-0.5 mt-0.5" aria-hidden="true" />
                                                 </button>
                                                 <ColumnVisibility<Person> table={table} onResetColumnOrder={resetColumnOrder} />
@@ -274,15 +279,17 @@ function Table() {
                                     </div>
 
                                     {rowSelectionCount > 0 && (
-                                        <div className="text-sm text-sky-700 bg-sky-100 px-4 py-2 mb-2">
+                                        <div className="text-sm text-indigo-700 bg-indigo-50 px-4 py-2">
                                             {rowSelectionCount} row{rowSelectionCount > 1 && 's'} selected
                                         </div>
                                     )}
                                 </div>
-                                <div className="py-4">total {dataQuery.data?.total} results</div>
+                                <div className="flex justify-between items-center">
+                                    <div className="py-4">{loading ? <p>loading...</p> : <p>Total {dataQuery.data?.total} results</p>}</div>
 
-                                {/* pagination */}
-                                <Pagination<Person> table={table} loading={loading} />
+                                    {/* pagination */}
+                                    <Pagination<Person> table={table} loading={loading} />
+                                </div>
                             </div>
                         </div>
                         <div className="h-5 my-2">{loading && <h4>loading...</h4>}</div>

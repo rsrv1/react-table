@@ -76,11 +76,11 @@ function RowSelectionMessage<T>({ mutate, loading, count, selectedRows, resetRow
     }
 
     return (
-        <div className="absolute z-10 left-0 flex h-12 items-center space-x-3 bg-gray-50 sm:left-16 pr-6">
+        <div className="absolute z-10 left-0 flex h-12 items-center bg-gray-100 sm:left-16 px-3 mr-3">
             <Select
                 value={action}
                 disabled={loading}
-                className="rounded border border-gray-300 bg-white py-1 text-xs font-medium text-gray-700 shadow-sm hover:bg-gray-50"
+                className="rounded border border-gray-300 bg-white py-1 text-xs font-medium text-gray-700 shadow-sm hover:bg-gray-50 mr-3"
                 onChange={e => {
                     setAction(e.target.value)
                 }}>

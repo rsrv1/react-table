@@ -144,6 +144,11 @@ function ColumnHeader<T>({ table, position, header, name, unsortable, rowSelecto
                     )}
                 />
             )}
+            {rowSelector && rowSelectionCount > 0 && (
+                <span className="absolute top-4 left-0 bg-indigo-50 h-[1.20rem] w-5 flex items-center px-1 text-[0.70rem] text-indigo-700 border border-r-transparent border-indigo-400">
+                    {rowSelectionCount}
+                </span>
+            )}
             <div ref={previewRef} className={clsx(!rowSelector && 'justify-between items-center', 'flex')}>
                 <div className={clsx(!rowSelector && 'flex items-center justify-between')}>
                     <span>
