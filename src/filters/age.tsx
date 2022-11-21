@@ -3,7 +3,9 @@ import { useRouter } from 'next/router'
 import React from 'react'
 import Select from '../components/Select'
 import { Person } from '../data/fetchData'
+import { URI_QUERY_PREFIX } from '../main'
 import useRouteFilter from '../table/hooks/useRouteFilter'
+import { getFilterQueryKey } from '../table/utils'
 
 type props = {
     table: Table<Person>
@@ -19,7 +21,7 @@ function Age({ table, id, loading }: props) {
     const dispatch = useRouteFilter()
     const [age, setAge] = React.useState<number | 'ALL'>('ALL')
 
-    const valueInUrl = React.useMemo(() => router.query['filter[age]'], [router.query])
+    const valueInUrl = React.useMemo(() => router.query[getFilterQueryKey(URI_QUERY_PREFIX, 'age')], [router.query])
     React.useEffect(() => {
         if (urlQuerToHydrated) return
         if (!valueInUrl) return

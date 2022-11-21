@@ -1,5 +1,6 @@
 import React from 'react'
 import { SWRConfig } from 'swr'
+import { URI_QUERY_PREFIX } from './main'
 import Table from './table'
 import { TableProvider } from './table/context/tableContext'
 
@@ -14,7 +15,7 @@ function App() {
                     }
                 },
             }}>
-            <TableProvider>
+            <TableProvider prefix={URI_QUERY_PREFIX}>
                 <Table />
             </TableProvider>
         </SWRConfig>

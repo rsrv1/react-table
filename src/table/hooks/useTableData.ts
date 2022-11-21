@@ -7,7 +7,8 @@ import { actionType } from '../context/reducer/request'
 import { getSorted, sortDirection, actionType as columnSortActionType, state as columnSortStateType } from '../context/reducer/columnSort'
 import { actionType as rowSelectionActionType, getSelectedRows } from '../context/reducer/rowSelection'
 import { useRouter } from 'next/router'
-import { routeQueryToColumnsortState } from '../utils'
+import { getQueryKey, routeQueryToColumnsortState } from '../utils'
+import useRouteKey from './useRouteKey'
 
 export type Response<T> = {
     rows: T[]
@@ -35,12 +36,15 @@ let initialQueryParamRead = false
 function useTableData<T extends { id: string }>({ filter, fetcher }: TableData<T>) {
     const router = useRouter()
     const rowSelection = useRowSelectionState()
+    const getRouteKey = useRouteKey()
     const dispatch = useDispatch()
     const [fallbackInitialQueryParamRead, setFallbackInitialQueryParamRead] = React.useState(false)
-    const { page = 0, perPage = DEFAULT_PERPAGE, search = '' } = router.query as { page?: number; perPage?: number; search?: string }
+    const page = router.query[getRouteKey('page')] ?? 0
+    const perPage = router.query[getRouteKey('perPage')] ?? DEFAULT_PERPAGE
+    const search = router.query[getRouteKey('search')] ?? ''
     const selectedRows = React.useMemo(() => getSelectedRows(rowSelection), [rowSelection])
     const loading = useLoadingState()
-    const { columnRePositioning } = useSettingsState()
+    const { columnRePositioning, uriQueryPrefix } = useSettingsState()
     const { searchTerm } = useSearchState()
     const { all, addAllCurrentPageRows } = rowSelection
     const [{ pageIndex, pageSize }, setPagination] = React.useState<PaginationState>({
@@ -51,8 +55,10 @@ function useTableData<T extends { id: string }>({ filter, fetcher }: TableData<T
     const fetcherOptions: Query = {
         page: Number(page),
         perPage: Number(perPage),
-        search,
-        sort: router.query?.sort ? getSorted({ column: routeQueryToColumnsortState(router.query?.sort as string) }) : '',
+        search: String(search),
+        sort: router.query[getRouteKey('sort')]
+            ? getSorted({ column: routeQueryToColumnsortState(router.query[getRouteKey('sort')] as string) })
+            : '',
         filter,
     }
 
@@ -75,26 +81,32 @@ function useTableData<T extends { id: string }>({ filter, fetcher }: TableData<T
         if (initialQueryParamRead) return
 
         /**set pagination */
-        if (router.query?.page || router.query?.perPage) {
+        if (router.query[getRouteKey('page')] || router.query[getRouteKey('perPage')]) {
             setPagination(({ pageSize, pageIndex }) => ({
-                pageSize: router.query?.perPage ? Number(router.query.perPage) : pageSize,
-                pageIndex: router.query?.page ? Number(router.query.page) : pageIndex,
+                pageSize: router.query[getRouteKey('perPage')] ? Number(router.query[getRouteKey('perPage')]) : pageSize,
+                pageIndex: router.query[getRouteKey('page')] ? Number(router.query[getRouteKey('page')]) : pageIndex,
             }))
         }
 
         /**search match with initial router query - effective if hard url reload with query params */
-        if (router.query?.search) {
-            dispatch.search({ type: actionType.SET_SEARCH_TERM, payload: router.query.search as string })
+        if (router.query[getRouteKey('search')]) {
+            dispatch.search({ type: actionType.SET_SEARCH_TERM, payload: router.query[getRouteKey('search')] as string })
         }
 
         /**sorting match with initial router query - effective if hard url reload with query params */
-        if (router.query?.sort) {
-            const sorted = routeQueryToColumnsortState(router.query?.sort as string)
+        if (router.query[getRouteKey('sort')]) {
+            const sorted = routeQueryToColumnsortState(router.query[getRouteKey('sort')] as string)
 
             dispatch.columnSort({ type: columnSortActionType.BULK_SET, payload: sorted })
         }
 
-        if (Object.keys(router.query).some(item => ['page', 'perPage', 'search', 'sort'].includes(item) || item.startsWith('filter')))
+        if (
+            Object.keys(router.query).some(
+                item =>
+                    [getRouteKey('page'), getRouteKey('perPage'), getRouteKey('search'), getRouteKey('sort')].includes(item) ||
+                    item.startsWith(getQueryKey(uriQueryPrefix, 'filter'))
+            )
+        )
             initialQueryParamRead = true
     }, [router.query, dispatch])
 

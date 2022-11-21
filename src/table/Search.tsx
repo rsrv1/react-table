@@ -5,6 +5,7 @@ import { useDispatch, useLoadingState, useSearchState } from './context/tableCon
 import { actionType } from './context/reducer/request'
 import { NextRouter, useRouter } from 'next/router'
 import { Table } from '@tanstack/react-table'
+import useRouteKey from './hooks/useRouteKey'
 
 type Props<T> = {
     table: Table<T>
@@ -15,19 +16,19 @@ type Props<T> = {
 
 let queryParamToHydrated = false
 
-const setQuerySearchTerm = (router: NextRouter, term: string) => {
+const setQuerySearchTerm = (getKey: (k: string) => string, router: NextRouter, term: string) => {
     router.push(
         {
-            query: Object.assign({}, router.query, { page: 0, search: term }),
+            query: Object.assign({}, router.query, { [getKey('page')]: 0, [getKey('search')]: term }),
         },
         undefined,
         { shallow: true }
     )
 }
-const removeQuerySearchTerm = (router: NextRouter) => {
+const removeQuerySearchTerm = (getKey: (k: string) => string, router: NextRouter) => {
     router.push(
         {
-            query: Object.assign({}, router.query, { page: 0, search: '' }),
+            query: Object.assign({}, router.query, { [getKey('page')]: 0, [getKey('search')]: '' }),
         },
         undefined,
         { shallow: true }
@@ -38,12 +39,14 @@ function Search<T>({ table, value: initialValue = '', debounce = 900, className,
     const router = useRouter()
     const dispatch = useDispatch()
     const { searchTerm, lastSearchTerm } = useSearchState()
+    const getRouteKey = useRouteKey()
     const loading = useLoadingState()
     const [searching, setSearching] = React.useState(false)
     const [value, setValue] = React.useState(initialValue)
     const termDiff = React.useMemo(() => searchTerm !== lastSearchTerm, [searchTerm, lastSearchTerm])
     const inputRef = React.useRef<HTMLInputElement>(null)
     const lastDebounceTimer = React.useRef<null | NodeJS.Timeout>(null)
+    const searchRouteValue = router.query[getRouteKey('search')]
 
     React.useEffect(() => {
         if (termDiff && loading) {
@@ -57,12 +60,12 @@ function Search<T>({ table, value: initialValue = '', debounce = 900, className,
     /** useful when initially hydrating from url param */
     React.useEffect(() => {
         if (queryParamToHydrated) return
-        if (!router.query?.search || router.query?.search === '') return
+        if (!searchRouteValue || searchRouteValue === '') return
 
         queryParamToHydrated = true
-        setValue(router.query.search as string)
-        dispatch.search({ type: actionType.SET_SEARCH_TERM, payload: router.query.search as string })
-    }, [router.query.search])
+        setValue(searchRouteValue as string)
+        dispatch.search({ type: actionType.SET_SEARCH_TERM, payload: searchRouteValue as string })
+    }, [searchRouteValue])
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value.trim()
@@ -70,7 +73,7 @@ function Search<T>({ table, value: initialValue = '', debounce = 900, className,
 
         if (value === '') {
             // no debounce wants immediate clear
-            setQuerySearchTerm(router, value)
+            setQuerySearchTerm(getRouteKey, router, value)
             dispatch.search({ type: actionType.SET_SEARCH_TERM, payload: '' })
             table.resetPageIndex()
             return
@@ -78,14 +81,14 @@ function Search<T>({ table, value: initialValue = '', debounce = 900, className,
 
         lastDebounceTimer.current && clearTimeout(lastDebounceTimer.current)
         lastDebounceTimer.current = setTimeout(() => {
-            setQuerySearchTerm(router, value)
+            setQuerySearchTerm(getRouteKey, router, value)
             dispatch.search({ type: actionType.SET_SEARCH_TERM, payload: value })
             table.resetPageIndex()
         }, debounce)
     }
 
     const handleClear = () => {
-        removeQuerySearchTerm(router)
+        removeQuerySearchTerm(getRouteKey, router)
         setValue('')
         dispatch.search({ type: actionType.SET_SEARCH_TERM, payload: '' })
         table.resetPageIndex()

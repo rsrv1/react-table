@@ -2,9 +2,11 @@ import { Table } from '@tanstack/react-table'
 import { useRouter } from 'next/router'
 import React from 'react'
 import Select from '../components/Select'
+import useRouteKey from './hooks/useRouteKey'
 
 function Pagination<T>({ table, loading }: { table: Table<T>; loading: boolean }) {
     const router = useRouter()
+    const getRouteKey = useRouteKey()
     const { pageIndex, pageSize } = table.getState().pagination
 
     const syncPaginationUrlQuery = (params: { page?: number; perPage?: number }) => {
@@ -17,7 +19,7 @@ function Pagination<T>({ table, loading }: { table: Table<T>; loading: boolean }
                 className="border rounded p-1"
                 onClick={() => {
                     table.setPageIndex(0)
-                    syncPaginationUrlQuery({ page: 0 })
+                    syncPaginationUrlQuery({ [getRouteKey('page')]: 0 })
                 }}
                 disabled={!table.getCanPreviousPage() || loading}>
                 {'<<'}
@@ -26,7 +28,7 @@ function Pagination<T>({ table, loading }: { table: Table<T>; loading: boolean }
                 className="border rounded p-1"
                 onClick={() => {
                     table.previousPage()
-                    syncPaginationUrlQuery({ page: pageIndex - 1 })
+                    syncPaginationUrlQuery({ [getRouteKey('page')]: pageIndex - 1 })
                 }}
                 disabled={!table.getCanPreviousPage() || loading}>
                 {'<'}
@@ -35,7 +37,7 @@ function Pagination<T>({ table, loading }: { table: Table<T>; loading: boolean }
                 className="border rounded p-1"
                 onClick={() => {
                     table.nextPage()
-                    syncPaginationUrlQuery({ page: pageIndex + 1 })
+                    syncPaginationUrlQuery({ [getRouteKey('page')]: pageIndex + 1 })
                 }}
                 disabled={!table.getCanNextPage() || loading}>
                 {'>'}
@@ -44,7 +46,7 @@ function Pagination<T>({ table, loading }: { table: Table<T>; loading: boolean }
                 className="border rounded p-1"
                 onClick={() => {
                     table.setPageIndex(table.getPageCount() - 1)
-                    syncPaginationUrlQuery({ page: table.getPageCount() - 1 })
+                    syncPaginationUrlQuery({ [getRouteKey('page')]: table.getPageCount() - 1 })
                 }}
                 disabled={!table.getCanNextPage() || loading}>
                 {'>>'}
@@ -64,7 +66,7 @@ function Pagination<T>({ table, loading }: { table: Table<T>; loading: boolean }
                     onChange={e => {
                         const page = e.target.value ? Number(e.target.value) - 1 : 0
                         table.setPageIndex(page)
-                        syncPaginationUrlQuery({ page })
+                        syncPaginationUrlQuery({ [getRouteKey('page')]: page })
                     }}
                     className="border border-gray-300 p-1 rounded w-10 text-sm py-0.5"
                     disabled={loading}
@@ -76,7 +78,7 @@ function Pagination<T>({ table, loading }: { table: Table<T>; loading: boolean }
                 disabled={loading}
                 onChange={e => {
                     table.setPagination({ pageIndex: 0, pageSize: Number(e.target?.value) })
-                    syncPaginationUrlQuery({ perPage: Number(e.target?.value), page: 0 })
+                    syncPaginationUrlQuery({ [getRouteKey('perPage')]: Number(e.target?.value), [getRouteKey('page')]: 0 })
                 }}>
                 {[10, 20, 30, 40, 50].map(pageSize => (
                     <option key={pageSize} value={pageSize}>

@@ -57,6 +57,7 @@ function TableRenderer({
         [isSelectedGetter, position]
     )
 
+    /** handling swr validating state UI */
     React.useEffect(() => {
         if (validating && !loading) {
             setRefreshing(true)
@@ -74,6 +75,7 @@ function TableRenderer({
             clearTimeout(timer)
         }
     }, [refreshing])
+    /** handling swr validating state UI */
 
     return (
         <table className={clsx('divide-y divide-gray-300 table-fixed', position === 'center' || 'shadow bg-gray-100/80')}>
@@ -231,7 +233,11 @@ function Table() {
                                     </div>
 
                                     {loading && <div className={styles.loading}></div>}
-                                    <div className={clsx(table.getIsSomeColumnsPinned() && 'flex space-x-1', 'mx-auto overflow-x-auto')}>
+                                    <div
+                                        className={clsx(
+                                            table.getIsSomeColumnsPinned() && 'flex space-x-1',
+                                            'mx-auto overflow-x-auto lg:overflow-hidden'
+                                        )}>
                                         <TableRenderer
                                             isSelectedGetter={isSelectedGetter}
                                             rowSelectionCount={rowSelectionCount}

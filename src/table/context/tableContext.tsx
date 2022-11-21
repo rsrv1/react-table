@@ -15,6 +15,7 @@ type SearchContext = {
     lastSearchTerm: string
 }
 type SettingsContext = {
+    uriQueryPrefix: string
     columnRePositioning: boolean
 }
 type DispatcherContext = {
@@ -26,6 +27,7 @@ type DispatcherContext = {
 }
 
 export type TableProviderProps = {
+    prefix: string
     children: React.ReactNode
 }
 
@@ -36,7 +38,7 @@ const ColumnSortContext = React.createContext<columnSortState | undefined>(undef
 const RowSelectionContext = React.createContext<rowSelectionState | undefined>(undefined)
 const DispatcherContext = React.createContext<DispatcherContext | undefined>(undefined)
 
-function TableProvider({ children }: TableProviderProps) {
+function TableProvider({ prefix, children }: TableProviderProps) {
     const router = useRouter()
 
     const { search = '', sort } = router.query as { search?: string; sort?: string }
@@ -69,7 +71,10 @@ function TableProvider({ children }: TableProviderProps) {
         [requestState.lastSearchTerm, requestState.searchTerm]
     )
 
-    const SettingsContextValue = React.useMemo(() => ({ columnRePositioning: requestState.columnRePositioning }), [requestState.columnRePositioning])
+    const SettingsContextValue = React.useMemo(
+        () => ({ uriQueryPrefix: prefix, columnRePositioning: requestState.columnRePositioning }),
+        [prefix, requestState.columnRePositioning]
+    )
 
     return (
         <DispatcherContext.Provider value={diapatcherValue}>

@@ -1,15 +1,16 @@
 import React from 'react'
-import useTableData, { Query, Response, TableData } from './table/hooks/useTableData'
+import useTableData, { Query, Response } from './table/hooks/useTableData'
 import useTableHandlers from './table/hooks/useTableHandlers'
 import useColumns from './useColumns'
 import useTable from './table/hooks/useTable'
-import { ColumnOrderState, PaginationState, Table } from '@tanstack/react-table'
+import { ColumnOrderState, Table } from '@tanstack/react-table'
 import { SWRResponse } from 'swr'
 import { fetchData, Person } from './data/fetchData'
 import { selectedRows } from './table/context/reducer/rowSelection'
 import { DndProvider } from 'react-dnd'
 import { HTML5Backend } from 'react-dnd-html5-backend'
 import { useRouter } from 'next/router'
+import { getFilterQueryKey, getQueryKey } from './table/utils'
 
 export type RenderProps<T> = {
     table: Table<T>
@@ -30,17 +31,26 @@ export type Props = {
     children: (args: RenderProps<Person>) => JSX.Element
 }
 
+export const URI_QUERY_PREFIX = 'person'
+
 function useHydrateFiltersFromRouteQuery() {
     const router = useRouter()
-    const ageFilterValue = router.query['filter[age]']
-    const statusFilterValue = router.query['filter[status]']
+    const age = getFilterQueryKey(URI_QUERY_PREFIX, 'age')
+    const status = getFilterQueryKey(URI_QUERY_PREFIX, 'status')
+
+    const ageFilterValue = router.query[age]
+    const statusFilterValue = router.query[status]
 
     const filter = React.useMemo(() => {
-        if (!router.query?.filter) return undefined
+        if (!router.query[getQueryKey(URI_QUERY_PREFIX, 'filter')]) return undefined
 
-        return (router.query?.filter as string)
+        return (router.query[getQueryKey(URI_QUERY_PREFIX, 'filter')] as string)
             .split(',')
-            .reduce((acc: { [k: string]: string }, key: string) => Object.assign({}, acc, { [key]: router.query[`filter[${key}]`] }), {})
+            .reduce(
+                (acc: { [k: string]: string }, key: string) =>
+                    Object.assign({}, acc, { [key]: router.query[getFilterQueryKey(URI_QUERY_PREFIX, key)] }),
+                {}
+            )
     }, [ageFilterValue, statusFilterValue])
 
     return filter

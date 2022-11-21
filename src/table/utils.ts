@@ -28,6 +28,9 @@ const routeQueryToColumnsortState = (query: string): { [column: string]: sortDir
     )
 }
 
+const getFilterQueryKey = (prefix: string, param: string) => `table[${prefix}][filter][${param}]`
+const getQueryKey = (prefix: string, name: string) => `table[${prefix}][${name}]`
+
 const range = (len: number) => {
     const arr = []
     for (let i = 0; i < len; i++) {
@@ -36,4 +39,4 @@ const range = (len: number) => {
     return arr
 }
 
-export { _shuffle, range, filtersToString, _isObjEmpty, routeQueryToColumnsortState }
+export { _shuffle, range, filtersToString, _isObjEmpty, routeQueryToColumnsortState, getFilterQueryKey, getQueryKey }

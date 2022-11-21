@@ -3,6 +3,8 @@ import { Person, Status } from '../data/fetchData'
 import { Table } from '@tanstack/react-table'
 import { useRouter } from 'next/router'
 import useRouteFilter from '../table/hooks/useRouteFilter'
+import { URI_QUERY_PREFIX } from '../main'
+import { getFilterQueryKey } from '../table/utils'
 
 let urlQuerToHydrated = false
 
@@ -12,7 +14,7 @@ function StatusFilter({ table }: { table: Table<Person> }) {
     const [statusFilters, setStatusFilters] = React.useState<Status[]>([])
 
     /** hydrate from router query */
-    const valueInUrl = React.useMemo(() => router.query['filter[status]'], [router.query])
+    const valueInUrl = React.useMemo(() => router.query[getFilterQueryKey(URI_QUERY_PREFIX, 'status')], [router.query])
     React.useEffect(() => {
         if (urlQuerToHydrated) return
         if (!valueInUrl) return

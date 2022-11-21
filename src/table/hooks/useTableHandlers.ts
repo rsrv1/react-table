@@ -5,10 +5,12 @@ import { actionType } from '../context/reducer/rowSelection'
 import { actionType as requestActionType } from '../context/reducer/request'
 import { sortDirection } from '../context/reducer/columnSort'
 import { NextRouter, useRouter } from 'next/router'
+import useRouteKey from './useRouteKey'
 
 function useTableHandlers() {
     const dispatch = useDispatch()
     const router = useRouter()
+    const getRouteKey = useRouteKey()
     const rowSelection = useRowSelectionState()
 
     const isSelectedGetter = React.useMemo(() => isSelected(rowSelection), [rowSelection])
@@ -63,15 +65,17 @@ function useTableHandlers() {
     const resetSortUrlQuery = React.useCallback(
         (columns: { [key: string]: sortDirection }) => {
             if (Object.keys(columns).length === 0) {
-                router.push({ query: Object.assign({}, router.query, { page: 0, sort: '' }) }, undefined, { shallow: true })
+                router.push({ query: Object.assign({}, router.query, { [getRouteKey('page')]: 0, [getRouteKey('sort')]: '' }) }, undefined, {
+                    shallow: true,
+                })
                 return
             }
 
             router.push(
                 {
                     query: Object.assign({}, router.query, {
-                        page: 0,
-                        sort: Object.keys(columns)
+                        [getRouteKey('page')]: 0,
+                        [getRouteKey('sort')]: Object.keys(columns)
                             .map(column => `${columns[column] === sortDirection.ASC ? '' : '-'}${column}`)
                             .join(','),
                     }),
@@ -80,7 +84,7 @@ function useTableHandlers() {
                 { shallow: true }
             )
         },
-        [router]
+        [router, getRouteKey]
     )
 
     return {
