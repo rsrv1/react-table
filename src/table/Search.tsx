@@ -1,14 +1,14 @@
 import clsx from 'clsx'
 import React from 'react'
 import Spinner from '../components/Spinner'
-import { useDispatch, useLoadingState, useSearchState } from './context/tableContext'
-import { actionType } from './context/reducer/request'
+import { useLoadingState } from './context/tableContext'
 import { NextRouter, useRouter } from 'next/router'
 import { Table } from '@tanstack/react-table'
 import useRouteKey from './hooks/useRouteKey'
 
 type Props<T> = {
     table: Table<T>
+    validating: boolean
     value?: string
     debounce?: number
     className?: string
@@ -35,27 +35,26 @@ const removeQuerySearchTerm = (getKey: (k: string) => string, router: NextRouter
     )
 }
 
-function Search<T>({ table, value: initialValue = '', debounce = 900, className, ...rest }: Props<T>) {
+function Search<T>({ table, validating, value: initialValue = '', debounce = 900, className, ...rest }: Props<T>) {
     const router = useRouter()
-    const dispatch = useDispatch()
-    const { searchTerm, lastSearchTerm } = useSearchState()
     const getRouteKey = useRouteKey()
     const loading = useLoadingState()
     const [searching, setSearching] = React.useState(false)
     const [value, setValue] = React.useState(initialValue)
-    const termDiff = React.useMemo(() => searchTerm !== lastSearchTerm, [searchTerm, lastSearchTerm])
+    const searchRouteValue = router.query[getRouteKey('search')]
     const inputRef = React.useRef<HTMLInputElement>(null)
     const lastDebounceTimer = React.useRef<null | NodeJS.Timeout>(null)
-    const searchRouteValue = router.query[getRouteKey('search')]
 
     React.useEffect(() => {
-        if (termDiff && loading) {
-            setSearching(true)
-            return
-        }
+        setSearching(true)
+    }, [searchRouteValue])
+
+    React.useEffect(() => {
+        if (!searching) return
+        if (loading || validating) return
 
         setSearching(false)
-    }, [loading, termDiff])
+    }, [loading, validating, searching])
 
     /** useful when initially hydrating from url param */
     React.useEffect(() => {
@@ -64,7 +63,6 @@ function Search<T>({ table, value: initialValue = '', debounce = 900, className,
 
         queryParamToHydrated = true
         setValue(searchRouteValue as string)
-        dispatch.search({ type: actionType.SET_SEARCH_TERM, payload: searchRouteValue as string })
     }, [searchRouteValue])
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -74,7 +72,6 @@ function Search<T>({ table, value: initialValue = '', debounce = 900, className,
         if (value === '') {
             // no debounce wants immediate clear
             setQuerySearchTerm(getRouteKey, router, value)
-            dispatch.search({ type: actionType.SET_SEARCH_TERM, payload: '' })
             table.resetPageIndex()
             return
         }
@@ -82,7 +79,6 @@ function Search<T>({ table, value: initialValue = '', debounce = 900, className,
         lastDebounceTimer.current && clearTimeout(lastDebounceTimer.current)
         lastDebounceTimer.current = setTimeout(() => {
             setQuerySearchTerm(getRouteKey, router, value)
-            dispatch.search({ type: actionType.SET_SEARCH_TERM, payload: value })
             table.resetPageIndex()
         }, debounce)
     }
@@ -90,7 +86,6 @@ function Search<T>({ table, value: initialValue = '', debounce = 900, className,
     const handleClear = () => {
         removeQuerySearchTerm(getRouteKey, router)
         setValue('')
-        dispatch.search({ type: actionType.SET_SEARCH_TERM, payload: '' })
         table.resetPageIndex()
         inputRef.current?.focus()
     }

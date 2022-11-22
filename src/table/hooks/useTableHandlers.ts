@@ -1,7 +1,6 @@
 import React from 'react'
 import { isSelected } from '../context/reducer/rowSelection'
 import { useDispatch, useRowSelectionState } from '../context/tableContext'
-import { actionType } from '../context/reducer/rowSelection'
 import { actionType as requestActionType } from '../context/reducer/request'
 import { sortDirection } from '../context/reducer/columnSort'
 import { NextRouter, useRouter } from 'next/router'

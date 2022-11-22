@@ -6,12 +6,10 @@ import useTable from './table/hooks/useTable'
 import { ColumnOrderState, Table } from '@tanstack/react-table'
 import { SWRResponse } from 'swr'
 import { fetchData, Person } from './data/fetchData'
-import { selectedRows } from './table/context/reducer/rowSelection'
 import { DndProvider } from 'react-dnd'
 import { HTML5Backend } from 'react-dnd-html5-backend'
 import { useRouter } from 'next/router'
 import { getFilterQueryKey, getQueryKey } from './table/utils'
-import useRowSelectionHandlers from './table/hooks/useRowSelectionHandlers'
 
 export type RenderProps<T> = {
     table: Table<T>

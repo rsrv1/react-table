@@ -142,6 +142,7 @@ function Table() {
                                                         </div>
                                                         <Search<Person>
                                                             table={table}
+                                                            validating={dataQuery.isValidating}
                                                             debounce={800}
                                                             placeholder="Search..."
                                                             className="block w-full rounded-md sm:text-sm"

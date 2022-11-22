@@ -1,7 +1,7 @@
 import React from 'react'
 import { PaginationState } from '@tanstack/react-table'
 import useSWR, { SWRResponse } from 'swr'
-import { useDispatch, useLoadingState, useResultState, useRowSelectionState, useSearchState, useSettingsState } from '../context/tableContext'
+import { useDispatch, useLoadingState, useResultState, useRowSelectionState, useSettingsState } from '../context/tableContext'
 import { actionType } from '../context/reducer/request'
 import { getSorted, sortDirection, actionType as columnSortActionType, state as columnSortStateType } from '../context/reducer/columnSort'
 import { actionType as rowSelectionActionType, getSelectedRows, selectionCount } from '../context/reducer/rowSelection'
@@ -93,11 +93,6 @@ function useTableData<T extends { id: string }>({ filter, fetcher }: TableData<T
             }))
         }
 
-        /**search match with initial router query - effective if hard url reload with query params */
-        if (router.query[getRouteKey('search')]) {
-            dispatch.search({ type: actionType.SET_SEARCH_TERM, payload: router.query[getRouteKey('search')] as string })
-        }
-
         /**sorting match with initial router query - effective if hard url reload with query params */
         if (router.query[getRouteKey('sort')]) {
             const sorted = routeQueryToColumnsortState(router.query[getRouteKey('sort')] as string)
@@ -141,11 +136,6 @@ function useTableData<T extends { id: string }>({ filter, fetcher }: TableData<T
 
         dispatch.loading({ type: actionType.LOADING, payload: false })
     }, [isLoading, dispatch])
-
-    /** when a request ends then set the last search term if applicable */
-    React.useEffect(() => {
-        dataQuery.data && dispatch.search({ type: actionType.STORE_LAST_SEARCH_TERM })
-    }, [dataQuery.data, dispatch])
 
     /** select all current page rows */
     React.useEffect(() => {
