@@ -62,7 +62,7 @@ function Main({ children }: Props) {
     const { setPagination, pagination, pageSize, rowSelectionCount, isColumnPositioning, dataQuery, lastData, loading, options } =
         useTableData<Person>({ filter, fetcher })
 
-    const { stopColumnPositioning } = useTableHandlers()
+    const { stopColumnPositioning, resetTableUrlQuery } = useTableHandlers()
 
     const columns = useColumns({
         data: dataQuery.data,
