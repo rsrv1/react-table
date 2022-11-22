@@ -1,7 +1,7 @@
 import React from 'react'
 import { PaginationState } from '@tanstack/react-table'
 import useSWR, { SWRResponse } from 'swr'
-import { useDispatch, useLoadingState, useRowSelectionState, useSearchState, useSettingsState } from '../context/tableContext'
+import { useDispatch, useLoadingState, useResultState, useRowSelectionState, useSearchState, useSettingsState } from '../context/tableContext'
 import { actionType } from '../context/reducer/request'
 import { getSorted, sortDirection, actionType as columnSortActionType, state as columnSortStateType } from '../context/reducer/columnSort'
 import { actionType as rowSelectionActionType, getSelectedRows, selectionCount } from '../context/reducer/rowSelection'
@@ -41,11 +41,10 @@ function useTableData<T extends { id: string }>({ filter, fetcher }: TableData<T
     const page = router.query[getRouteKey('page')] ?? 0
     const perPage = router.query[getRouteKey('perPage')] ?? DEFAULT_PERPAGE
     const search = router.query[getRouteKey('search')] ?? ''
-    const selectedRows = React.useMemo(() => getSelectedRows(rowSelection), [rowSelection])
     const loading = useLoadingState()
+    const { total } = useResultState()
     const { columnRePositioning, uriQueryPrefix } = useSettingsState()
-    const { searchTerm } = useSearchState()
-    const { all, addAllCurrentPageRows } = rowSelection
+    const { addAllCurrentPageRows } = rowSelection
     const [{ pageIndex, pageSize }, setPagination] = React.useState<PaginationState>({
         pageIndex: Number(page),
         pageSize: Number(perPage),
@@ -67,7 +66,7 @@ function useTableData<T extends { id: string }>({ filter, fetcher }: TableData<T
 
     const isLoading = !dataQuery.data && !dataQuery.error
 
-    const rowSelectionCount = lastData.current ? selectionCount(rowSelection, lastData.current.total) : 0
+    const rowSelectionCount = total > 0 ? selectionCount(rowSelection, total) : 0
 
     const pagination = React.useMemo(
         () => ({
@@ -76,6 +75,11 @@ function useTableData<T extends { id: string }>({ filter, fetcher }: TableData<T
         }),
         [pageIndex, pageSize]
     )
+
+    /** total server response change keep track */
+    React.useEffect(() => {
+        dispatch.result({ type: actionType.SET_RESULT_TOTAL, payload: Number(dataQuery.data?.total) })
+    }, [dataQuery.data?.total])
 
     /** first load set from url params */
     React.useEffect(() => {
@@ -155,11 +159,8 @@ function useTableData<T extends { id: string }>({ filter, fetcher }: TableData<T
         pagination,
         setPagination,
         pageSize,
-        searchTerm,
         rowSelectionCount,
         isColumnPositioning: columnRePositioning,
-        allRowSelected: all,
-        selectedRows,
         dataQuery,
         lastData,
         loading,

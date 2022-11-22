@@ -18,10 +18,14 @@ type SettingsContext = {
     uriQueryPrefix: string
     columnRePositioning: boolean
 }
+type ResultContext = {
+    total: number
+}
 type DispatcherContext = {
     loading: React.Dispatch<requestActions>
     search: React.Dispatch<requestActions>
     settings: React.Dispatch<requestActions>
+    result: React.Dispatch<requestActions>
     columnSort: React.Dispatch<columnSortActions>
     rowSelection: React.Dispatch<rowSelectionActions>
 }
@@ -36,6 +40,7 @@ const SearchContext = React.createContext<SearchContext | undefined>(undefined)
 const SettingsContext = React.createContext<SettingsContext | undefined>(undefined)
 const ColumnSortContext = React.createContext<columnSortState | undefined>(undefined)
 const RowSelectionContext = React.createContext<rowSelectionState | undefined>(undefined)
+const ResultContext = React.createContext<ResultContext | undefined>(undefined)
 const DispatcherContext = React.createContext<DispatcherContext | undefined>(undefined)
 
 function TableProvider({ prefix, children }: TableProviderProps) {
@@ -48,6 +53,7 @@ function TableProvider({ prefix, children }: TableProviderProps) {
         lastSearchTerm: '',
         searchTerm: search,
         columnRePositioning: false,
+        total: 0,
     })
 
     const [columnSortState, columnSortDispatch] = React.useReducer(ColumnSortReducer, {
@@ -60,6 +66,7 @@ function TableProvider({ prefix, children }: TableProviderProps) {
             loading: requestDispatch,
             search: requestDispatch,
             settings: requestDispatch,
+            result: requestDispatch,
             columnSort: columnSortDispatch,
             rowSelection: rowSelectionDispatch,
         }),
@@ -76,14 +83,18 @@ function TableProvider({ prefix, children }: TableProviderProps) {
         [prefix, requestState.columnRePositioning]
     )
 
+    const resultContextValue = React.useMemo(() => ({ total: requestState.total }), [requestState.total])
+
     return (
         <DispatcherContext.Provider value={diapatcherValue}>
             <LoadingContext.Provider value={requestState.loading}>
                 <SearchContext.Provider value={SearchContextValue}>
                     <SettingsContext.Provider value={SettingsContextValue}>
-                        <ColumnSortContext.Provider value={columnSortState}>
-                            <RowSelectionContext.Provider value={rowSelectionState}>{children}</RowSelectionContext.Provider>
-                        </ColumnSortContext.Provider>
+                        <ResultContext.Provider value={resultContextValue}>
+                            <ColumnSortContext.Provider value={columnSortState}>
+                                <RowSelectionContext.Provider value={rowSelectionState}>{children}</RowSelectionContext.Provider>
+                            </ColumnSortContext.Provider>
+                        </ResultContext.Provider>
                     </SettingsContext.Provider>
                 </SearchContext.Provider>
             </LoadingContext.Provider>
@@ -145,5 +156,14 @@ function useRowSelectionState() {
 
     return selection
 }
+function useResultState() {
+    const result = React.useContext(ResultContext)
 
-export { TableProvider, useLoadingState, useDispatch, useSettingsState, useSearchState, useColumnSortState, useRowSelectionState }
+    if (result === undefined) {
+        throw new Error('useResultState should be called within ResultContext.Provider')
+    }
+
+    return result
+}
+
+export { TableProvider, useLoadingState, useDispatch, useSettingsState, useSearchState, useColumnSortState, useRowSelectionState, useResultState }

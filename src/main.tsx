@@ -11,17 +11,15 @@ import { DndProvider } from 'react-dnd'
 import { HTML5Backend } from 'react-dnd-html5-backend'
 import { useRouter } from 'next/router'
 import { getFilterQueryKey, getQueryKey } from './table/utils'
+import useRowSelectionHandlers from './table/hooks/useRowSelectionHandlers'
 
 export type RenderProps<T> = {
     table: Table<T>
     columnOrder: ColumnOrderState
-    isSelectedGetter: (id: string) => boolean
     resetColumnOrder: () => void
     isColumnPositioning: boolean
     stopColumnPositioning: () => void
     rowSelectionCount: number
-    selectedRows: selectedRows
-    resetRowSelection: () => void
     dataQuery: SWRResponse<Response<T>>
     loading: boolean
     options: Query
@@ -63,43 +61,13 @@ function Main({ children }: Props) {
         return fetchData(args)
     }, [])
 
-    const {
-        setPagination,
-        pagination,
-        pageSize,
-        searchTerm,
-        rowSelectionCount,
-        isColumnPositioning,
-        allRowSelected,
-        selectedRows,
-        dataQuery,
-        lastData,
-        loading,
-        options,
-    } = useTableData<Person>({ filter, fetcher })
+    const { setPagination, pagination, pageSize, rowSelectionCount, isColumnPositioning, dataQuery, lastData, loading, options } =
+        useTableData<Person>({ filter, fetcher })
 
-    const {
-        resetRowSelection,
-        isSelectedGetter,
-        handleSelectAll,
-        handleSelectAllCurrentPage,
-        handleRemoveFromExcept,
-        handleAddToExcept,
-        handleAddToOnly,
-        handleRemoveFromOnly,
-        stopColumnPositioning,
-    } = useTableHandlers()
+    const { stopColumnPositioning } = useTableHandlers()
 
     const columns = useColumns({
-        isSelectedGetter,
-        handleRemoveFromExcept,
-        handleAddToExcept,
-        handleAddToOnly,
-        handleRemoveFromOnly,
         data: dataQuery.data,
-        loading,
-        allRowSelected,
-        rowSelectionCount,
     })
 
     const { table, columnOrder, resetColumnOrder } = useTable<Person>({
@@ -120,13 +88,10 @@ function Main({ children }: Props) {
             {children({
                 table,
                 columnOrder,
-                isSelectedGetter,
                 resetColumnOrder,
                 isColumnPositioning,
                 stopColumnPositioning,
                 rowSelectionCount,
-                selectedRows,
-                resetRowSelection,
                 dataQuery,
                 loading,
                 options,

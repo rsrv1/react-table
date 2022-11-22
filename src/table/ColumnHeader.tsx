@@ -1,6 +1,6 @@
 import React, { Suspense } from 'react'
 import clsx from 'clsx'
-import { useColumnSortState, useDispatch, useLoadingState, useRowSelectionState, useSettingsState } from './context/tableContext'
+import { useColumnSortState, useDispatch, useLoadingState, useResultState, useRowSelectionState, useSettingsState } from './context/tableContext'
 import { actionType, sortDirection, state as columnSortStateType } from './context/reducer/columnSort'
 import { Column, ColumnOrderState, Header, Table } from '@tanstack/react-table'
 import { useDrag, useDrop } from 'react-dnd'
@@ -10,6 +10,8 @@ import useTableHandlers from './hooks/useTableHandlers'
 import RowSelectorMenu from './RowSelectorMenu'
 import { FakeColumnMenuButton } from './ColumnMenuButton'
 import dynamic from 'next/dynamic'
+import { selectionCount } from './context/reducer/rowSelection'
+import useRowSelectionHandlers from './hooks/useRowSelectionHandlers'
 
 type Props<T> = {
     table: Table<T>
@@ -17,7 +19,6 @@ type Props<T> = {
     name: string
     unsortable: boolean
     rowSelector?: boolean
-    rowSelectionCount: number
     children: React.ReactNode
     position?: 'left' | 'center' | 'right'
     className?: string
@@ -48,18 +49,21 @@ const IconAscending = () => (
     </div>
 )
 
-function ColumnHeader<T>({ table, position, header, name, unsortable, rowSelector, rowSelectionCount, children, className }: Props<T>) {
+function ColumnHeader<T>({ table, position, header, name, unsortable, rowSelector, children, className }: Props<T>) {
     const dispatcher = useDispatch()
     const columnSort = useColumnSortState()
     const rowSelection = useRowSelectionState()
     const loading = useLoadingState()
     const { columnRePositioning } = useSettingsState()
-    const { resetRowSelection, handleSelectAllCurrentPage, resetSortUrlQuery } = useTableHandlers()
+    const { resetSortUrlQuery } = useTableHandlers()
+    const { resetRowSelection, handleSelectAllCurrentPage } = useRowSelectionHandlers()
     const dispatch = dispatcher.columnSort
     const columns = columnSort.column as columnSortStateType['column']
     const [showColumnOptionsMenu, setShowColumnOptionsMenu] = React.useState(false)
     const { all: allRowSelected, except } = rowSelection
     const pagination = table.getState().pagination
+    const { total } = useResultState()
+    const rowSelectionCount = total > 0 ? selectionCount(rowSelection, total) : 0
 
     const { getState, setColumnOrder } = table
     const { columnOrder } = getState()

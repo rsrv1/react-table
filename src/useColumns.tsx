@@ -1,48 +1,16 @@
 import React from 'react'
 import { ColumnDef, Table, Row } from '@tanstack/react-table'
 import { Person } from './data/fetchData'
-import IndeterminateCheckbox from './table/IndeterminateCheckbox'
 import { Response } from './table/hooks/useTableData'
 import ArrowDown from './components/ArrowDown'
 import ArrowRight from './components/ArrowRight'
+import RowSelectionCheckbox from './table/RowSelectionCheckbox'
 
 type Args = {
-    isSelectedGetter: (id: string) => boolean
-    handleRemoveFromExcept: (id: string) => void
-    handleAddToExcept: (id: string) => void
-    handleAddToOnly: (id: string) => void
-    handleRemoveFromOnly: (id: string) => void
     data: Response<Person> | undefined
-    loading: boolean
-    allRowSelected: boolean
-    rowSelectionCount: number
 }
 
-function useColumns({
-    isSelectedGetter,
-    handleRemoveFromExcept,
-    handleAddToExcept,
-    handleAddToOnly,
-    handleRemoveFromOnly,
-    data,
-    loading,
-    allRowSelected,
-    rowSelectionCount,
-}: Args): ColumnDef<Person, any>[] {
-    const handleCellSelectChange = (event: React.FormEvent<HTMLInputElement>, id: string) => {
-        const isChecked = (event.target as HTMLInputElement).checked
-
-        if (allRowSelected) {
-            if (isChecked) handleRemoveFromExcept(id)
-            else handleAddToExcept(id)
-
-            return
-        }
-
-        if (isChecked) handleAddToOnly(id)
-        else handleRemoveFromOnly(id)
-    }
-
+function useColumns({ data }: Args): ColumnDef<Person, any>[] {
     const handleRowExpand = (table: Table<Person>, row: Row<Person>) => {
         table.resetColumnPinning() // so that expanded row don't break the ui
         row.getToggleExpandedHandler()()
@@ -53,17 +21,7 @@ function useColumns({
             {
                 accessorKey: 'id',
                 id: 'id',
-                cell: ({ getValue, row, column: { id }, table }) => (
-                    <IndeterminateCheckbox
-                        {...{
-                            checked: isSelectedGetter(getValue() as string),
-                            className: 'absolute left-4 top-1/2 -mt-2 h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500',
-                            indeterminate: false,
-                            onChange: e => handleCellSelectChange(e, getValue() as string),
-                            disabled: loading,
-                        }}
-                    />
-                ),
+                cell: ({ getValue, row, column: { id }, table }) => <RowSelectionCheckbox value={getValue() as string} />,
             },
             {
                 accessorKey: '_expand',
@@ -143,7 +101,7 @@ function useColumns({
                 ),
             },
         ],
-        [data, rowSelectionCount, loading]
+        []
     )
 
     return columns

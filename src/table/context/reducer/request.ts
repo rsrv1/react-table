@@ -3,6 +3,7 @@ export type state = {
     searchTerm: string
     lastSearchTerm: string
     columnRePositioning: boolean
+    total: number
 }
 
 export enum actionType {
@@ -10,6 +11,7 @@ export enum actionType {
     SET_SEARCH_TERM = 'SET_SEARCH_TERM',
     STORE_LAST_SEARCH_TERM = 'STORE_LAST_SEARCH_TERM',
     COLUMN_RE_POSITIONING = 'COLUMN_RE_POSITIONING',
+    SET_RESULT_TOTAL = 'SET_RESULT_TOTAL',
 }
 
 export type actions =
@@ -17,6 +19,7 @@ export type actions =
     | { type: actionType.SET_SEARCH_TERM; payload: string }
     | { type: actionType.STORE_LAST_SEARCH_TERM }
     | { type: actionType.COLUMN_RE_POSITIONING; payload: boolean }
+    | { type: actionType.SET_RESULT_TOTAL; payload: number }
 
 export default function reducer(state: state, action: actions) {
     switch (action.type) {
@@ -33,6 +36,9 @@ export default function reducer(state: state, action: actions) {
 
         case actionType.COLUMN_RE_POSITIONING:
             return _g(state, { columnRePositioning: action.payload })
+
+        case actionType.SET_RESULT_TOTAL:
+            return _g(state, { total: action.payload })
 
         default:
             throw new Error(`Unhandled action type: ${action.type}`)

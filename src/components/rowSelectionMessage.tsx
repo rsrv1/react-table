@@ -1,6 +1,8 @@
 import React from 'react'
 import { KeyedMutator } from 'swr'
-import { selectedRows } from '../table/context/reducer/rowSelection'
+import { getSelectedRows, selectedRows } from '../table/context/reducer/rowSelection'
+import { useRowSelectionState } from '../table/context/tableContext'
+import useRowSelectionHandlers from '../table/hooks/useRowSelectionHandlers'
 import { Response } from '../table/hooks/useTableData'
 import Select from './Select'
 
@@ -8,12 +10,13 @@ type Props<T> = {
     loading: boolean
     mutate: KeyedMutator<Response<T>>
     count: number
-    resetRowSelection: () => void
-    selectedRows: selectedRows
 }
 
-function RowSelectionMessage<T>({ mutate, loading, count, selectedRows, resetRowSelection }: Props<T>) {
+function RowSelectionMessage<T>({ mutate, loading, count }: Props<T>) {
     const [action, setAction] = React.useState('')
+    const rowSelection = useRowSelectionState()
+    const selectedRows = React.useMemo(() => getSelectedRows(rowSelection), [rowSelection])
+    const { resetRowSelection } = useRowSelectionHandlers()
 
     const applyAction = () => {
         if (action === 'update') {

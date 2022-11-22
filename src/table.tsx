@@ -3,8 +3,8 @@ import { flexRender, Table as TanstackTable, Row, PaginationState } from '@tanst
 import Pagination from './table/pagination'
 import Filters from './filters'
 import ColumnVisibility from './table/columnVisibility'
+import TableRenderer from './table/Renderer'
 import RowSelectionMessage from './components/rowSelectionMessage'
-import ColumnHeader from './table/ColumnHeader'
 import renderSubComponent from './components/RowSubExpand'
 import Main from './main'
 import { Person } from './data/fetchData'
@@ -13,6 +13,8 @@ import ColumnRepositionConfirm from './components/ColumnRepositionConfirm'
 import styles from './table/loader.module.css'
 import { CaretDown, MagnifyingGlass } from 'phosphor-react'
 import Search from './table/Search'
+import { useRowSelectionState } from './table/context/tableContext'
+import { isSelected } from './table/context/reducer/rowSelection'
 
 type tablePosition = 'left' | 'center' | 'right'
 
@@ -30,22 +32,10 @@ const getCells = (position: tablePosition, row: Row<Person>) => {
     return row.getVisibleCells()
 }
 
-function TableRenderer({
-    table,
-    rowSelectionCount,
-    isSelectedGetter,
-    validating,
-    loading,
-    position = 'center',
-}: {
-    table: TanstackTable<Person>
-    rowSelectionCount: number
-    isSelectedGetter: (id: string) => boolean
-    validating: boolean
-    loading: boolean
-    position?: tablePosition
-}) {
-    const [refreshing, setRefreshing] = React.useState(false)
+function TableBody({ table, rows, position = 'center' }: { table: TanstackTable<Person>; rows: Row<Person>[]; position?: tablePosition }) {
+    const rowSelection = useRowSelectionState()
+    const isSelectedGetter = React.useMemo(() => isSelected(rowSelection), [rowSelection])
+
     const isRowSelected = (row: Row<Person>) => {
         const idCell = getCells(position, row).filter(cell => cell.column.id === 'id')
 
@@ -54,99 +44,44 @@ function TableRenderer({
         return isSelectedGetter(idCell[0].getValue() as string)
     }
 
-    /** handling swr validating state UI */
-    React.useEffect(() => {
-        if (validating && !loading) {
-            setRefreshing(true)
-        }
-    }, [validating, loading])
-
-    React.useEffect(() => {
-        if (!refreshing) return
-
-        const timer = setTimeout(() => {
-            setRefreshing(false)
-        }, 550)
-
-        return () => {
-            clearTimeout(timer)
-        }
-    }, [refreshing])
-    /** handling swr validating state UI */
-
     return (
-        <table
-            className={clsx(
-                'divide-y divide-gray-300 table-fixed',
-                position === 'center' || 'shadow bg-gray-100/80',
-                position !== 'center' && !table.getIsSomeColumnsPinned() && 'hidden'
-            )}>
-            <thead className={clsx(refreshing ? 'bg-white' : 'bg-gray-50')}>
-                {getHeaderGroups(position, table).map(headerGroup => (
-                    <tr key={headerGroup.id} className="relative">
-                        {headerGroup.headers.map(header =>
-                            ['_expand'].includes(header.id) ? (
-                                <th key={header.id}></th>
-                            ) : (
-                                <ColumnHeader<Person>
-                                    key={header.id}
-                                    position={position}
-                                    header={header}
-                                    table={table}
-                                    unsortable={header.id.startsWith('_') || ['id'].includes(header.id)}
-                                    rowSelector={header.id === 'id'}
-                                    rowSelectionCount={rowSelectionCount}
-                                    name={header.id}
-                                    className={clsx(header.id === 'firstName' && 'min-w-[20rem]', 'whitespace-nowrap')}>
-                                    {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
-                                </ColumnHeader>
-                            )
-                        )}
-                        <th
-                            className={clsx(
-                                'absolute inset-0',
-                                refreshing ? 'transition-[width] duration-700 ease-in-out w-full bg-slate-300/20' : 'w-0 bg-transparent'
-                            )}
-                        />
-                    </tr>
-                ))}
-            </thead>
-            <tbody className="divide-y divide-gray-200 bg-white">
-                {table.getRowModel().rows.map(row => (
-                    <React.Fragment key={row.id}>
-                        <tr className={clsx(isRowSelected(row) && 'bg-gray-50')}>
-                            {getCells(position, row).map(cell => {
-                                return (
-                                    <td
-                                        key={cell.id}
-                                        className={clsx(
-                                            cell.column.id === 'id' && 'relative',
-                                            cell.column.id === 'firstName' && 'py-4 pr-3',
-                                            'whitespace-nowrap px-2 py-2 text-sm text-gray-500'
-                                        )}>
-                                        {cell.column.id === 'id' ? (
-                                            <div className="w-12 px-6 sm:w-16 sm:px-8">
-                                                {isRowSelected(row) && <div className="absolute inset-y-0 left-0 w-0.5 bg-indigo-600" />}
-                                                {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                                            </div>
-                                        ) : (
-                                            flexRender(cell.column.columnDef.cell, cell.getContext())
-                                        )}
-                                    </td>
-                                )
-                            })}
-                        </tr>
-                        {row.getIsExpanded() && getHeaderGroups(position, table)[0].headers.length > 0 && (
-                            <tr>
-                                <td colSpan={getCells(position, row).length}>
-                                    {(position === 'center' || position === undefined) && renderSubComponent({ row })}
+        <>
+            {rows.map(row => (
+                <React.Fragment key={row.id}>
+                    <tr className={clsx(isRowSelected(row) && 'bg-gray-50')}>
+                        {getCells(position, row).map(cell => {
+                            return (
+                                <td
+                                    key={cell.id}
+                                    className={clsx(
+                                        cell.column.id === 'id' && 'relative',
+                                        cell.column.id === 'firstName' && 'py-4 pr-3',
+                                        'whitespace-nowrap px-2 py-2 text-sm text-gray-500'
+                                    )}>
+                                    {cell.column.id === 'id' ? (
+                                        <div className="w-12 px-6 sm:w-16 sm:px-8">
+                                            {isSelectedGetter(cell.getValue() as string) && (
+                                                <div className="absolute inset-y-0 left-0 w-0.5 bg-indigo-600" />
+                                            )}
+                                            {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                                        </div>
+                                    ) : (
+                                        flexRender(cell.column.columnDef.cell, cell.getContext())
+                                    )}
                                 </td>
-                            </tr>
-                        )}
-                    </React.Fragment>
-                ))}
-            </tbody>
-        </table>
+                            )
+                        })}
+                    </tr>
+                    {row.getIsExpanded() && getHeaderGroups(position, table)[0].headers.length > 0 && (
+                        <tr>
+                            <td colSpan={getCells(position, row).length}>
+                                {(position === 'center' || position === undefined) && renderSubComponent({ row })}
+                            </td>
+                        </tr>
+                    )}
+                </React.Fragment>
+            ))}
+        </>
     )
 }
 
@@ -166,13 +101,10 @@ function Table() {
                 {({
                     table,
                     columnOrder,
-                    isSelectedGetter,
                     resetColumnOrder,
-                    resetRowSelection,
                     rowSelectionCount,
                     isColumnPositioning,
                     stopColumnPositioning,
-                    selectedRows,
                     dataQuery,
                     loading,
                     options,
@@ -240,42 +172,37 @@ function Table() {
                                             table.getIsSomeColumnsPinned() && 'flex space-x-1',
                                             'mx-auto overflow-x-auto lg:overflow-hidden'
                                         )}>
-                                        <TableRenderer
-                                            isSelectedGetter={isSelectedGetter}
-                                            rowSelectionCount={rowSelectionCount}
-                                            table={table}
-                                            validating={dataQuery.isValidating}
-                                            loading={!dataQuery.data && !dataQuery.error}
-                                            position="left"
-                                        />
-                                        <div className={clsx(table.getIsSomeColumnsPinned() && 'overflow-x-auto max-w-2xl', 'relative')}>
-                                            {/** set overflow-x-auto to make the column pinning work, to server better y overflow for inf pagination this setup is good for now */}
-                                            {rowSelectionCount > 0 && (
-                                                <RowSelectionMessage<Person>
-                                                    mutate={dataQuery.mutate}
-                                                    loading={loading}
-                                                    count={rowSelectionCount}
-                                                    resetRowSelection={resetRowSelection}
-                                                    selectedRows={selectedRows}
-                                                />
-                                            )}
+                                        {table.getIsSomeColumnsPinned() && (
                                             <TableRenderer
-                                                isSelectedGetter={isSelectedGetter}
-                                                rowSelectionCount={rowSelectionCount}
                                                 table={table}
                                                 validating={dataQuery.isValidating}
                                                 loading={!dataQuery.data && !dataQuery.error}
-                                                position="center"
-                                            />
+                                                position="left">
+                                                <TableBody table={table} rows={table.getRowModel().rows} position="left" />
+                                            </TableRenderer>
+                                        )}
+                                        <div className={clsx(table.getIsSomeColumnsPinned() && 'overflow-x-auto max-w-2xl', 'relative')}>
+                                            {/** set overflow-x-auto to make the column pinning work, to server better y overflow for inf pagination this setup is good for now */}
+                                            {rowSelectionCount > 0 && (
+                                                <RowSelectionMessage<Person> mutate={dataQuery.mutate} loading={loading} count={rowSelectionCount} />
+                                            )}
+                                            <TableRenderer
+                                                table={table}
+                                                validating={dataQuery.isValidating}
+                                                loading={!dataQuery.data && !dataQuery.error}
+                                                position="center">
+                                                <TableBody table={table} rows={table.getRowModel().rows} position="center" />
+                                            </TableRenderer>
                                         </div>
-                                        <TableRenderer
-                                            isSelectedGetter={isSelectedGetter}
-                                            rowSelectionCount={rowSelectionCount}
-                                            table={table}
-                                            validating={dataQuery.isValidating}
-                                            loading={!dataQuery.data && !dataQuery.error}
-                                            position="right"
-                                        />
+                                        {table.getIsSomeColumnsPinned() && (
+                                            <TableRenderer
+                                                table={table}
+                                                validating={dataQuery.isValidating}
+                                                loading={!dataQuery.data && !dataQuery.error}
+                                                position="right">
+                                                <TableBody table={table} rows={table.getRowModel().rows} position="right" />
+                                            </TableRenderer>
+                                        )}
                                     </div>
 
                                     {rowSelectionCount > 0 && (
@@ -293,10 +220,6 @@ function Table() {
                             </div>
                         </div>
                         {/* debug interaction */}
-                        <div className="mt-10">
-                            <span className="font-medium text-indigo-500">Selected rows:</span> {JSON.stringify(selectedRows)}
-                        </div>
-                        <hr />
                         <div>
                             <span className="font-medium text-indigo-500">Query:</span> {JSON.stringify(options)}
                         </div>
