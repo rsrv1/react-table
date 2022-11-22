@@ -12,6 +12,7 @@ import { FakeColumnMenuButton } from './ColumnMenuButton'
 import dynamic from 'next/dynamic'
 import { selectionCount } from './context/reducer/rowSelection'
 import useRowSelectionHandlers from './hooks/useRowSelectionHandlers'
+import { genericMemo as memo } from './utils'
 
 type Props<T> = {
     table: Table<T>
@@ -206,4 +207,4 @@ function ColumnHeader<T>({ table, position, header, name, unsortable, rowSelecto
     )
 }
 
-export default ColumnHeader
+export default memo(ColumnHeader)

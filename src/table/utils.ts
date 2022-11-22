@@ -1,3 +1,4 @@
+import React from 'react'
 import { sortDirection } from './context/reducer/columnSort'
 
 function _shuffle(list: string[]) {
@@ -31,6 +32,8 @@ const routeQueryToColumnsortState = (query: string): { [column: string]: sortDir
 const getFilterQueryKey = (prefix: string, param: string) => `table[${prefix}][filter][${param}]`
 const getQueryKey = (prefix: string, name: string) => `table[${prefix}][${name}]`
 
+const genericMemo: <T>(component: T) => T = React.memo
+
 const range = (len: number) => {
     const arr = []
     for (let i = 0; i < len; i++) {
@@ -39,4 +42,4 @@ const range = (len: number) => {
     return arr
 }
 
-export { _shuffle, range, filtersToString, _isObjEmpty, routeQueryToColumnsortState, getFilterQueryKey, getQueryKey }
+export { _shuffle, range, filtersToString, _isObjEmpty, routeQueryToColumnsortState, getFilterQueryKey, getQueryKey, genericMemo }
