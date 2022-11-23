@@ -126,7 +126,7 @@ function ColumnHeader<T>({
             style={{ width: header.getSize() }}
             className={clsx(
                 className,
-                'relative whitespace-nowrap lg:px-2 py-2.5 text-left text-sm font-semibold text-gray-400 group',
+                'relative whitespace-nowrap md:px-2 py-2.5 text-left text-sm font-semibold text-gray-400 group',
                 isDragging && 'opacity-[0.8] bg-cyan-50 text-cyan-700'
             )}>
             {isOver && !isDragging && (
@@ -139,19 +139,21 @@ function ColumnHeader<T>({
             )}
             {rowSelector && <RowSelectionCountBadge />}
             <div ref={previewRef} className={clsx(!rowSelector && 'justify-between items-center', 'flex')}>
-                <div className={clsx(!rowSelector && 'flex items-center justify-between')}>
+                <div className="flex items-center">
                     {/* content */}
                     <span>{rowSelector ? <BulkRowSelectorCheckbox pagination={pagination} /> : children}</span>
 
                     {/* sort control */}
-                    <button
-                        onClick={handleSort}
-                        disabled={unsortable || columnRePositioning}
-                        type="button"
-                        className={clsx('flex px-2 ml-1 text-base sm:text-sm')}>
-                        {!columns[name] && !unsortable && <IconNotSorting />}
-                        {columns[name] && <>{columns[name] === sortDirection.DESC ? <IconDescending /> : <IconAscending />}</>}
-                    </button>
+                    {unsortable || (
+                        <button
+                            onClick={handleSort}
+                            disabled={columnRePositioning}
+                            type="button"
+                            className={clsx('flex px-2 ml-1 text-base sm:text-sm')}>
+                            {!columns[name] && !unsortable && <IconNotSorting />}
+                            {columns[name] && <>{columns[name] === sortDirection.DESC ? <IconDescending /> : <IconAscending />}</>}
+                        </button>
+                    )}
 
                     {/* resize control */}
                     {header.column.getCanResize() && (
@@ -166,7 +168,8 @@ function ColumnHeader<T>({
                     )}
 
                     {/* menu / drag handler */}
-                    <span className="absolute top-2.5 right-2">
+                    {/* <span className="flex justify-between"> */}
+                    <span className={clsx(rowSelector ? 'flex items-center' : 'absolute top-2.5 right-2')}>
                         {columnRePositioning ? (
                             rowSelector || (position && ['left', 'right'].includes(position)) ? null : (
                                 <button ref={dragRef} title="re-position" type="button" className="cursor-grabbing hover:bg-gray-200/80 p-1">
@@ -175,13 +178,14 @@ function ColumnHeader<T>({
                             )
                         ) : (
                             <>
-                                {rowSelector && <RowSelectorMenu />}
-                                {!rowSelector && !showColumnOptionsMenu && <FakeColumnMenuButton />}
-
-                                {!rowSelector && showColumnOptionsMenu && (
+                                {rowSelector ? (
+                                    <RowSelectorMenu />
+                                ) : showColumnOptionsMenu ? (
                                     <Suspense fallback={<FakeColumnMenuButton />}>
                                         <ColumnOptionsMenu<T> unsortable={unsortable} name={name} header={header} />
                                     </Suspense>
+                                ) : (
+                                    <FakeColumnMenuButton />
                                 )}
                             </>
                         )}
