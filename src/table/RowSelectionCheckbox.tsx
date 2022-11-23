@@ -5,7 +5,7 @@ import useRowSelectionHandlers from './hooks/useRowSelectionHandlers'
 import IndeterminateCheckbox from './IndeterminateCheckbox'
 
 function RowSelectionCheckbox({ value }: { value: string }) {
-    const loading = useLoadingState()
+    const { loading } = useLoadingState()
     const rowSelection = useRowSelectionState()
     const { handleRemoveFromExcept, handleAddToExcept, handleAddToOnly, handleRemoveFromOnly } = useRowSelectionHandlers()
     const isSelectedGetter = React.useMemo(() => isSelected(rowSelection), [rowSelection])

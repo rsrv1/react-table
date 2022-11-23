@@ -7,8 +7,7 @@ import { Table } from '@tanstack/react-table'
 import useRouteKey from './hooks/useRouteKey'
 
 type Props<T> = {
-    table: Table<T>
-    validating: boolean
+    resetPageIndex: (defaultState?: boolean | undefined) => void
     value?: string
     debounce?: number
     className?: string
@@ -35,10 +34,10 @@ const removeQuerySearchTerm = (getKey: (k: string) => string, router: NextRouter
     )
 }
 
-function Search<T>({ table, validating, value: initialValue = '', debounce = 900, className, ...rest }: Props<T>) {
+function Search<T>({ resetPageIndex, value: initialValue = '', debounce = 900, className, ...rest }: Props<T>) {
     const router = useRouter()
     const getRouteKey = useRouteKey()
-    const loading = useLoadingState()
+    const { loading, validating } = useLoadingState()
     const [searching, setSearching] = React.useState(false)
     const [value, setValue] = React.useState(initialValue)
     const searchRouteValue = router.query[getRouteKey('search')]
@@ -72,21 +71,21 @@ function Search<T>({ table, validating, value: initialValue = '', debounce = 900
         if (value === '') {
             // no debounce wants immediate clear
             setQuerySearchTerm(getRouteKey, router, value)
-            table.resetPageIndex()
+            resetPageIndex()
             return
         }
 
         lastDebounceTimer.current && clearTimeout(lastDebounceTimer.current)
         lastDebounceTimer.current = setTimeout(() => {
             setQuerySearchTerm(getRouteKey, router, value)
-            table.resetPageIndex()
+            resetPageIndex()
         }, debounce)
     }
 
     const handleClear = () => {
         removeQuerySearchTerm(getRouteKey, router)
         setValue('')
-        table.resetPageIndex()
+        resetPageIndex()
         inputRef.current?.focus()
     }
 

@@ -32,7 +32,7 @@ const getCells = (position: tablePosition, row: Row<Person>) => {
     return row.getVisibleCells()
 }
 
-function TableBody({ table, rows, position = 'center' }: { table: TanstackTable<Person>; rows: Row<Person>[]; position?: tablePosition }) {
+function TableBody({ table, position = 'center' }: { table: TanstackTable<Person>; position?: tablePosition }) {
     const rowSelection = useRowSelectionState()
     const isSelectedGetter = React.useMemo(() => isSelected(rowSelection), [rowSelection])
 
@@ -46,20 +46,21 @@ function TableBody({ table, rows, position = 'center' }: { table: TanstackTable<
 
     return (
         <>
-            {rows.map(row => (
+            {table.getRowModel().rows.map(row => (
                 <React.Fragment key={row.id}>
                     <tr className={clsx(isRowSelected(row) && 'bg-gray-50')}>
                         {getCells(position, row).map(cell => {
                             return (
                                 <td
                                     key={cell.id}
+                                    style={{ width: cell.column.getSize() }}
                                     className={clsx(
-                                        cell.column.id === 'id' && 'relative',
+                                        cell.column.id === 'id' && 'relative w-12',
                                         cell.column.id === 'firstName' && 'py-4 pr-3',
                                         'whitespace-nowrap px-2 py-2 text-sm text-gray-500'
                                     )}>
                                     {cell.column.id === 'id' ? (
-                                        <div className="w-12 px-6 sm:w-16 sm:px-8">
+                                        <div className="px-6 sm:w-16 sm:px-8">
                                             {isSelectedGetter(cell.getValue() as string) && (
                                                 <div className="absolute inset-y-0 left-0 w-0.5 bg-indigo-600" />
                                             )}
@@ -141,8 +142,7 @@ function Table() {
                                                             <MagnifyingGlass size={15} className="h-5 w-5" aria-hidden="true" />
                                                         </div>
                                                         <Search<Person>
-                                                            table={table}
-                                                            validating={dataQuery.isValidating}
+                                                            resetPageIndex={table.resetPageIndex}
                                                             debounce={800}
                                                             placeholder="Search..."
                                                             className="block w-full rounded-md sm:text-sm"
@@ -169,39 +169,24 @@ function Table() {
 
                                     {loading && <div className={styles.loading}></div>}
                                     <div
-                                        className={clsx(
-                                            table.getIsSomeColumnsPinned() && 'flex space-x-1',
-                                            'mx-auto overflow-x-auto lg:overflow-hidden'
-                                        )}>
+                                        className={clsx(table.getIsSomeColumnsPinned() ? 'flex space-x-1' : 'overflow-x-auto', 'lg:overflow-hidden')}>
                                         {table.getIsSomeColumnsPinned() && (
-                                            <TableRenderer
-                                                table={table}
-                                                validating={dataQuery.isValidating}
-                                                loading={!dataQuery.data && !dataQuery.error}
-                                                position="left">
-                                                <TableBody table={table} rows={table.getRowModel().rows} position="left" />
+                                            <TableRenderer table={table} position="left">
+                                                <TableBody table={table} position="left" />
                                             </TableRenderer>
                                         )}
-                                        <div className={clsx(table.getIsSomeColumnsPinned() && 'overflow-x-auto max-w-2xl', 'relative')}>
+                                        <div className={clsx(table.getIsSomeColumnsPinned() && 'overflow-x-auto ', 'relative')}>
                                             {/** set overflow-x-auto to make the column pinning work, to server better y overflow for inf pagination this setup is good for now */}
                                             {rowSelectionCount > 0 && (
                                                 <RowSelectionMessage<Person> mutate={dataQuery.mutate} loading={loading} count={rowSelectionCount} />
                                             )}
-                                            <TableRenderer
-                                                table={table}
-                                                validating={dataQuery.isValidating}
-                                                loading={!dataQuery.data && !dataQuery.error}
-                                                position="center">
-                                                <TableBody table={table} rows={table.getRowModel().rows} position="center" />
+                                            <TableRenderer table={table} position="center">
+                                                <TableBody table={table} position="center" />
                                             </TableRenderer>
                                         </div>
                                         {table.getIsSomeColumnsPinned() && (
-                                            <TableRenderer
-                                                table={table}
-                                                validating={dataQuery.isValidating}
-                                                loading={!dataQuery.data && !dataQuery.error}
-                                                position="right">
-                                                <TableBody table={table} rows={table.getRowModel().rows} position="right" />
+                                            <TableRenderer table={table} position="right">
+                                                <TableBody table={table} position="right" />
                                             </TableRenderer>
                                         )}
                                     </div>

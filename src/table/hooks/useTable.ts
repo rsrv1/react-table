@@ -33,17 +33,17 @@ function useTable<T>({ data, lastData, pagination, setPagination, columns, meta 
         onColumnVisibilityChange: setColumnVisibility,
         onColumnOrderChange: setColumnOrder,
         onColumnPinningChange: setColumnPinning,
+        enableColumnResizing: true,
+        columnResizeMode: 'onChange',
         manualPagination: true,
         getCoreRowModel: getCoreRowModel(),
         getRowCanExpand: row => true,
-        ...(process.env.NODE_ENV !== 'production' && {
-            debugTable: false,
-            debugHeaders: false,
-            debugColumns: false,
-            // debugTable: true,
-            // debugHeaders: true,
-            // debugColumns: true,
-        }),
+        ...(process.env.NODE_ENV !== 'production' &&
+            {
+                // debugTable: true,
+                // debugHeaders: true,
+                // debugColumns: true,
+            }),
 
         meta,
     })

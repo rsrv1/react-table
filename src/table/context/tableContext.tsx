@@ -7,7 +7,10 @@ import RowSelectionReducer, {
     state as rowSelectionState,
 } from './reducer/rowSelection'
 
-type LoadingContext = boolean
+type LoadingContext = {
+    loading: boolean
+    validating: boolean
+}
 type SettingsContext = {
     uriQueryPrefix: string
     columnRePositioning: boolean
@@ -38,6 +41,7 @@ const DispatcherContext = React.createContext<DispatcherContext | undefined>(und
 function TableProvider({ prefix, children }: TableProviderProps) {
     const [requestState, requestDispatch] = React.useReducer(RequestReducer, {
         loading: false,
+        validating: false,
         columnRePositioning: false,
         total: 0,
     })
@@ -64,10 +68,14 @@ function TableProvider({ prefix, children }: TableProviderProps) {
     )
 
     const resultContextValue = React.useMemo(() => ({ total: requestState.total }), [requestState.total])
+    const loadingContextValue = React.useMemo(
+        () => ({ loading: requestState.loading, validating: requestState.validating }),
+        [requestState.loading, requestState.validating]
+    )
 
     return (
         <DispatcherContext.Provider value={diapatcherValue}>
-            <LoadingContext.Provider value={requestState.loading}>
+            <LoadingContext.Provider value={loadingContextValue}>
                 <SettingsContext.Provider value={SettingsContextValue}>
                     <ResultContext.Provider value={resultContextValue}>
                         <ColumnSortContext.Provider value={columnSortState}>

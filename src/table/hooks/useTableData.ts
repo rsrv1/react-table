@@ -41,7 +41,7 @@ function useTableData<T extends { id: string }>({ filter, fetcher }: TableData<T
     const page = router.query[getRouteKey('page')] ?? 0
     const perPage = router.query[getRouteKey('perPage')] ?? DEFAULT_PERPAGE
     const search = router.query[getRouteKey('search')] ?? ''
-    const loading = useLoadingState()
+    const { loading } = useLoadingState()
     const { total } = useResultState()
     const { columnRePositioning, uriQueryPrefix } = useSettingsState()
     const { addAllCurrentPageRows } = rowSelection
@@ -50,21 +50,25 @@ function useTableData<T extends { id: string }>({ filter, fetcher }: TableData<T
         pageSize: Number(perPage),
     })
 
-    const fetcherOptions: Query = {
-        page: Number(page),
-        perPage: Number(perPage),
-        search: String(search),
-        sort: router.query[getRouteKey('sort')]
-            ? getSorted({ column: routeQueryToColumnsortState(router.query[getRouteKey('sort')] as string) })
-            : '',
-        filter,
-    }
+    const fetcherOptions: Query | null =
+        initialQueryParamRead || fallbackInitialQueryParamRead
+            ? {
+                  page: Number(page),
+                  perPage: Number(perPage),
+                  search: String(search),
+                  sort: router.query[getRouteKey('sort')]
+                      ? getSorted({ column: routeQueryToColumnsortState(router.query[getRouteKey('sort')] as string) })
+                      : '',
+                  filter,
+              }
+            : null
 
     const lastData = React.useRef<Response<T>>({ rows: [], pageCount: 0, total: 0 })
 
-    const dataQuery = useSWR(initialQueryParamRead || fallbackInitialQueryParamRead ? fetcherOptions : null, fetcher)
+    const dataQuery = useSWR(fetcherOptions, fetcher)
 
     const isLoading = !dataQuery.data && !dataQuery.error
+    const isValidating = dataQuery.data && dataQuery.isValidating
 
     const rowSelectionCount = total > 0 ? selectionCount(rowSelection, total) : 0
 
@@ -136,6 +140,16 @@ function useTableData<T extends { id: string }>({ filter, fetcher }: TableData<T
 
         dispatch.loading({ type: actionType.LOADING, payload: false })
     }, [isLoading, dispatch])
+
+    /** track validating state */
+    React.useEffect(() => {
+        if (isValidating) {
+            dispatch.loading({ type: actionType.VALIDATING, payload: true })
+            return
+        }
+
+        dispatch.loading({ type: actionType.VALIDATING, payload: false })
+    }, [isValidating, dispatch])
 
     /** select all current page rows */
     React.useEffect(() => {

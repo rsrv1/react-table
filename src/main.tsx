@@ -20,7 +20,7 @@ export type RenderProps<T> = {
     rowSelectionCount: number
     dataQuery: SWRResponse<Response<T>>
     loading: boolean
-    options: Query
+    options: Query | null
 }
 
 export type Props = {

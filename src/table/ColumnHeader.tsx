@@ -2,21 +2,24 @@ import React, { Suspense } from 'react'
 import clsx from 'clsx'
 import { useColumnSortState, useDispatch, useLoadingState, useResultState, useRowSelectionState, useSettingsState } from './context/tableContext'
 import { actionType, sortDirection, state as columnSortStateType } from './context/reducer/columnSort'
-import { Column, ColumnOrderState, Header, Table } from '@tanstack/react-table'
+import { Column, ColumnOrderState, Header, PaginationState, Table, Updater } from '@tanstack/react-table'
 import { useDrag, useDrop } from 'react-dnd'
 import { ArrowsDownUp, DotsNine, SortAscending, SortDescending } from 'phosphor-react'
-import IndeterminateCheckbox from './IndeterminateCheckbox'
 import useTableHandlers from './hooks/useTableHandlers'
 import RowSelectorMenu from './RowSelectorMenu'
 import { FakeColumnMenuButton } from './ColumnMenuButton'
 import dynamic from 'next/dynamic'
 import { selectionCount } from './context/reducer/rowSelection'
-import useRowSelectionHandlers from './hooks/useRowSelectionHandlers'
 import { genericMemo as memo } from './utils'
+import BulkRowSelectorCheckbox from './BulkRowSelectorCheckbox'
+import RowSelectionCountBadge from './RowSelectionCountBadge'
 
 type Props<T> = {
-    table: Table<T>
+    setColumnOrder: (updater: Updater<ColumnOrderState>) => void
+    columnOrder: ColumnOrderState
+    pagination: PaginationState
     header: Header<T, unknown>
+    resetPageIndex: () => void
     name: string
     unsortable: boolean
     rowSelector?: boolean
@@ -50,24 +53,27 @@ const IconAscending = () => (
     </div>
 )
 
-function ColumnHeader<T>({ table, position, header, name, unsortable, rowSelector, children, className }: Props<T>) {
+function ColumnHeader<T>({
+    pagination,
+    columnOrder,
+    setColumnOrder,
+    position,
+    header,
+    name,
+    resetPageIndex,
+    unsortable,
+    rowSelector,
+    children,
+    className,
+}: Props<T>) {
     const dispatcher = useDispatch()
     const columnSort = useColumnSortState()
-    const rowSelection = useRowSelectionState()
-    const loading = useLoadingState()
     const { columnRePositioning } = useSettingsState()
     const { resetSortUrlQuery } = useTableHandlers()
-    const { resetRowSelection, handleSelectAllCurrentPage } = useRowSelectionHandlers()
     const dispatch = dispatcher.columnSort
     const columns = columnSort.column as columnSortStateType['column']
     const [showColumnOptionsMenu, setShowColumnOptionsMenu] = React.useState(false)
-    const { all: allRowSelected, except } = rowSelection
-    const pagination = table.getState().pagination
-    const { total } = useResultState()
-    const rowSelectionCount = total > 0 ? selectionCount(rowSelection, total) : 0
 
-    const { getState, setColumnOrder } = table
-    const { columnOrder } = getState()
     const { column } = header
 
     const [{ isOver, canDrop }, dropRef] = useDrop({
@@ -92,7 +98,7 @@ function ColumnHeader<T>({ table, position, header, name, unsortable, rowSelecto
     })
 
     const handleSort = () => {
-        table.resetPageIndex()
+        resetPageIndex()
 
         if (!columns[name]) {
             resetSortUrlQuery(Object.assign({}, columnSort.column, { [name]: sortDirection.ASC }))
@@ -112,33 +118,15 @@ function ColumnHeader<T>({ table, position, header, name, unsortable, rowSelecto
         dispatch({ type: actionType.REMOVE, payload: name })
     }
 
-    const isRowSelectionIndeterminate = React.useMemo(
-        () =>
-            (!allRowSelected && rowSelectionCount > 0 && pagination.pageIndex === 0 && rowSelectionCount < pagination.pageSize) ||
-            (!allRowSelected && rowSelectionCount > 0 && pagination.pageIndex > 0 && rowSelectionCount > pagination.pageSize) ||
-            (allRowSelected && Object.keys(except).length > 0),
-        [allRowSelected, rowSelectionCount, pagination.pageIndex, pagination.pageSize, except]
-    )
-
-    const handleBulkRowSelectionChange = React.useCallback(
-        (e: React.ChangeEvent<HTMLInputElement>) => {
-            resetRowSelection()
-            if (isRowSelectionIndeterminate || e.target.checked) {
-                handleSelectAllCurrentPage()
-                return
-            }
-        },
-        [isRowSelectionIndeterminate, resetRowSelection, handleSelectAllCurrentPage]
-    )
-
     return (
         <th
             ref={dropRef}
             colSpan={header.colSpan}
             onMouseEnter={() => setShowColumnOptionsMenu(true)}
+            style={{ width: header.getSize() }}
             className={clsx(
                 className,
-                'relative whitespace-nowrap lg:px-2 py-2.5 text-left text-sm font-semibold text-gray-400',
+                'relative whitespace-nowrap lg:px-2 py-2.5 text-left text-sm font-semibold text-gray-400 group',
                 isDragging && 'opacity-[0.8] bg-cyan-50 text-cyan-700'
             )}>
             {isOver && !isDragging && (
@@ -149,29 +137,13 @@ function ColumnHeader<T>({ table, position, header, name, unsortable, rowSelecto
                     )}
                 />
             )}
-            {rowSelector && rowSelectionCount > 0 && (
-                <span className="absolute top-4 left-0 bg-indigo-50 h-[1.20rem] w-5 flex items-center px-1 text-[0.70rem] text-indigo-700 border border-r-transparent border-indigo-400">
-                    {rowSelectionCount}
-                </span>
-            )}
+            {rowSelector && <RowSelectionCountBadge />}
             <div ref={previewRef} className={clsx(!rowSelector && 'justify-between items-center', 'flex')}>
                 <div className={clsx(!rowSelector && 'flex items-center justify-between')}>
-                    <span>
-                        {rowSelector ? (
-                            <IndeterminateCheckbox
-                                {...{
-                                    checked: rowSelectionCount > 0 && !isRowSelectionIndeterminate,
-                                    className: 'ml-4',
-                                    indeterminate: isRowSelectionIndeterminate,
-                                    onChange: handleBulkRowSelectionChange,
-                                    disabled: loading,
-                                }}
-                            />
-                        ) : (
-                            children
-                        )}
-                    </span>
+                    {/* content */}
+                    <span>{rowSelector ? <BulkRowSelectorCheckbox pagination={pagination} /> : children}</span>
 
+                    {/* sort control */}
                     <button
                         onClick={handleSort}
                         disabled={unsortable || columnRePositioning}
@@ -180,27 +152,40 @@ function ColumnHeader<T>({ table, position, header, name, unsortable, rowSelecto
                         {!columns[name] && !unsortable && <IconNotSorting />}
                         {columns[name] && <>{columns[name] === sortDirection.DESC ? <IconDescending /> : <IconAscending />}</>}
                     </button>
-                </div>
 
-                <div>
-                    {columnRePositioning ? (
-                        rowSelector || (position && ['left', 'right'].includes(position)) ? null : (
-                            <button ref={dragRef} title="re-position" type="button" className="cursor-grabbing hover:bg-gray-200/80 p-1">
-                                <DotsNine weight="regular" className="w-5 h-5 text-gray-600 hover:text-gray-800" aria-hidden="true" />
-                            </button>
-                        )
-                    ) : (
-                        <>
-                            {rowSelector && <RowSelectorMenu rowSelectionCount={rowSelectionCount} />}
-                            {!rowSelector && !showColumnOptionsMenu && <FakeColumnMenuButton />}
-
-                            {!rowSelector && showColumnOptionsMenu && (
-                                <Suspense fallback={<FakeColumnMenuButton />}>
-                                    <ColumnOptionsMenu<T> unsortable={unsortable} name={name} header={header} />
-                                </Suspense>
-                            )}
-                        </>
+                    {/* resize control */}
+                    {header.column.getCanResize() && (
+                        <span
+                            onMouseDown={header.getResizeHandler()}
+                            onTouchStart={header.getResizeHandler()}
+                            className={clsx(
+                                'absolute right-0 top-0 h-full w-1 opacity-0 cursor-col-resize',
+                                header.column.getIsResizing() ? 'bg-sky-500 opacity-100' : 'bg-gray-300',
+                                'group-hover:opacity-100'
+                            )}></span>
                     )}
+
+                    {/* menu / drag handler */}
+                    <span className="absolute top-2.5 right-2">
+                        {columnRePositioning ? (
+                            rowSelector || (position && ['left', 'right'].includes(position)) ? null : (
+                                <button ref={dragRef} title="re-position" type="button" className="cursor-grabbing hover:bg-gray-200/80 p-1">
+                                    <DotsNine weight="regular" className="w-5 h-5 text-gray-600 hover:text-gray-800" aria-hidden="true" />
+                                </button>
+                            )
+                        ) : (
+                            <>
+                                {rowSelector && <RowSelectorMenu />}
+                                {!rowSelector && !showColumnOptionsMenu && <FakeColumnMenuButton />}
+
+                                {!rowSelector && showColumnOptionsMenu && (
+                                    <Suspense fallback={<FakeColumnMenuButton />}>
+                                        <ColumnOptionsMenu<T> unsortable={unsortable} name={name} header={header} />
+                                    </Suspense>
+                                )}
+                            </>
+                        )}
+                    </span>
                 </div>
             </div>
         </th>

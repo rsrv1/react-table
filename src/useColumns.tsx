@@ -21,12 +21,16 @@ function useColumns({ data }: Args): ColumnDef<Person, any>[] {
             {
                 accessorKey: 'id',
                 id: 'id',
+                size: 40,
+                enableResizing: false,
+                enablePinning: false,
                 cell: ({ getValue, row, column: { id }, table }) => <RowSelectionCheckbox value={getValue() as string} />,
             },
             {
                 accessorKey: '_expand',
                 id: '_expand',
                 header: () => null,
+                enableResizing: false,
                 cell: ({ row, table }) => {
                     return row.getCanExpand() ? (
                         <button
@@ -44,6 +48,9 @@ function useColumns({ data }: Args): ColumnDef<Person, any>[] {
             {
                 accessorKey: 'firstName',
                 id: 'firstName',
+                size: 250,
+                minSize: 160,
+                maxSize: 400,
                 cell: ({ row, getValue }) => (
                     <div
                         style={{
@@ -73,12 +80,12 @@ function useColumns({ data }: Args): ColumnDef<Person, any>[] {
             {
                 accessorKey: 'status',
                 id: 'status',
-                header: 'Status',
+                header: () => <span>Status</span>,
             },
             {
                 accessorKey: 'progress',
                 id: 'progress',
-                header: 'Profile Progress',
+                header: () => 'Progress',
                 cell: info => (
                     <span>
                         {info.row.original.lastName}-{info.row.original.age}
@@ -89,6 +96,9 @@ function useColumns({ data }: Args): ColumnDef<Person, any>[] {
                 accessorFn: row => row.id,
                 id: '_action',
                 header: 'Action',
+                size: 100,
+                enableResizing: false,
+                enablePinning: false,
                 cell: ({ getValue, row: { index }, column: { id }, table }) => (
                     <button
                         onClick={() => {
