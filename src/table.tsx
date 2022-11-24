@@ -168,8 +168,7 @@ function Table() {
                                                 <TableBody table={table} position="left" />
                                             </TableRenderer>
                                         )}
-                                        <div className={clsx(table.getIsSomeColumnsPinned() && 'overflow-x-auto ', 'relative')}>
-                                            {/** set overflow-x-auto to make the column pinning work, to server better y overflow for inf pagination this setup is good for now */}
+                                        <div className={clsx(table.getIsSomeColumnsPinned() && 'overflow-x-auto', 'relative max-w-full')}>
                                             {rowSelectionCount > 0 && (
                                                 <RowSelectionMessage<Person> mutate={mutate} loading={loading} count={rowSelectionCount} />
                                             )}

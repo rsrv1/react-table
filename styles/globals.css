@@ -1,3 +1,17 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+.resizer {
+    user-select: none;
+    touch-action: none;
+}
+@media (hover: hover) {
+    .resizer {
+        opacity: 0;
+    }
+
+    *:hover > .resizer {
+        opacity: 1;
+    }
+}

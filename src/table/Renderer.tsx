@@ -31,7 +31,7 @@ function Renderer<T>({
     const columnOrder = table.getState().columnOrder
 
     return headerGroups.length === 0 ? null : (
-        <table className={clsx('divide-y divide-gray-300 table-fixed ', position === 'center' ? 'w-full' : 'shadow bg-gray-100/80', className)}>
+        <table className={clsx('divide-y divide-gray-300 table-fixed ', position === 'center' ? 'md:w-full' : 'shadow bg-gray-100/80', className)}>
             <thead className="bg-gray-50">
                 {headerGroups.map(headerGroup => (
                     <tr key={headerGroup.id} className="relative">
@@ -57,7 +57,7 @@ function Renderer<T>({
                         )}
                     </tr>
                 ))}
-                <ValidatingIndicator />
+                {position === 'center' && <ValidatingIndicator />}
             </thead>
             <tbody className="divide-y divide-gray-200 bg-white">{children}</tbody>
         </table>

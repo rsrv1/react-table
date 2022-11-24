@@ -156,21 +156,26 @@ function ColumnHeader<T>({
                     )}
 
                     {/* resize control */}
-                    {header.column.getCanResize() && (
+                    {header.column.getCanResize() && !columnRePositioning && position === 'center' && (
                         <div
                             onMouseDown={header.getResizeHandler()}
                             onTouchStart={header.getResizeHandler()}
                             className={clsx(
-                                'absolute right-0 top-0 flex justify-center items-center h-full w-4 opacity-0 cursor-col-resize',
-                                'group-hover:opacity-100 '
+                                'absolute right-0 top-0 flex justify-center items-center h-full w-4 cursor-col-resize resizer',
+                                'group-hover:opacity-100',
+                                header.column.getIsResizing() && 'opacity-100'
                             )}>
                             <span className={clsx('w-1 h-full', header.column.getIsResizing() ? 'bg-sky-500 opacity-100' : 'bg-gray-300')}></span>
                         </div>
                     )}
 
                     {/* menu / drag handler */}
-                    {/* <span className="flex justify-between"> */}
-                    <span className={clsx(rowSelector ? 'flex items-center' : 'absolute top-2.5 right-3')}>
+                    <span
+                        className={clsx(
+                            rowSelector && 'flex items-center',
+                            !rowSelector && 'absolute top-2.5',
+                            header.column.getCanResize() ? 'right-3' : 'right-0'
+                        )}>
                         {columnRePositioning ? (
                             rowSelector || (position && ['left', 'right'].includes(position)) ? null : (
                                 <button ref={dragRef} title="re-position" type="button" className="cursor-grabbing hover:bg-gray-200/80 p-1">
