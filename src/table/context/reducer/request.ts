@@ -24,8 +24,6 @@ export default function reducer(state: state, action: actions) {
             return _g(state, { loading: action.payload })
 
         case actionType.VALIDATING:
-            console.log('VALIDATING', action.payload)
-
             return _g(state, { validating: action.payload })
 
         case actionType.COLUMN_RE_POSITIONING:

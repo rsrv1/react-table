@@ -114,6 +114,8 @@ function useColumns({ data }: Args): ColumnDef<Person, any>[] {
         []
     )
 
+    console.log('useColumns rerender')
+
     return columns
 }
 

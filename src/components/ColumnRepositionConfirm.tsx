@@ -1,5 +1,7 @@
 import { Table } from '@tanstack/react-table'
 import React from 'react'
+import { URI_QUERY_PREFIX } from '../main'
+import { StoreColumnOrder } from '../table/PersistPreference'
 
 function ColumnRepositionConfirm<T>({
     table,
@@ -11,9 +13,8 @@ function ColumnRepositionConfirm<T>({
     resetColumnPositioning(): void
 }) {
     const savePosition = () => {
-        const order = table.getState().columnOrder
-        console.log('column order', order)
-
+        const store = new StoreColumnOrder(URI_QUERY_PREFIX)
+        store.save(table.getState().columnOrder)
         stopColumnPositioning()
     }
 
