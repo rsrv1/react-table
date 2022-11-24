@@ -3,6 +3,8 @@ import { SWRConfig } from 'swr'
 import { URI_QUERY_PREFIX } from './main'
 import Table from './table'
 import { TableProvider } from './table/context/tableContext'
+import { DndProvider } from 'react-dnd'
+import { HTML5Backend } from 'react-dnd-html5-backend'
 
 function App() {
     return (
@@ -16,7 +18,9 @@ function App() {
                 },
             }}>
             <TableProvider prefix={URI_QUERY_PREFIX}>
-                <Table />
+                <DndProvider backend={HTML5Backend}>
+                    <Table />
+                </DndProvider>
             </TableProvider>
         </SWRConfig>
     )

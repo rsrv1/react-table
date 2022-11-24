@@ -4,6 +4,7 @@ interface PersistentStorage<T> {
     prefix: string
     save(value: T): void
     read(): T
+    flush(): void
 }
 
 class StoreColumnSize implements PersistentStorage<ColumnSizingState> {
@@ -29,6 +30,10 @@ class StoreColumnSize implements PersistentStorage<ColumnSizingState> {
 
         return JSON.parse(value)
     }
+
+    flush(): void {
+        localStorage.removeItem(this.getKey())
+    }
 }
 
 class StoreColumnOrder implements PersistentStorage<ColumnOrderState> {
@@ -53,6 +58,10 @@ class StoreColumnOrder implements PersistentStorage<ColumnOrderState> {
         if (!value) return []
 
         return JSON.parse(value)
+    }
+
+    flush(): void {
+        localStorage.removeItem(this.getKey())
     }
 }
 

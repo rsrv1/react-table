@@ -19,7 +19,10 @@ function useTable<T>({ data, lastData, pagination, setPagination, columns, meta 
     const [columnPinning, setColumnPinning] = React.useState({})
     const { uriQueryPrefix } = useSettingsState()
     const [columnOrder, setColumnOrder] = React.useState<ColumnOrderState>(columns.map(column => column.id as string))
-    const resetColumnOrder = React.useCallback(() => setColumnOrder(columns.map(column => column.id as string)), [columns])
+    const resetColumnOrder = React.useCallback(() => {
+        new StoreColumnOrder(uriQueryPrefix).flush()
+        setColumnOrder(columns.map(column => column.id as string))
+    }, [columns, uriQueryPrefix])
 
     /** first mount hydrate column order preference */
     React.useLayoutEffect(() => {
@@ -78,7 +81,7 @@ function useTable<T>({ data, lastData, pagination, setPagination, columns, meta 
     /** store column resizing data */
     useDebounce(table.getState().columnSizing, 900, handleColumnSizingChange)
 
-    return { table, columnOrder, resetColumnOrder }
+    return { table, resetColumnOrder }
 }
 
 export default useTable

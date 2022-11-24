@@ -4,21 +4,19 @@ import useTableHandlers from './table/hooks/useTableHandlers'
 import useColumns from './useColumns'
 import useTable from './table/hooks/useTable'
 import { ColumnOrderState, Table } from '@tanstack/react-table'
-import { SWRResponse } from 'swr'
+import { KeyedMutator, SWRResponse } from 'swr'
 import { fetchData, Person } from './data/fetchData'
-import { DndProvider } from 'react-dnd'
-import { HTML5Backend } from 'react-dnd-html5-backend'
 import { useRouter } from 'next/router'
 import { getFilterQueryKey, getQueryKey } from './table/utils'
 
 export type RenderProps<T> = {
     table: Table<T>
-    columnOrder: ColumnOrderState
     resetColumnOrder: () => void
     isColumnPositioning: boolean
     stopColumnPositioning: () => void
     rowSelectionCount: number
-    dataQuery: SWRResponse<Response<T>>
+    mutate: KeyedMutator<Response<T>>
+    total: number
     loading: boolean
     options: Query | null
 }
@@ -59,8 +57,10 @@ function Main({ children }: Props) {
         return fetchData(args)
     }, [])
 
-    const { setPagination, pagination, pageSize, rowSelectionCount, isColumnPositioning, dataQuery, lastData, loading, options } =
-        useTableData<Person>({ filter, fetcher })
+    const { setPagination, pagination, rowSelectionCount, isColumnPositioning, dataQuery, lastData, loading, options } = useTableData<Person>({
+        filter,
+        fetcher,
+    })
 
     const { stopColumnPositioning, resetTableUrlQuery } = useTableHandlers()
 
@@ -68,7 +68,7 @@ function Main({ children }: Props) {
         data: dataQuery.data,
     })
 
-    const { table, columnOrder, resetColumnOrder } = useTable<Person>({
+    const { table, resetColumnOrder } = useTable<Person>({
         data: dataQuery.data,
         lastData,
         pagination,
@@ -82,19 +82,19 @@ function Main({ children }: Props) {
     })
 
     return (
-        <DndProvider backend={HTML5Backend}>
+        <>
             {children({
                 table,
-                columnOrder,
                 resetColumnOrder,
                 isColumnPositioning,
                 stopColumnPositioning,
                 rowSelectionCount,
-                dataQuery,
+                mutate: dataQuery.mutate,
+                total: dataQuery.data?.total || 0,
                 loading,
                 options,
             })}
-        </DndProvider>
+        </>
     )
 }
 

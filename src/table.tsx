@@ -93,23 +93,16 @@ function Table() {
                 <div className="sm:flex-auto">
                     <h1 className="text-xl font-semibold text-gray-900">Users</h1>
                     <p className="mt-2 text-sm text-gray-700">
-                        A list of all the users in your account including their name, title, email and role. <a href="/test">Jump</a>
+                        A list of all the users in your account including their name, title, email and role.{' '}
+                        <a className="text-blue-500" href="/test">
+                            Jump
+                        </a>
                     </p>
                 </div>
             </div>
 
             <Main>
-                {({
-                    table,
-                    columnOrder,
-                    resetColumnOrder,
-                    rowSelectionCount,
-                    isColumnPositioning,
-                    stopColumnPositioning,
-                    dataQuery,
-                    loading,
-                    options,
-                }) => (
+                {({ table, resetColumnOrder, rowSelectionCount, isColumnPositioning, stopColumnPositioning, mutate, total, loading, options }) => (
                     <div className="mt-8 flex flex-col">
                         <div className="-my-2 -mx-4 sm:-mx-6 lg:-mx-8">
                             <div className="lg:inline-block min-w-full py-2 align-middle md:px-6 lg:px-8">
@@ -178,7 +171,7 @@ function Table() {
                                         <div className={clsx(table.getIsSomeColumnsPinned() && 'overflow-x-auto ', 'relative')}>
                                             {/** set overflow-x-auto to make the column pinning work, to server better y overflow for inf pagination this setup is good for now */}
                                             {rowSelectionCount > 0 && (
-                                                <RowSelectionMessage<Person> mutate={dataQuery.mutate} loading={loading} count={rowSelectionCount} />
+                                                <RowSelectionMessage<Person> mutate={mutate} loading={loading} count={rowSelectionCount} />
                                             )}
                                             <TableRenderer table={table} position="center">
                                                 <TableBody table={table} position="center" />
@@ -198,7 +191,7 @@ function Table() {
                                     )}
                                 </div>
                                 <div className="flex justify-between items-center">
-                                    <div className="py-4">{loading ? <p>loading...</p> : <p>Total {dataQuery.data?.total} results</p>}</div>
+                                    <div className="py-4">{loading ? <p>loading...</p> : <p>Total {total} results</p>}</div>
 
                                     {/* pagination */}
                                     <Pagination<Person> table={table} loading={loading} />

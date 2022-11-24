@@ -96,7 +96,7 @@ function useColumns({ data }: Args): ColumnDef<Person, any>[] {
                 accessorFn: row => row.id,
                 id: '_action',
                 header: 'Action',
-                size: 100,
+                size: 80,
                 enableResizing: false,
                 enablePinning: false,
                 cell: ({ getValue, row: { index }, column: { id }, table }) => (
@@ -113,8 +113,6 @@ function useColumns({ data }: Args): ColumnDef<Person, any>[] {
         ],
         []
     )
-
-    console.log('useColumns rerender')
 
     return columns
 }
