@@ -163,9 +163,9 @@ function ColumnHeader<T>({
                             className={clsx(
                                 'absolute right-0 top-0 flex justify-center items-center h-full w-4 cursor-col-resize resizer',
                                 'group-hover:opacity-100',
-                                header.column.getIsResizing() && 'opacity-100'
+                                header.column.getIsResizing() ? 'opacity-100' : 'opacity-0'
                             )}>
-                            <span className={clsx('w-1 h-full', header.column.getIsResizing() ? 'bg-sky-500 opacity-100' : 'bg-gray-300')}></span>
+                            <span className={clsx('w-1 h-full', header.column.getIsResizing() ? 'bg-sky-500' : 'bg-gray-300')}></span>
                         </div>
                     )}
 
