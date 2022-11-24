@@ -110,7 +110,7 @@ export const isSelected = (state: state): isSelectedGetter => {
 
     return (id: string) => {
         if (Object.keys(only).length > 0) {
-            return only[id]
+            return only[id] || false
         }
 
         if (all) {
