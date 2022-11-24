@@ -14,7 +14,7 @@ function ColumnRepositionConfirm<T>({
 }) {
     const savePosition = () => {
         const store = new StoreColumnOrder(URI_QUERY_PREFIX)
-        store.save(table.getState().columnOrder)
+        store.save = table.getState().columnOrder
         stopColumnPositioning()
     }
 

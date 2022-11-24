@@ -24,15 +24,6 @@ function useTable<T>({ data, lastData, pagination, setPagination, columns, meta 
         setColumnOrder(columns.map(column => column.id as string))
     }, [columns, uriQueryPrefix])
 
-    /** first mount hydrate column order preference */
-    React.useLayoutEffect(() => {
-        const store = new StoreColumnOrder(uriQueryPrefix)
-        const preference = store.read()
-        if (!preference || preference.length === 0) return
-
-        setColumnOrder(preference)
-    }, [uriQueryPrefix])
-
     const table = useReactTable({
         data: data?.rows ?? lastData.current.rows,
         columns,
@@ -62,18 +53,25 @@ function useTable<T>({ data, lastData, pagination, setPagination, columns, meta 
         meta,
     })
 
-    /** first mount hydrate column size preference */
     React.useLayoutEffect(() => {
         if (typeof window === 'undefined') return
 
+        /** first mount hydrate column size preference */
         const store = new StoreColumnSize(uriQueryPrefix)
-        table.setColumnSizing(store.read())
+        table.setColumnSizing(store.read)
+
+        /** first mount hydrate column order preference */
+        const orderStore = new StoreColumnOrder(uriQueryPrefix)
+        const preference = orderStore.read
+        if (!preference || preference.length === 0) return
+
+        setColumnOrder(preference)
     }, [uriQueryPrefix])
 
     const handleColumnSizingChange = React.useCallback(
         (columnSizing: ColumnSizingState) => {
             const store = new StoreColumnSize(uriQueryPrefix)
-            store.save(columnSizing)
+            store.save = columnSizing
         },
         [uriQueryPrefix]
     )

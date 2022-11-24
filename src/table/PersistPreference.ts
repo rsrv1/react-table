@@ -2,8 +2,8 @@ import { ColumnOrderState, ColumnSizingState } from '@tanstack/react-table'
 
 interface PersistentStorage<T> {
     prefix: string
-    save(value: T): void
-    read(): T
+    set save(value: T)
+    get read(): T
     flush(): void
 }
 
@@ -18,13 +18,13 @@ class StoreColumnSize implements PersistentStorage<ColumnSizingState> {
         return `table.${this.prefix}.colSize`
     }
 
-    save(value: ColumnSizingState) {
+    set save(value: ColumnSizingState) {
         if (Object.keys(value).length > 0) {
-            localStorage.setItem(this.getKey(), JSON.stringify(Object.assign({}, this.read(), value)))
+            localStorage.setItem(this.getKey(), JSON.stringify(Object.assign({}, this.read, value)))
         }
     }
 
-    read(): ColumnSizingState {
+    get read(): ColumnSizingState {
         const value = localStorage.getItem(this.getKey())
         if (!value) return {}
 
@@ -47,13 +47,13 @@ class StoreColumnOrder implements PersistentStorage<ColumnOrderState> {
         return `table.${this.prefix}.colOrder`
     }
 
-    save(value: ColumnOrderState) {
+    set save(value: ColumnOrderState) {
         if (value.length > 0) {
             localStorage.setItem(this.getKey(), JSON.stringify(value))
         }
     }
 
-    read(): ColumnOrderState {
+    get read(): ColumnOrderState {
         const value = localStorage.getItem(this.getKey())
         if (!value) return []
 
