@@ -72,14 +72,16 @@ function TableProvider({ prefix, children }: TableProviderProps) {
         () => ({ loading: requestState.loading, validating: requestState.validating }),
         [requestState.loading, requestState.validating]
     )
+    const rowSelectionContextValue = React.useMemo(() => rowSelectionState, [rowSelectionState])
+    const columnSortContextValue = React.useMemo(() => ({ column: columnSortState.column }), [columnSortState.column])
 
     return (
         <DispatcherContext.Provider value={diapatcherValue}>
             <LoadingContext.Provider value={loadingContextValue}>
                 <SettingsContext.Provider value={SettingsContextValue}>
                     <ResultContext.Provider value={resultContextValue}>
-                        <ColumnSortContext.Provider value={columnSortState}>
-                            <RowSelectionContext.Provider value={rowSelectionState}>{children}</RowSelectionContext.Provider>
+                        <ColumnSortContext.Provider value={columnSortContextValue}>
+                            <RowSelectionContext.Provider value={rowSelectionContextValue}>{children}</RowSelectionContext.Provider>
                         </ColumnSortContext.Provider>
                     </ResultContext.Provider>
                 </SettingsContext.Provider>
