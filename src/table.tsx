@@ -57,7 +57,7 @@ function TableBody({ table, position = 'center' }: { table: TanstackTable<Person
                                     className={clsx(
                                         cell.column.id === 'id' && 'relative w-12',
                                         cell.column.id === 'firstName' && 'py-4 pr-3',
-                                        'whitespace-nowrap px-2 py-2 text-sm text-gray-500'
+                                        'whitespace-nowrap px-2 py-2 text-sm text-gray-500 truncate'
                                     )}>
                                     {cell.column.id === 'id' ? (
                                         <div className="px-6 sm:w-16 sm:px-8">

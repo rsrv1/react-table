@@ -38,17 +38,17 @@ const ColumnOptionsMenu = dynamic(() => import('./ColumnOptionsMenu'), {
 })
 
 const IconNotSorting = () => (
-    <div className="hover:bg-slate-200 p-1.5 inline-flex rounded-full text-gray-300 hover:text-gray-600">
+    <div className="hover:bg-gray-100 p-1.5 inline-flex rounded-full text-gray-300 hover:text-gray-600" title="sort">
         <ArrowsDownUp size={16} className="font-medium" />
     </div>
 )
 const IconDescending = () => (
-    <div className="bg-sky-50 hover:bg-sky-100 p-1 inline-flex w-6 rounded-full">
+    <div className="bg-sky-50 hover:bg-sky-100 p-1 inline-flex w-6 rounded-full" title="unsort">
         <SortDescending size={18} weight="bold" className="font-medium text-sky-500" />
     </div>
 )
 const IconAscending = () => (
-    <div className="bg-sky-50 p-1 inline-flex w-6 rounded-full">
+    <div className="bg-sky-50 p-1 hover:bg-sky-100 inline-flex w-6 rounded-full" title="descending">
         <SortAscending size={18} weight="bold" className="font-medium text-sky-500" />
     </div>
 )
@@ -126,7 +126,7 @@ function ColumnHeader<T>({
             style={{ width: header.getSize() }}
             className={clsx(
                 className,
-                'relative whitespace-nowrap md:px-2 py-2.5 text-left text-sm font-semibold text-gray-400 group',
+                'relative whitespace-nowrap md:px-2 py-2.5 text-left text-sm font-semibold text-gray-500 group',
                 isDragging && 'opacity-[0.8] bg-cyan-50 text-cyan-700'
             )}>
             {isOver && !isDragging && (
@@ -165,7 +165,7 @@ function ColumnHeader<T>({
                                 'group-hover:opacity-100',
                                 header.column.getIsResizing() ? 'opacity-100' : 'opacity-0'
                             )}>
-                            <span className={clsx('w-1 h-full', header.column.getIsResizing() ? 'bg-sky-500' : 'bg-gray-300')}></span>
+                            <span className={clsx('w-0.5 h-full', header.column.getIsResizing() ? 'bg-sky-500' : 'bg-gray-300')}></span>
                         </div>
                     )}
 
