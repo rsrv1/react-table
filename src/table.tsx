@@ -10,11 +10,11 @@ import Main from './main'
 import { Person } from './data/fetchData'
 import clsx from 'clsx'
 import ColumnRepositionConfirm from './components/ColumnRepositionConfirm'
-import styles from './table/loader.module.css'
 import { CaretDown, MagnifyingGlass } from 'phosphor-react'
 import Search from './table/Search'
 import { useRowSelectionState } from './table/context/tableContext'
 import { isSelected } from './table/context/reducer/rowSelection'
+import LineProgress from './table/LineProgress'
 
 type tablePosition = 'left' | 'center' | 'right'
 
@@ -160,7 +160,10 @@ function Table() {
                                         </div>
                                     </div>
 
-                                    {loading && <div className={styles.loading}></div>}
+                                    <div className={clsx(loading || 'invisible', 'w-full relative')}>
+                                        <LineProgress />
+                                    </div>
+
                                     <div
                                         className={clsx(table.getIsSomeColumnsPinned() ? 'flex space-x-1' : 'overflow-x-auto', 'lg:overflow-hidden')}>
                                         {table.getIsSomeColumnsPinned() && (
