@@ -47,7 +47,7 @@ function Renderer<T>({
                                     columnOrder={columnOrder}
                                     setColumnOrder={setColumnOrder}
                                     resetPageIndex={resetPageIndex}
-                                    unsortable={header.id.startsWith('_') || ['id'].includes(header.id)}
+                                    unsortable={['id'].includes(header.id) || !header.column.getCanSort()}
                                     rowSelector={header.id === 'id'}
                                     name={header.id}
                                     className="whitespace-nowrap">

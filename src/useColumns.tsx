@@ -22,6 +22,7 @@ function useColumns({ data }: Args): ColumnDef<Person, any>[] {
                 accessorKey: 'id',
                 id: 'id',
                 size: 40,
+                enableSorting: false,
                 enableResizing: false,
                 enablePinning: false,
                 cell: ({ getValue, row, column: { id }, table }) => <RowSelectionCheckbox value={getValue() as string} />,
@@ -97,6 +98,7 @@ function useColumns({ data }: Args): ColumnDef<Person, any>[] {
                 id: '_action',
                 header: 'Action',
                 size: 80,
+                enableSorting: false,
                 enableResizing: false,
                 enablePinning: false,
                 cell: ({ getValue, row: { index }, column: { id }, table }) => (
