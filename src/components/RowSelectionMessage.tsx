@@ -79,7 +79,7 @@ function RowSelectionMessage<T>({ mutate, loading, count }: Props<T>) {
     }
 
     return (
-        <div className="absolute z-10 left-8 flex h-12 items-center bg-gray-100 md:left-16 px-3 mr-3">
+        <div className="absolute z-10 left-10 flex h-12 items-center bg-gray-100 md:left-16 px-3 mr-3">
             <Select
                 value={action}
                 disabled={loading}

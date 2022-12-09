@@ -174,7 +174,7 @@ function ColumnHeader<T>({
                     <span
                         className={clsx(
                             rowSelector && 'flex items-center',
-                            !rowSelector && 'absolute top-2.5',
+                            !rowSelector && 'md:absolute top-2.5',
                             header.column.getCanResize() ? 'right-3' : 'right-0'
                         )}>
                         {columnRePositioning ? (

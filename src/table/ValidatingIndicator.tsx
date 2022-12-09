@@ -18,7 +18,7 @@ function ValidatingIndicator() {
     }, [validating])
 
     return (
-        <tr className="relative">
+        <tr className="relative overflow-hidden">
             <th className={clsx('absolute inset-0', show ? styles.validatingTransition : 'bg-transparent')} />
         </tr>
     )
