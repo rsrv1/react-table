@@ -27,7 +27,9 @@ function Renderer<T>({
     const headerGroups = getHeaderGroups(position, table)
     const resetPageIndex = React.useCallback(() => table.resetPageIndex(), [])
     const setColumnOrder = React.useMemo(() => table.setColumnOrder, [])
-    const pagination = table.getState().pagination
+
+    const { pageIndex, pageSize } = table.getState().pagination
+    const pagination = React.useMemo(() => ({ pageIndex, pageSize }), [pageIndex, pageSize])
     const columnOrder = table.getState().columnOrder
 
     return headerGroups.length === 0 ? null : (
