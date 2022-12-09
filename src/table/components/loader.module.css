@@ -172,3 +172,24 @@
         transform: scaleX(0.08);
     }
 }
+
+/**microsoft*/
+.validatingTransition {
+    height: 1.5px;
+    position: absolute;
+    transition: width 0.3s ease 0s;
+    width: 0px;
+    min-width: 33%;
+    background: linear-gradient(to right, rgb(237, 235, 233) 0%, rgb(0, 120, 212) 50%, rgb(237, 235, 233) 100%);
+    animation: 2s ease 0s infinite normal none running breeze;
+}
+
+@keyframes breeze {
+    0% {
+        left: -30%;
+    }
+
+    100% {
+        left: 100%;
+    }
+}
