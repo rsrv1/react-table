@@ -10,7 +10,7 @@ import { StoreColumnSize } from '../PersistPreference'
 
 const MotionReorderMenuGroup = dynamic(() => import(/* webpackPrefetch: true */ './MotionReorderMenuGroup'), {
     suspense: true,
-})
+}) as <T>({ table }: { table: Table<T> }) => JSX.Element
 
 function ColumnVisibility<T>({ table, onResetColumnOrder }: { table: Table<T>; onResetColumnOrder?: () => void }) {
     const { uriQueryPrefix } = useSettingsState()

@@ -13,6 +13,7 @@ import { selectionCount } from './context/reducer/rowSelection'
 import { genericMemo as memo } from './utils'
 import BulkRowSelectorCheckbox from './BulkRowSelectorCheckbox'
 import RowSelectionCountBadge from './RowSelectionCountBadge'
+import { ColumnOptionsDropdownType } from './ColumnOptionsMenu'
 
 type Props<T> = {
     setColumnOrder: (updater: Updater<ColumnOrderState>) => void
@@ -35,7 +36,7 @@ const reorderColumn = (draggedColumnId: string, targetColumnId: string, columnOr
 
 const ColumnOptionsMenu = dynamic(() => import(/* webpackPrefetch: true */ './ColumnOptionsMenu'), {
     suspense: true,
-})
+}) as <T>(arg: ColumnOptionsDropdownType<T>) => JSX.Element
 
 const IconNotSorting = () => (
     <div className="hover:bg-gray-100 p-1.5 inline-flex rounded-full text-gray-300 hover:text-gray-600" title="sort">
