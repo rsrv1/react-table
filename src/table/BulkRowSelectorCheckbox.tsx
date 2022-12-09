@@ -4,7 +4,7 @@ import { selectionCount } from './context/reducer/rowSelection'
 import { useLoadingState, useResultState, useRowSelectionState } from './context/tableContext'
 import useRowSelectionCount from './hooks/useRowSelectionCount'
 import useRowSelectionHandlers from './hooks/useRowSelectionHandlers'
-import IndeterminateCheckbox from './IndeterminateCheckbox'
+import IndeterminateCheckbox from './components/IndeterminateCheckbox'
 
 function BulkRowSelectorCheckbox({ pagination }: { pagination: PaginationState }) {
     const { loading } = useLoadingState()

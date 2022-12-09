@@ -33,7 +33,7 @@ const reorderColumn = (draggedColumnId: string, targetColumnId: string, columnOr
     return [...columnOrder]
 }
 
-const ColumnOptionsMenu = dynamic(() => import('./ColumnOptionsMenu'), {
+const ColumnOptionsMenu = dynamic(() => import(/* webpackPrefetch: true */ './ColumnOptionsMenu'), {
     suspense: true,
 })
 

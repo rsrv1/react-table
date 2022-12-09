@@ -1,7 +1,7 @@
 import React from 'react'
 import { MenuButton } from '@szhsin/react-menu'
 import { useResultState, useRowSelectionState } from './context/tableContext'
-import { Menu, MenuItem } from './Menu'
+import { Menu, MenuItem } from './components/Menu'
 import DownArrowIcon from '../components/DownArrowIcon'
 import useRowSelectionHandlers from './hooks/useRowSelectionHandlers'
 import useRowSelectionCount from './hooks/useRowSelectionCount'

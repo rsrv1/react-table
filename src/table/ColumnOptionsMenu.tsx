@@ -4,7 +4,7 @@ import { Header } from '@tanstack/react-table'
 import { useColumnSortState, useDispatch, useSettingsState } from './context/tableContext'
 import { actionType, sortDirection } from './context/reducer/columnSort'
 import { actionType as requestActionType } from './context/reducer/request'
-import { Menu, MenuItem } from './Menu'
+import { Menu, MenuItem } from './components/Menu'
 import useTableHandlers from './hooks/useTableHandlers'
 import { buttonClassName, Icon } from './ColumnMenuButton'
 

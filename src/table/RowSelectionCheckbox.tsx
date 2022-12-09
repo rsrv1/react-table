@@ -2,7 +2,7 @@ import React from 'react'
 import { isSelected } from './context/reducer/rowSelection'
 import { useLoadingState, useRowSelectionState } from './context/tableContext'
 import useRowSelectionHandlers from './hooks/useRowSelectionHandlers'
-import IndeterminateCheckbox from './IndeterminateCheckbox'
+import IndeterminateCheckbox from './components/IndeterminateCheckbox'
 
 function RowSelectionCheckbox({ value }: { value: string }) {
     const { loading } = useLoadingState()
