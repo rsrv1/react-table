@@ -54,7 +54,10 @@ export const getSorted = (state: state): string => {
     const entries = Object.entries(state.column)
     if (entries.length === 0) return ''
 
-    return entries.map(([col, direction]) => (direction === sortDirection.DESC ? `-${col}` : col)).join(',')
+    return entries
+        .sort((a, b) => a[0].localeCompare(b[0]))
+        .map(([col, direction]) => (direction === sortDirection.DESC ? `-${col}` : col))
+        .join(',')
 }
 
 function _g(state: state, modifications: Partial<state>): state {
