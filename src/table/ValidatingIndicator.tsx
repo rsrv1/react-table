@@ -1,25 +1,38 @@
 import React from 'react'
 import clsx from 'clsx'
 import { useLoadingState } from './context/tableContext'
-import styles from './components/loader.module.css'
 
 function ValidatingIndicator() {
     const { validating } = useLoadingState()
-    const [show, setShow] = React.useState(false)
+    const el = React.useRef<HTMLTableHeaderCellElement>(null)
 
     React.useEffect(() => {
-        if (validating) setShow(true)
+        let addTimer: NodeJS.Timeout | null = null
+        let removeTimer: NodeJS.Timeout | null = null
 
-        const timer = setTimeout(() => {
-            setShow(false)
-        }, 1200)
+        if (validating) {
+            el.current && el.current.classList.remove('validating-progress')
+            addTimer && clearTimeout(addTimer)
+            addTimer = setTimeout(() => {
+                if (el.current === null) return
+                el.current.classList.add('validating-progress')
+            }, 0)
+        }
 
-        return () => clearTimeout(timer)
+        removeTimer && clearTimeout(removeTimer)
+        removeTimer = setTimeout(() => {
+            el.current && el.current.classList.remove('validating-progress')
+        }, 500)
+
+        return () => {
+            addTimer && clearTimeout(addTimer)
+            removeTimer && clearTimeout(removeTimer)
+        }
     }, [validating])
 
     return (
         <tr className="relative overflow-hidden">
-            <th className={clsx('absolute inset-0', show ? styles.validatingTransition : 'bg-transparent')} />
+            <th ref={el} className="absolute inset-0" />
         </tr>
     )
 }

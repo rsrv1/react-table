@@ -160,9 +160,7 @@ function Table() {
                                         </div>
                                     </div>
 
-                                    <div className={clsx(loading || 'invisible', 'w-full relative')}>
-                                        <LineProgress />
-                                    </div>
+                                    <div className={clsx(loading || 'invisible', 'w-full relative')}>{loading && <LineProgress />}</div>
 
                                     <div
                                         className={clsx(table.getIsSomeColumnsPinned() ? 'flex space-x-1' : 'overflow-x-auto', 'lg:overflow-hidden')}>
