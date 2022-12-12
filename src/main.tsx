@@ -70,7 +70,6 @@ function Main({ children }: Props) {
 
     const { table, resetColumnOrder } = useTable<Person>({
         data: dataQuery.data,
-        lastData,
         pagination,
         setPagination,
         columns,

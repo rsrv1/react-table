@@ -7,14 +7,13 @@ import { StoreColumnOrder, StoreColumnSize } from '../PersistPreference'
 
 type Args<T> = {
     data: Response<T> | undefined
-    lastData: React.MutableRefObject<Response<T>>
     pagination: PaginationState
     setPagination: React.Dispatch<React.SetStateAction<PaginationState>>
     columns: ColumnDef<T, any>[]
     meta?: TableMeta<T> | undefined
 }
 
-function useTable<T>({ data, lastData, pagination, setPagination, columns, meta }: Args<T>) {
+function useTable<T>({ data, pagination, setPagination, columns, meta }: Args<T>) {
     const [columnVisibility, setColumnVisibility] = React.useState({})
     const [columnPinning, setColumnPinning] = React.useState({})
     const { uriQueryPrefix } = useSettingsState()
@@ -25,9 +24,9 @@ function useTable<T>({ data, lastData, pagination, setPagination, columns, meta 
     }, [columns, uriQueryPrefix])
 
     const table = useReactTable({
-        data: data?.rows ?? lastData.current.rows,
+        data: data?.rows ?? [],
         columns,
-        pageCount: data?.pageCount ?? lastData.current.pageCount,
+        pageCount: data?.pageCount ?? 0,
         state: {
             columnVisibility,
             columnOrder,
@@ -77,7 +76,7 @@ function useTable<T>({ data, lastData, pagination, setPagination, columns, meta 
     )
 
     /** store column resizing data */
-    useDebounce(table.getState().columnSizing, 900, handleColumnSizingChange)
+    useDebounce(table.getState().columnSizing, 800, handleColumnSizingChange)
 
     return { table, resetColumnOrder }
 }

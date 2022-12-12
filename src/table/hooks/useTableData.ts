@@ -63,12 +63,9 @@ function useTableData<T extends { id: string }>({ filter, fetcher }: TableData<T
               }
             : null
 
-    const lastData = React.useRef<Response<T>>({ rows: [], pageCount: 0, total: 0 })
-
-    const dataQuery = useSWR(fetcherOptions, fetcher)
-
-    const isLoading = !dataQuery.data && !dataQuery.error
-    const isValidating = dataQuery.data && dataQuery.isValidating
+    const dataQuery = useSWR(fetcherOptions, fetcher, { keepPreviousData: true })
+    const isLoading = dataQuery.isLoading
+    const isValidating = !isLoading && dataQuery.isValidating
 
     const rowSelectionCount = total > 0 ? selectionCount(rowSelection, total) : 0
 
@@ -126,11 +123,6 @@ function useTableData<T extends { id: string }>({ filter, fetcher }: TableData<T
         }
     }, [])
 
-    /** keeping the last data as - when SWR fetches the current data becomes undefined (to avoid the flickering) */
-    React.useEffect(() => {
-        if (dataQuery.data) lastData.current = dataQuery.data
-    }, [dataQuery.data])
-
     /** track loading state */
     React.useEffect(() => {
         if (isLoading) {
@@ -166,7 +158,6 @@ function useTableData<T extends { id: string }>({ filter, fetcher }: TableData<T
         rowSelectionCount,
         isColumnPositioning: columnRePositioning,
         dataQuery,
-        lastData,
         loading,
         options: fetcherOptions,
     }
