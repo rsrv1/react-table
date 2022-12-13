@@ -5,6 +5,7 @@ import { Response } from './table/hooks/useTableData'
 import ArrowDown from './components/ArrowDown'
 import ArrowRight from './components/ArrowRight'
 import RowSelectionCheckbox from './table/RowSelectionCheckbox'
+import { CopyToClipboard } from './components/CopyToClipboard'
 
 type Args = {
     data: Response<Person> | undefined
@@ -102,14 +103,18 @@ function useColumns({ data }: Args): ColumnDef<Person, any>[] {
                 enableResizing: false,
                 enablePinning: false,
                 cell: ({ getValue, row: { index }, column: { id }, table }) => (
-                    <button
-                        onClick={() => {
-                            table.options.meta?.customFn(index, id, getValue)
-                            console.log('clicked id', getValue())
-                        }}
-                        type="button">
-                        call
-                    </button>
+                    <div className="flex- items-center space-x-2">
+                        <button
+                            onClick={() => {
+                                table.options.meta?.customFn(index, id, getValue)
+                                console.log('clicked id', getValue())
+                            }}
+                            className="border border-blue-200 px-2 py-0.5"
+                            type="button">
+                            call
+                        </button>
+                        <CopyToClipboard className="inline-flex items-center" value={getValue() as string} />
+                    </div>
                 ),
             },
         ],
