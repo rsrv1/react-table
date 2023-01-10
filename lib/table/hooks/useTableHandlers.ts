@@ -3,16 +3,20 @@ import { isSelected } from '../context/reducer/rowSelection'
 import { useDispatch, useRowSelectionState, useSettingsState } from '../context/tableContext'
 import { actionType as requestActionType } from '../context/reducer/request'
 import { sortDirection } from '../context/reducer/columnSort'
-import { NextRouter, useRouter } from 'next/router'
+import { useRouter, useSearchParams } from 'next/navigation'
 import useRouteKey from './useRouteKey'
 import { getFilterQueryKey } from '../utils'
+import urlcat from 'urlcat'
 
 function useTableHandlers() {
     const dispatch = useDispatch()
+    const searchParams = useSearchParams()
     const router = useRouter()
     const getRouteKey = useRouteKey()
     const rowSelection = useRowSelectionState()
     const { uriQueryPrefix: prefix } = useSettingsState()
+
+    const searchParamString = searchParams.toString()
 
     const isSelectedGetter = React.useMemo(() => isSelected(rowSelection), [rowSelection])
 
@@ -23,26 +27,31 @@ function useTableHandlers() {
     const resetSortUrlQuery = React.useCallback(
         (columns: { [key: string]: sortDirection }) => {
             if (Object.keys(columns).length === 0) {
-                router.push({ query: Object.assign({}, router.query, { [getRouteKey('page')]: 0, [getRouteKey('sort')]: '' }) }, undefined, {
-                    shallow: true,
-                })
+                router.push(
+                    urlcat(
+                        '',
+                        '/',
+                        Object.assign({}, Object.fromEntries(searchParams.entries()), { [getRouteKey('page')]: 0, [getRouteKey('sort')]: '' })
+                    )
+                )
+
                 return
             }
 
             router.push(
-                {
-                    query: Object.assign({}, router.query, {
+                urlcat(
+                    '',
+                    '/',
+                    Object.assign({}, Object.fromEntries(searchParams.entries()), {
                         [getRouteKey('page')]: 0,
                         [getRouteKey('sort')]: Object.keys(columns)
                             .map(column => `${columns[column] === sortDirection.ASC ? '' : '-'}${column}`)
                             .join(','),
-                    }),
-                },
-                undefined,
-                { shallow: true }
+                    })
+                )
             )
         },
-        [router, getRouteKey]
+        [router, getRouteKey, searchParamString]
     )
 
     const resetTableUrlQuery = React.useCallback(() => {
@@ -63,8 +72,8 @@ function useTableHandlers() {
             return query
         }
 
-        router.push({ query: filter({ ...router.query } as { [key: string]: string }) }, undefined, { shallow: true })
-    }, [router, getRouteKey, prefix])
+        router.push(urlcat('', '/', filter(Object.fromEntries(searchParams.entries()) as { [key: string]: string })))
+    }, [router, getRouteKey, prefix, searchParamString])
 
     return {
         isSelectedGetter,

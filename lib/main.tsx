@@ -1,3 +1,5 @@
+'use client'
+
 import React from 'react'
 import useTableData, { Query, Response } from './table/hooks/useTableData'
 import useTableHandlers from './table/hooks/useTableHandlers'
@@ -6,7 +8,7 @@ import useTable from './table/hooks/useTable'
 import { ColumnOrderState, Table } from '@tanstack/react-table'
 import { KeyedMutator, SWRResponse } from 'swr'
 import { fetchData, Person } from './data/fetchData'
-import { useRouter } from 'next/router'
+import { useSearchParams } from 'next/navigation'
 import { getFilterQueryKey, getQueryKey } from './table/utils'
 
 export type RenderProps<T> = {
@@ -28,21 +30,22 @@ export type Props = {
 export const URI_QUERY_PREFIX = 'person'
 
 function useHydrateFiltersFromRouteQuery() {
-    const router = useRouter()
+    const searchParams = useSearchParams()
+
     const age = getFilterQueryKey(URI_QUERY_PREFIX, 'age')
     const status = getFilterQueryKey(URI_QUERY_PREFIX, 'status')
 
-    const ageFilterValue = router.query[age]
-    const statusFilterValue = router.query[status]
+    const ageFilterValue = searchParams.get(age)
+    const statusFilterValue = searchParams.get(status)
 
     const filter = React.useMemo(() => {
-        if (!router.query[getQueryKey(URI_QUERY_PREFIX, 'filter')]) return undefined
+        if (!searchParams.get(getQueryKey(URI_QUERY_PREFIX, 'filter'))) return undefined
 
-        return (router.query[getQueryKey(URI_QUERY_PREFIX, 'filter')] as string)
+        return (searchParams.get(getQueryKey(URI_QUERY_PREFIX, 'filter')) as string)
             .split(',')
             .reduce(
                 (acc: { [k: string]: string }, key: string) =>
-                    Object.assign({}, acc, { [key]: router.query[getFilterQueryKey(URI_QUERY_PREFIX, key)] }),
+                    Object.assign({}, acc, { [key]: searchParams.get(getFilterQueryKey(URI_QUERY_PREFIX, key)) }),
                 {}
             )
     }, [ageFilterValue, statusFilterValue])

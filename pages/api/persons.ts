@@ -1,8 +1,8 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import faker from '@faker-js/faker'
-import { Person, Status } from '../../src/data/fetchData'
-import { range } from '../../src/table/utils'
-import { Query, Response } from '../../src/table/hooks/useTableData'
+import { Person, Status } from '../../lib/data/fetchData'
+import { range } from '../../lib/table/utils'
+import { Query, Response } from '../../lib/table/hooks/useTableData'
 const crypto = require('node:crypto')
 
 const newPerson = (): Person => {

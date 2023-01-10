@@ -1,5 +1,5 @@
 import { Table } from '@tanstack/react-table'
-import { useRouter } from 'next/router'
+import { useSearchParams } from 'next/navigation'
 import React from 'react'
 import Select from '../components/Select'
 import { Person } from '../data/fetchData'
@@ -17,11 +17,11 @@ type props = {
 let urlQuerToHydrated = false
 
 function Age({ table, id, loading }: props) {
-    const router = useRouter()
+    const searchParams = useSearchParams()
     const dispatch = useRouteFilter()
     const [age, setAge] = React.useState<number | 'ALL'>('ALL')
 
-    const valueInUrl = React.useMemo(() => router.query[getFilterQueryKey(URI_QUERY_PREFIX, 'age')], [router.query])
+    const valueInUrl = searchParams.get(getFilterQueryKey(URI_QUERY_PREFIX, 'age'))
     React.useEffect(() => {
         if (urlQuerToHydrated) return
         if (!valueInUrl) return

@@ -2,9 +2,9 @@ import clsx from 'clsx'
 import React from 'react'
 import Spinner from '../components/Spinner'
 import { useLoadingState } from './context/tableContext'
-import { NextRouter, useRouter } from 'next/router'
-import { Table } from '@tanstack/react-table'
+import { useRouter, useSearchParams } from 'next/navigation'
 import useRouteKey from './hooks/useRouteKey'
+import urlcat from 'urlcat'
 
 type Props<T> = {
     resetPageIndex: (defaultState?: boolean | undefined) => void
@@ -15,34 +15,31 @@ type Props<T> = {
 
 let queryParamToHydrated = false
 
-const setQuerySearchTerm = (getKey: (k: string) => string, router: NextRouter, term: string) => {
-    router.push(
-        {
-            query: Object.assign({}, router.query, { [getKey('page')]: 0, [getKey('search')]: term }),
-        },
-        undefined,
-        { shallow: true }
-    )
-}
-const removeQuerySearchTerm = (getKey: (k: string) => string, router: NextRouter) => {
-    router.push(
-        {
-            query: Object.assign({}, router.query, { [getKey('page')]: 0, [getKey('search')]: '' }),
-        },
-        undefined,
-        { shallow: true }
-    )
-}
-
 function Search<T>({ resetPageIndex, value: initialValue = '', debounce = 900, className, ...rest }: Props<T>) {
     const router = useRouter()
+    const searchParams = useSearchParams()
     const getRouteKey = useRouteKey()
     const { loading, validating } = useLoadingState()
     const [searching, setSearching] = React.useState(false)
     const [value, setValue] = React.useState(initialValue)
-    const searchRouteValue = router.query[getRouteKey('search')]
+    const searchRouteValue = searchParams.get(getRouteKey('search'))
     const inputRef = React.useRef<HTMLInputElement>(null)
     const lastDebounceTimer = React.useRef<null | NodeJS.Timeout>(null)
+
+    const setQuerySearchTerm = (term: string) => {
+        router.push(
+            urlcat(
+                '',
+                '/',
+                Object.assign({}, Object.fromEntries(searchParams.entries()), { [getRouteKey('page')]: 0, [getRouteKey('search')]: term })
+            )
+        )
+    }
+    const removeQuerySearchTerm = () => {
+        router.push(
+            urlcat('', '/', Object.assign({}, Object.fromEntries(searchParams.entries()), { [getRouteKey('page')]: 0, [getRouteKey('search')]: '' }))
+        )
+    }
 
     React.useEffect(() => {
         setSearching(true)
@@ -70,20 +67,20 @@ function Search<T>({ resetPageIndex, value: initialValue = '', debounce = 900, c
 
         if (value === '') {
             // no debounce wants immediate clear
-            setQuerySearchTerm(getRouteKey, router, value)
+            setQuerySearchTerm(value)
             resetPageIndex()
             return
         }
 
         lastDebounceTimer.current && clearTimeout(lastDebounceTimer.current)
         lastDebounceTimer.current = setTimeout(() => {
-            setQuerySearchTerm(getRouteKey, router, value)
+            setQuerySearchTerm(value)
             resetPageIndex()
         }, debounce)
     }
 
     const handleClear = () => {
-        removeQuerySearchTerm(getRouteKey, router)
+        removeQuerySearchTerm()
         setValue('')
         resetPageIndex()
         inputRef.current?.focus()

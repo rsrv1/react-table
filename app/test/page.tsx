@@ -1,7 +1,10 @@
-import { useRouter } from 'next/router'
+'use client'
+
+import { useRouter } from 'next/navigation'
 import React from 'react'
-import { URI_QUERY_PREFIX } from '../src/main'
-import { getFilterQueryKey, getQueryKey } from '../src/table/utils'
+import { URI_QUERY_PREFIX } from '../../lib/main'
+import { getFilterQueryKey, getQueryKey } from '../../lib/table/utils'
+import Link from 'next/link'
 
 function Test() {
     const router = useRouter()
@@ -26,18 +29,20 @@ function Test() {
 
         console.log('prefetching', queryParam)
 
-        router.prefetch(`/${queryParam}`)
-    }
-
-    const handleClick = () => {
-        router.push({ pathname: '/', query })
+        router.prefetch(`?${queryParam}`)
     }
 
     return (
         <div className="flex space-x-6">
-            <button onClick={handleClick} type="button" className="border-gray-100 px-2 py-0.5">
+            <Link
+                href={{
+                    pathname: '/',
+                    query,
+                }}
+                className="border-gray-100 px-2 py-0.5">
                 Goto Table
-            </button>
+            </Link>
+
             <button onMouseOver={handlePrefetch} type="button" className="border-gray-100 px-2 py-0.5">
                 Prefetch
             </button>

@@ -1,16 +1,18 @@
 import { Table } from '@tanstack/react-table'
-import { useRouter } from 'next/router'
+import { useRouter, useSearchParams } from 'next/navigation'
 import React from 'react'
 import Select from '../components/Select'
 import useRouteKey from './hooks/useRouteKey'
+import urlcat from 'urlcat'
 
 function Pagination<T>({ table, loading }: { table: Table<T>; loading: boolean }) {
     const router = useRouter()
+    const searchParams = useSearchParams()
     const getRouteKey = useRouteKey()
     const { pageIndex, pageSize } = table.getState().pagination
 
     const syncPaginationUrlQuery = (params: { page?: number; perPage?: number }) => {
-        router.push({ query: Object.assign({}, router.query, params) }, undefined, { shallow: true })
+        router.push(urlcat('', '/', Object.assign({}, Object.fromEntries(searchParams.entries()), params)))
     }
 
     return (
